@@ -15,10 +15,7 @@ It has been written in Visual Studio Community 2019 for Mac and designed in Unit
 
 To install game you must download it from link:
 
-```
-https://github.com/marhor3327/Space-Game.git
-```
-
+**[Download here](https://github.com/marhor3327/Space-Game/releases)**
 
 ## License
 
