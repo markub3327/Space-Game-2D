@@ -1,8 +1,6 @@
 ﻿<Properties StartupConfiguration="{8BF8F3C2-9201-845E-E2D6-7D1C2D02936D}|">
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/PlayerMovement.cs">
     <Files>
-      <File FileName="Assets/Scripts/MeteoritController.cs" Line="8" Column="27" />
-      <File FileName="Assets/Scripts/CameraController.cs" Line="1" Column="1" />
       <File FileName="Assets/Scripts/PlayerMovement.cs" Line="1" Column="1" />
     </Files>
     <Pads>
