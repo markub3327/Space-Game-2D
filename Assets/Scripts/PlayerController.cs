@@ -13,6 +13,10 @@ public class PlayerController : MonoBehaviour
 
     private ParticleSystem[] pSystems;
 
+    private float axisH = 0;
+
+    private float axisV = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -20,27 +24,37 @@ public class PlayerController : MonoBehaviour
         pSystems = GetComponentsInChildren<ParticleSystem>();
     }
 
-
-    // Update is called once per frame
-    void FixedUpdate()
+    private void Update()
     {
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
+        axisH = Input.GetAxis("Horizontal");
+        axisV = Input.GetAxis("Vertical");
 
-        // Pridaj silu do rotacie lode
-        rb2D.AddTorque(torque * (-h) * Time.deltaTime, ForceMode2D.Force);
-
-        // Pridaj silu do pohybu lode
-        rb2D.AddRelativeForce(new Vector2((speed * v * Time.deltaTime), 0.0F), ForceMode2D.Impulse);
-
-        // Zapni animaciu pohonu
-        if (System.Math.Abs(h) > 0.0f || System.Math.Abs(v) > 0.0f)
+        // Zapni animaciu & zvuk pohonu
+        if (System.Math.Abs(axisH) > 0.0f || System.Math.Abs(axisV) > 0.0f)
         {
             foreach (var pSystem in pSystems)
             {
                 if (!pSystem.isEmitting)
-                    pSystem.Play(true);
+                    pSystem.Play();
             }
         }
+        else
+        {
+            foreach (var pSystem in pSystems)
+            {
+                pSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            }
+        }
+    }
+
+
+    // Update is called once per frame
+    private void FixedUpdate()
+    {        
+        // Pridaj silu do rotacie lode
+        rb2D.AddTorque(torque * (-axisH) * Time.deltaTime, ForceMode2D.Force);
+
+        // Pridaj silu do pohybu lode
+        rb2D.AddRelativeForce(new Vector2((speed * axisV * Time.deltaTime), 0.0F), ForceMode2D.Impulse);        
     }
 }
