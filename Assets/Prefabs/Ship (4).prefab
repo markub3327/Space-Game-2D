@@ -627,7 +627,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 22329d85714b6436f8388e3907c6c9c0, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -10828,8 +10828,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7467510920839764866}
   - component: {fileID: 7467510920839764865}
-  - component: {fileID: 7467510920839764864}
-  - component: {fileID: 7467510920839764867}
+  - component: {fileID: 8995445083490282241}
+  - component: {fileID: 11078664331048627}
   m_Layer: 0
   m_Name: Ship (4)
   m_TagString: Player
@@ -10905,7 +10905,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!50 &7467510920839764864
+--- !u!50 &8995445083490282241
 Rigidbody2D:
   serializedVersion: 4
   m_ObjectHideFlags: 0
@@ -10926,7 +10926,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!60 &7467510920839764867
+--- !u!60 &11078664331048627
 PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

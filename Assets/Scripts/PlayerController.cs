@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb2D = GetComponent<Rigidbody2D>();
+        rb2D = GetComponentInChildren<Rigidbody2D>();
         pSystems = GetComponentsInChildren<ParticleSystem>();
     }
 
