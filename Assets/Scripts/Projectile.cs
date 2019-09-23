@@ -1,33 +1,41 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public class Projectile : MonoBehaviour {
-	public GameObject shoot_effect;
-	public GameObject hit_effect;
-	public GameObject firing_ship;
-	
-	// Use this for initialization
-	void Start () {
-		GameObject obj = (GameObject) Instantiate(shoot_effect, transform.position  - new Vector3(0,0,5), Quaternion.identity); //Spawn muzzle flash
-		obj.transform.parent = firing_ship.transform;
-		Destroy(gameObject, 5f); //Bullet will despawn after 5 seconds
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-	
-	
-	void OnTriggerEnter2D(Collider2D col) {
+public class Projectile : MonoBehaviour
+{
+    public GameObject firingShip;
 
-		//Don't want to collide with the ship that's shooting this thing, nor another projectile.
-		if (col.gameObject != firing_ship && col.gameObject.tag != "Projectile") {
-			Instantiate(hit_effect, transform.position, Quaternion.identity);
-			Destroy(gameObject);
-		}
-	}
-	
-	
-	
+    Rigidbody2D rigidbody2d;
+
+    // Start is called before the first frame update
+    void Awake()
+    {
+        rigidbody2d = GetComponent<Rigidbody2D>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (transform.position.magnitude > 1000.0f)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public void Launch(Vector2 force)
+    {
+        rigidbody2d.AddForce(force);
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject != firingShip)
+        {
+            //we also add a debug log to know what the projectile touch
+            Debug.Log("Projectile Collision with " + other.gameObject);
+
+            Destroy(gameObject);
+        }
+    }
 }
