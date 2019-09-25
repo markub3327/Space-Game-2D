@@ -22,12 +22,14 @@ public class UIItemDialog : MonoBehaviour
         
     }
 
+    // Na zaiatku kolizie
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Player")
             dialogBox.SetActive(true);
     }
 
+    // Na konci kolizie
     void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Player")

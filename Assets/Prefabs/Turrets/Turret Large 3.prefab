@@ -94,5 +94,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 2917896089770542357, guid: ebd63f22f45124a63be1208ba149776b,
     type: 3}
+  throwClip: {fileID: 8300000, guid: b2edfd40873655249ba0e01a5cf705be, type: 3}
   shot_speed: 400
   turret_rotation_speed: 3

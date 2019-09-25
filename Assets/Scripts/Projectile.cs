@@ -6,6 +6,8 @@ public class Projectile : MonoBehaviour
 {
     public GameObject firingShip;
 
+    public AudioClip hitClip;
+
     Rigidbody2D rigidbody2d;
 
     // Start is called before the first frame update
@@ -15,7 +17,7 @@ public class Projectile : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         if (transform.position.magnitude > 1000.0f)
         {
@@ -28,13 +30,40 @@ public class Projectile : MonoBehaviour
         rigidbody2d.AddForce(force);
     }
 
+    // Pri kolizii s objektom
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject != firingShip)
         {
             //we also add a debug log to know what the projectile touch
-            Debug.Log("Projectile Collision with " + other.gameObject);
+            //Debug.Log("Projectile Collision with " + other.gameObject);
 
+            switch (other.gameObject.tag)
+            {
+                // Ak zasiahol inu lod
+                case "Player":
+                    {
+                        ShipController player = other.gameObject.GetComponent<ShipController>();
+
+                        // Znizi zivoty hracovi
+                        player.ChangeHealth(-1);
+
+                        // Prehra zvuk zasahu lode
+                        player.PlaySound(hitClip);
+                        break;
+                    }
+                // Ak zasiahol asteroid
+                case "Asteroid":
+                    {
+                        // Prehra zvuk zasahu asteroidu
+                        firingShip.GetComponent<ShipController>().PlaySound(hitClip);
+                        // Znic asteroid
+                        Destroy(other.gameObject);
+                        break;
+                    }
+            }
+
+            // Znici strelu pri zrazke s objektom
             Destroy(gameObject);
         }
     }

@@ -9,7 +9,7 @@ public class UIHealthBar : MonoBehaviour
 
     public Image mask;
     float originalSize;
-
+    
     void Awake()
     {
         instance = this;
@@ -17,11 +17,13 @@ public class UIHealthBar : MonoBehaviour
 
     void Start()
     {
+        // Povodna sirka baneru
         originalSize = mask.rectTransform.rect.width;
     }
 
     public void SetValue(float value)
     {
+        // Zmen sirku baneru podla hodnoty zadanej parametrom
         mask.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, originalSize * value);
     }
 }
