@@ -661,7 +661,7 @@ ParticleSystem:
     enabled: 1
     type: 8
     angle: 5
-    length: 0.5
+    length: 0.4
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 1
     donutRadius: 0.2
@@ -4732,7 +4732,7 @@ ParticleSystemRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_RenderMode: 4
   m_SortMode: 0
   m_MinParticleSize: 0

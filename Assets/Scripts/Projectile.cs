@@ -42,16 +42,19 @@ public class Projectile : MonoBehaviour
             {
                 // Ak zasiahol inu lod
                 case "Player":
-                    {
-                        ShipController player = other.gameObject.GetComponent<ShipController>();
+					{
+						ShipController player = other.gameObject.GetComponent<ShipController>();
 
-                        // Znizi zivoty hracovi
-                        player.ChangeHealth(-1);
+						if (player != null && player.enabled)
+						{
+							// Znizi zivoty hracovi
+							player.ChangeHealth(-1);
 
-                        // Prehra zvuk zasahu lode
-                        player.PlaySound(hitClip);
-                        break;
-                    }
+							// Prehra zvuk zasahu lode
+							player.PlaySound(hitClip);
+						}
+						break;
+					}
                 // Ak zasiahol asteroid
                 case "Asteroid":
                     {
