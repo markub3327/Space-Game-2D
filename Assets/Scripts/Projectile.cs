@@ -8,7 +8,10 @@ public class Projectile : MonoBehaviour
 
     public AudioClip hitClip;
 
+    public ParticleSystem hitEffect;
+
     Rigidbody2D rigidbody2d;
+
 
     // Start is called before the first frame update
     void Awake()
@@ -66,8 +69,11 @@ public class Projectile : MonoBehaviour
                     }
             }
 
+            // Efekt vybuchu
+            hitEffect.Play();
+
             // Znici strelu pri zrazke s objektom
-            Destroy(gameObject);
+            Destroy(gameObject, 1.0f);
         }
     }
 }

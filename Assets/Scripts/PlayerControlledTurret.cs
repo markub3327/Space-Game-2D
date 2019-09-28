@@ -14,6 +14,8 @@ public class PlayerControlledTurret : MonoBehaviour
 
     ShipController controller;
 
+    public ParticleSystem shootEffect;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -31,20 +33,17 @@ public class PlayerControlledTurret : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1") && controller.Ammo > 0)
         {
-            //GameObject bullet = (GameObject)Instantiate(weapon_prefab, barrel_hardpoints[barrel_index].transform.position, transform.rotation);
             GameObject projectileObject = Instantiate(projectilePrefab, transform.position, Quaternion.Euler(transform.rotation.eulerAngles - (new Vector3(0, 0, 90.0f))));
 
             Projectile projectile = projectileObject.GetComponent<Projectile>();
             projectile.firingShip = transform.parent.gameObject;
             projectile.Launch(projectileObject.transform.up * shot_speed);
 
+            // Prehraj animaciu vystrelu
+            shootEffect.Play();
+
             // Prehra zvuk vystrelu
             controller.PlaySound(throwClip);
-
-            //barrel_index++; //This will cycle sequentially through the barrels in the barrel_hardpoints array
-
-            //if (barrel_index >= barrel_hardpoints.Length)
-            //	barrel_index = 0;
 
             // Uber z municie hraca jeden naboj
             controller.ChangeAmmo(-1);
