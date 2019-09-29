@@ -10,7 +10,7 @@ public class FuelCollectible : MonoBehaviour
     // Pri kolizii
     void OnTriggerStay2D(Collider2D other)
     {
-        ShipController controller = other.GetComponent<ShipController>();
+        ShipController controller = other.gameObject.GetComponent<ShipController>();
 
         if (controller != null)
         {

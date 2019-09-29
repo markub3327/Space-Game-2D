@@ -27,26 +27,33 @@ public class ShipController : MonoBehaviour
     private bool isEmptyFuel;
     private float fuelTimer;                // casovac uchovavajuci cas do minutia jednej nadrze paliva
 
+    // Respawn
+    public float timeRespawn = 10.0f;       // 30 seconds to respawn
+    public bool IsDestroyed { get; private set; }   // aktualny stav lode
+    private float respawnTimer;
+
     // Dynamika herneho objektu
     private Rigidbody2D rigidbody2d;
 
     // Reproduktor lode
-    AudioSource audioSource;
-    public bool IsPlayingClip
-    {
-        get
-        {
-            return audioSource.isPlaying;
-        }
-    }
+    private AudioSource audioSource;
+
+    // Animacie lode
+    private Animator animator;
+
+    // Collider
+    private PolygonCollider2D collider2d;
+
 
     // Start is called before the first frame update
     void Start()
     {
         rigidbody2d = GetComponent<Rigidbody2D>();
         audioSource = GetComponent<AudioSource>();
+        animator = GetComponent<Animator>();
+        collider2d = GetComponent<PolygonCollider2D>();
 
-        Health = maxHealth;
+        Health = 1;//maxHealth;
         Ammo = maxAmmo;
         Fuel = maxFuel;
     }
@@ -66,22 +73,39 @@ public class ShipController : MonoBehaviour
             MoveShip(move);
         }
 
-        // Ak je hrac "neporazitelny"
+        // Ak je lod "neznicitelna"
         if (isInvincible)
         {
             invincibleTimer -= Time.deltaTime;
-            if (invincibleTimer < 0)
+            if (invincibleTimer < 0.0f)
                 isInvincible = false;
         }
+
+        // Ak je lod znicena
+        if (IsDestroyed)
+        {
+            respawnTimer -= Time.deltaTime;
+            if (respawnTimer < 0.0f)
+            {
+                // set position to respawn point
+                var obj = GameObject.FindGameObjectWithTag("Respawn");
+                rigidbody2d.position = obj.transform.position;
+                rigidbody2d.rotation = obj.transform.rotation.eulerAngles.z;
+
+                animator.SetTrigger("Respawn");
+                IsDestroyed = false;
+                collider2d.enabled = true;
+            }
+        }
     }
-   
+
     /// <summary>
     /// Pohyb s lodou
     /// </summary>
     /// <param name="move">Normalizovany vektor udavajuci smer a velkost pohybu</param>
     private void MoveShip(Vector2 move)
     {
-        if (this.Fuel > 0)
+        if (!IsDestroyed && this.Fuel > 0)
         {
             // Vypocitaj zmenu rotacie hraca
             var position = rigidbody2d.position;
@@ -90,7 +114,7 @@ public class ShipController : MonoBehaviour
 
             // Vypocet prirastku zmeny pozicie a rotacie lode
             rotation += maxTorque * (-move.x) * Time.deltaTime;
-            var rotationRad = rotation * Mathf.Deg2Rad;
+            var rotationRad = (rotation + 90.0f) * Mathf.Deg2Rad;
             position += new Vector2((Mathf.Cos(rotationRad) * deltaPos), (Mathf.Sin(rotationRad) * deltaPos));
 
             // Pre vsetky motory lode
@@ -99,16 +123,11 @@ public class ShipController : MonoBehaviour
                 // Ak nie je uz spusteny zapni ho
                 if (!motor.isEmitting)
                 {
-                    // Nastav dlzku plamena podla rychlosti lode
-                    var motorShape = motor.shape;
-                    motorShape.length = Mathf.Clamp((Mathf.Abs(move.y) * 0.4f), 0.0f, 0.4f);
-
                     // Prehraj animaciu
                     motor.Play();
 
                     // Prehraj zvuk motora ak nehra
-                    if (!audioSource.isPlaying)
-                        PlaySound(engineClip);
+                    PlaySound(engineClip);
                 }
             }
 
@@ -124,14 +143,14 @@ public class ShipController : MonoBehaviour
             else
             {
                 fuelTimer -= Time.deltaTime;
-                if (fuelTimer < 0)
+                if (fuelTimer < 0.0f)
                     isEmptyFuel = true;
             }
 
             // Zmen pohyb a rotaciu lode
             rigidbody2d.rotation = rotation;
             rigidbody2d.MovePosition(position);
-        }
+        }        
     }
 
     /// <summary>
@@ -140,11 +159,14 @@ public class ShipController : MonoBehaviour
     /// <param name="amount">Mnozstvo municie, ktore sa pripocita k sucasnemu stavu municie</param>
     public void ChangeAmmo(int amount)
     {
-        Ammo = Mathf.Clamp(Ammo + amount, 0, maxAmmo);
+        if (!IsDestroyed)
+        {
+            Ammo = Mathf.Clamp(Ammo + amount, 0, maxAmmo);
 
-        // Vykonaj zmenu na UI bare zobrazujuceho zivot hraca
-        //UIAmmoBar.instance.SetValue(ammo / (float)maxAmmo);
-        Debug.Log($"Player: {this.name} has ammo {this.Ammo}/{this.maxAmmo}");
+            // Vykonaj zmenu na UI bare zobrazujuceho zivot hraca
+            //UIAmmoBar.instance.SetValue(ammo / (float)maxAmmo);
+            Debug.Log($"Player: {this.name} has ammo {this.Ammo}/{this.maxAmmo}");
+        }
     }
 
     /// <summary>
@@ -153,11 +175,14 @@ public class ShipController : MonoBehaviour
     /// <param name="amount">Mnozstvo municie, ktore sa pripocita k sucasnemu stavu municie</param>
     public void ChangeFuel(int amount)
     {
-        Fuel = Mathf.Clamp(Fuel + amount, 0, maxFuel);
+        if (!IsDestroyed)
+        {
+            Fuel = Mathf.Clamp(Fuel + amount, 0, maxFuel);
 
-        // Vykonaj zmenu na UI bare zobrazujuceho zivot hraca
-        //UIAmmoBar.instance.SetValue(ammo / (float)maxAmmo);
-        Debug.Log($"Player: {this.name} has fuel {this.Fuel}/{this.maxFuel}");
+            // Vykonaj zmenu na UI bare zobrazujuceho zivot hraca
+            //UIAmmoBar.instance.SetValue(ammo / (float)maxAmmo);
+            Debug.Log($"Player: {this.name} has fuel {this.Fuel}/{this.maxFuel}");
+        }
     }
 
     /// <summary>
@@ -166,20 +191,33 @@ public class ShipController : MonoBehaviour
     /// <param name="amount">Mnozstvo zivota, ktore sa pripocita k sucasnemu stavu zivota</param>
     public void ChangeHealth(int amount)
     {
-        // Pri uberani zivota
-        if (amount < 0)
+        if (!IsDestroyed)
         {
-            // Ak je hrac "neporazitelny" vyskoc z funkcie
-            if (isInvincible)
-                return;
+            // Pri uberani zivota
+            if (amount < 0.0f)
+            {
+                // Ak je hrac "neporazitelny" vyskoc z funkcie
+                if (isInvincible)
+                    return;
 
-            isInvincible = true;
-            invincibleTimer = timeInvincible;
+                isInvincible = true;
+                invincibleTimer = timeInvincible;
+
+                // Ak uz hrac nema zivoty znici sa lod
+                if (this.Health <= 0.0f)
+                {
+                    IsDestroyed = true;
+                    collider2d.enabled = false;
+                    respawnTimer = timeRespawn;
+                    
+                    animator.SetTrigger("Destroyed");
+                }
+            }
+            Health = Mathf.Clamp(Health + amount, 0, maxHealth);
+
+            // Vykonaj zmenu na UI bare zobrazujuceho zivot hraca
+            UIHealthBar.instance.SetValue(Health / (float)maxHealth);
         }
-        Health = Mathf.Clamp(Health + amount, 0, maxHealth);
-
-        // Vykonaj zmenu na UI bare zobrazujuceho zivot hraca
-        UIHealthBar.instance.SetValue(Health / (float)maxHealth);
     }
 
     /// <summary>
@@ -188,6 +226,9 @@ public class ShipController : MonoBehaviour
     /// <param name="clip">Zvukovy klip</param>
     public void PlaySound(AudioClip clip)
     {
-        audioSource.PlayOneShot(clip);
+        if (!IsDestroyed)
+        {
+            audioSource.PlayOneShot(clip);
+        }
     }
 }

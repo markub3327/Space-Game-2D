@@ -8,7 +8,7 @@ public class PlayerControlledTurret : MonoBehaviour
 
     public AudioClip throwClip;
 
-    public float shot_speed = 300.0f;
+    public float shot_speed = 350.0f;
 
     public float turret_rotation_speed = 3.0f;
 
@@ -28,12 +28,12 @@ public class PlayerControlledTurret : MonoBehaviour
 		//This makes the turret aim at the mouse position (Controlled by CustomPointer, but you can replace CustomPointer.pointerPosition with Input.MousePosition and it should work)
 		Vector3 turretPosition = Camera.main.WorldToScreenPoint(transform.position);
 		Vector3 direction = Input.mousePosition - turretPosition;
-		transform.rotation = Quaternion.Euler(0, 0, Mathf.LerpAngle(transform.rotation.eulerAngles.z, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg, turret_rotation_speed * Time.deltaTime));
+		transform.rotation = Quaternion.Euler(0, 0, Mathf.LerpAngle(transform.rotation.eulerAngles.z, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90.0f, turret_rotation_speed * Time.deltaTime));
 
 
         if (Input.GetButtonDown("Fire1") && controller.Ammo > 0)
         {
-            GameObject projectileObject = Instantiate(projectilePrefab, transform.position, Quaternion.Euler(transform.rotation.eulerAngles - (new Vector3(0, 0, 90.0f))));
+            GameObject projectileObject = Instantiate(projectilePrefab, transform.position, transform.rotation);
 
             Projectile projectile = projectileObject.GetComponent<Projectile>();
             projectile.firingShip = transform.parent.gameObject;

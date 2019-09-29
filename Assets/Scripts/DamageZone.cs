@@ -17,8 +17,7 @@ public class DamageZone : MonoBehaviour
             controller.ChangeHealth(-1);
 
 			// Prehraj zvuk poskodenia
-            if (!controller.IsPlayingClip)
-    			controller.PlaySound(damageClip);
+    		controller.PlaySound(damageClip);
 		}
 	}
 }

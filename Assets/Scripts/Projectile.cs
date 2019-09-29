@@ -46,15 +46,15 @@ public class Projectile : MonoBehaviour
                 // Ak zasiahol inu lod
                 case "Player":
 					{
-						ShipController player = other.gameObject.GetComponent<ShipController>();
+						ShipController controller = other.gameObject.GetComponent<ShipController>();
 
-						if (player != null && player.enabled)
+						if (controller != null)
 						{
 							// Znizi zivoty hracovi
-							player.ChangeHealth(-1);
+							controller.ChangeHealth(-1);
 
 							// Prehra zvuk zasahu lode
-							player.PlaySound(hitClip);
+							controller.PlaySound(hitClip);
 						}
 						break;
 					}

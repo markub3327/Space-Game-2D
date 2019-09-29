@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3998225999700333781}
   - component: {fileID: 1909848764060159020}
   m_Layer: 0
-  m_Name: Sun
+  m_Name: Star
   m_TagString: Star
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -70,7 +70,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 84e647dea229c4c21bb9e9427fd098fc, type: 3}
   m_Color: {r: 1, g: 0.9292453, b: 0.9292453, a: 1}
   m_FlipX: 0

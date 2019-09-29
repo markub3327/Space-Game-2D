@@ -13,7 +13,7 @@ public class AmmoCollectible : MonoBehaviour
     // Pri kolizii
     void OnTriggerEnter2D(Collider2D other)
     {
-        ShipController controller = other.GetComponent<ShipController>();
+        ShipController controller = other.gameObject.GetComponent<ShipController>();
 
         if (controller != null)
         {
