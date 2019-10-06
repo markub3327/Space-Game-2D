@@ -47,7 +47,6 @@ public class Projectile : MonoBehaviour
                 case "Player":
 					{
 						ShipController controller = other.gameObject.GetComponent<ShipController>();
-
 						if (controller != null)
 						{
 							// Znizi zivoty hracovi
@@ -63,8 +62,9 @@ public class Projectile : MonoBehaviour
                     {
                         // Prehra zvuk zasahu asteroidu
                         firingShip.GetComponent<ShipController>().PlaySound(hitClip);
+
                         // Znic asteroid
-                        Destroy(other.gameObject);
+                        other.gameObject.GetComponent<AsteroidController>().DestroyAsteroid();
                         break;
                     }
             }

@@ -4748,7 +4748,7 @@ ParticleSystemRenderer:
   m_Flip: {x: 0, y: 0, z: 0}
   m_UseCustomVertexStreams: 0
   m_EnableGPUInstancing: 1
-  m_ApplyActiveColorSpace: 1
+  m_ApplyActiveColorSpace: 0
   m_AllowRoll: 1
   m_VertexStreams: 00010304
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}

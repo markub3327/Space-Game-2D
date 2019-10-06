@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class ShipController : MonoBehaviour
 {
     // Engine systems
-    public ParticleSystem[] Motors;     // animacia plamenov motora
-    public AudioClip engineClip;        // zvukovy klip motorov
-    public float maxSpeed = 5.0f;       // max rychlost lode
-    public float maxTorque = 100.0f;     // max rychlost rotacie lode
+    public ParticleSystem[] Motors;             // animacia plamenov motora
+    public AudioClip engineClip;                // zvukovy klip motorov
+    public float maxSpeed = 5.0f;               // max rychlost lode
+    public float maxTorque = 100.0f;            // max rychlost rotacie lode
+    private Vector2 lookDirection = Vector2.up; // Smer predu lode
 
     // Player's health
     public int maxHealth = 10;              // maximalny pocet zivotov hraca
@@ -28,7 +30,7 @@ public class ShipController : MonoBehaviour
     private float fuelTimer;                // casovac uchovavajuci cas do minutia jednej nadrze paliva
 
     // Respawn
-    public float timeRespawn = 10.0f;       // 30 seconds to respawn
+    public float timeRespawn = 10.0f;       // 10 seconds to respawn
     public bool IsDestroyed { get; private set; }   // aktualny stav lode
     private float respawnTimer;
 
@@ -44,6 +46,8 @@ public class ShipController : MonoBehaviour
     // Collider
     private PolygonCollider2D collider2d;
 
+    // Respawn
+    private GameObject respawn;
 
     // Start is called before the first frame update
     void Start()
@@ -52,10 +56,14 @@ public class ShipController : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
         collider2d = GetComponent<PolygonCollider2D>();
+        respawn = GameObject.FindGameObjectWithTag("Respawn");
 
         Health = 1;//maxHealth;
         Ammo = maxAmmo;
         Fuel = maxFuel;
+
+        // Zacina v mieste respawnu
+        RespawnShip();
     }
 
     // Update is called once per frame
@@ -87,16 +95,13 @@ public class ShipController : MonoBehaviour
             respawnTimer -= Time.deltaTime;
             if (respawnTimer < 0.0f)
             {
-                // set position to respawn point
-                var obj = GameObject.FindGameObjectWithTag("Respawn");
-                rigidbody2d.position = obj.transform.position;
-                rigidbody2d.rotation = obj.transform.rotation.eulerAngles.z;
-
-                animator.SetTrigger("Respawn");
-                IsDestroyed = false;
-                collider2d.enabled = true;
+                RespawnShip();
+                animator.SetTrigger("Respawn");                
             }
         }
+
+        // Eyes
+        RadarScan();
     }
 
     /// <summary>
@@ -115,7 +120,12 @@ public class ShipController : MonoBehaviour
             // Vypocet prirastku zmeny pozicie a rotacie lode
             rotation += maxTorque * (-move.x) * Time.deltaTime;
             var rotationRad = (rotation + 90.0f) * Mathf.Deg2Rad;
-            position += new Vector2((Mathf.Cos(rotationRad) * deltaPos), (Mathf.Sin(rotationRad) * deltaPos));
+            lookDirection = new Vector2(Mathf.Cos(rotationRad), Mathf.Sin(rotationRad)); // normalizovany vektor smeru pohybu lode
+            position += lookDirection * deltaPos;
+
+            // Zmen pohyb a rotaciu lode
+            rigidbody2d.rotation = rotation;
+            rigidbody2d.MovePosition(position);
 
             // Pre vsetky motory lode
             foreach (var motor in Motors)
@@ -146,11 +156,16 @@ public class ShipController : MonoBehaviour
                 if (fuelTimer < 0.0f)
                     isEmptyFuel = true;
             }
-
-            // Zmen pohyb a rotaciu lode
-            rigidbody2d.rotation = rotation;
-            rigidbody2d.MovePosition(position);
         }        
+    }
+
+    private void RespawnShip()
+    {
+        // set to respawn point
+        rigidbody2d.position = respawn.transform.position;
+        rigidbody2d.rotation = respawn.transform.rotation.eulerAngles.z;
+        IsDestroyed = false;
+        collider2d.enabled = true;
     }
 
     /// <summary>
@@ -230,5 +245,95 @@ public class ShipController : MonoBehaviour
         {
             audioSource.PlayOneShot(clip);
         }
+    }
+
+    // Radar okolo lode
+    public void RadarScan()
+    {
+        // Max distance of ray
+        const float dist = 6.0f;
+
+        // Create new array of objects around ship [size = number of rays] (8 lucov po 45 stupnoch okolo celej lode)
+        RaycastHit2D[] rays = new RaycastHit2D[8];
+
+        // Front
+        rays[0] = SendRay(lookDirection, dist);
+        // Front-Right
+        rays[1] = SendRay(lookDirection.Shift(ExtendedVector2.down_right), dist);
+        // Right
+        rays[2] = SendRay(lookDirection.Shift(Vector2.down), dist);
+        // Right-Bottom
+        rays[3] = SendRay(lookDirection.Shift(ExtendedVector2.down_left), dist);
+        // Bottom
+        rays[4] = SendRay(lookDirection.Shift(Vector2.left), dist);
+        // Bottom-Left
+        rays[5] = SendRay(lookDirection.Shift(ExtendedVector2.up_left), dist);
+        // Left
+        rays[6] = SendRay(lookDirection.Shift(Vector2.up), dist);
+        // Left-Front
+        rays[7] = SendRay(lookDirection.Shift(ExtendedVector2.up_right), dist);
+
+        // Zobrazi luc v scene
+        Debug.DrawRay(rigidbody2d.position, lookDirection, Color.magenta);            // lookDirection = offset = "0deg"        
+        Debug.DrawRay(rigidbody2d.position, lookDirection.Shift(ExtendedVector2.down_right), Color.yellow); // lookDirection + Vector(1,0) = "90deg"
+        Debug.DrawRay(rigidbody2d.position, lookDirection.Shift(Vector2.down), Color.yellow); // lookDirection + Vector(1,0) = "90deg"
+        Debug.DrawRay(rigidbody2d.position, lookDirection.Shift(ExtendedVector2.down_left), Color.yellow); // lookDirection + Vector(1,0) = "90deg"
+        Debug.DrawRay(rigidbody2d.position, lookDirection.Shift(Vector2.left), Color.yellow); // lookDirection + Vector(1,0) = "90deg"
+        Debug.DrawRay(rigidbody2d.position, lookDirection.Shift(ExtendedVector2.up_left), Color.yellow); // lookDirection + Vector(1,0) = "90deg"
+        Debug.DrawRay(rigidbody2d.position, lookDirection.Shift(Vector2.up), Color.yellow); // lookDirection + Vector(1,0) = "90deg"
+        Debug.DrawRay(rigidbody2d.position, lookDirection.Shift(ExtendedVector2.up_right), Color.yellow); // lookDirection + Vector(1,0) = "90deg"
+
+        for (int i = 0; i < 8; i++)
+        {
+            // Ak luc narazil na objekt s colliderom
+            if (rays[i].collider != null)
+            {
+                Debug.Log($"Ray{i} is colliding with {rays[i].collider.name}");
+            }
+        }
+    }
+
+    public RaycastHit2D SendRay(Vector2 direction, float distance)
+    {
+        // Send ray
+        var objs = Physics2D.RaycastAll(rigidbody2d.position, direction, distance);
+        foreach (var obj in objs)
+        {
+            // Ak zasiahnuty objekt nebude vlastna lod
+            if (obj.collider != null && obj.collider.gameObject != this.gameObject)
+            {
+                return obj;
+            }
+        }
+
+        // Null raycast2D
+        return new RaycastHit2D();
+    }
+}
+
+// Rozsirujuca trieda pre triedu UnityEngine.Vector2
+public static class ExtendedVector2
+{
+    public static readonly Vector2 down_right = new Vector2(1f, -1f);
+
+    public static readonly Vector2 down_left = new Vector2(-1f, -1f);
+
+    public static readonly Vector2 up_left = new Vector2(-1f, 1f);
+
+    public static readonly Vector2 up_right = new Vector2(1f, 1f);
+
+    /// <summary>
+    /// Posun vektor o vektor odovzdany parametrom
+    /// </summary>
+    /// <param name="a">Povodny vektor</param>
+    /// <param name="b">Vektor posunu</param>
+    /// <returns></returns>
+    public static Vector2 Shift(this Vector2 orig, Vector2 shift)
+    {
+        Vector2 vector = new Vector2(orig.x * shift.x - orig.y * shift.y, orig.y * shift.x + orig.x * shift.y);
+
+        //Debug.Log($"New shifted vector is {vector}.");
+
+        return vector;
     }
 }
