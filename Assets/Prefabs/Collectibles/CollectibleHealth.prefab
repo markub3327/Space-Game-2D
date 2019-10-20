@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4927983459447221653}
   - component: {fileID: 4927983459447221642}
   - component: {fileID: 1499346251218543049}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: CollectibleHealth
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,10 +94,10 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.0058522224, y: 0.0058522224}
+  m_Offset: {x: 0, y: 0.5}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
+    pivot: {x: 0.5, y: 0}
     oldSize: {x: 1, y: 1}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
@@ -105,7 +105,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.8244333, y: 0.9180689}
+  m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
 --- !u!114 &1499346251218543049
 MonoBehaviour:
@@ -116,7 +116,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4927983459447221643}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1954fd98cc6204d49b430b9d80faccf4, type: 3}
+  m_Script: {fileID: 11500000, guid: dd31d880b097c492fa9c85f39f4f1cd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   collectibleClip: {fileID: 8300000, guid: af5f8b64e3f58f24c87ff8f789b04f6c, type: 3}

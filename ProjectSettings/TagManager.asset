@@ -7,7 +7,6 @@ TagManager:
   - Planet
   - Star
   - Moon
-  - Asteroid
   layers:
   - Default
   - TransparentFX
@@ -20,9 +19,9 @@ TagManager:
   - Confiner
   - Projectile
   - Ship
-  - 
-  - 
-  - 
+  - Collectible
+  - Asteroids
+  - Stars
   - 
   - 
   - 
