@@ -23,6 +23,12 @@ public class HealthCollectible : MonoBehaviour
 
             // Znic objekt zivota
             Destroy(gameObject);
-        }
+        }        
+    }
+
+    // Pri konci existencie objektu
+    private void OnDestroy()
+    {
+        GetComponentInParent<HealthsGenerator>().freePoints.Add(transform.position);
     }
 }

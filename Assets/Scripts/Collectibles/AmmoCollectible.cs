@@ -27,4 +27,10 @@ public class AmmoCollectible : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    // Pri konci existencie objektu
+    private void OnDestroy()
+    {
+        GetComponentInParent<AmmoGenerator>().freePoints.Add(transform.position);
+    }
 }

@@ -7,11 +7,15 @@ public class HealthsGenerator : MonoBehaviour
     // Maximalny pocet srdiecok v hre
     public static int MaxHealthObjects { get; set; } = 3;
 
-    // Zoznam objektov srdiecok
-    public List<GameObject> healths = new List<GameObject>(MaxHealthObjects);
+    // Zoznam volnych pozicii pre srdiecka
+    public List<Vector2> freePoints = new List<Vector2>(MaxHealthObjects);
 
     // Prefab Health object
     public GameObject HealthPrefab;
+
+    // Casovac pridavania srdiecok
+    private const float maxTime = 3f;
+    private float Timer = maxTime;
 
     // Start is called before the first frame update
     void Start()
@@ -22,11 +26,22 @@ public class HealthsGenerator : MonoBehaviour
     // Update is called once per frame
     private void FixedUpdate()
     {
-        // Pocet municie v hre
-        if (healths.Count < MaxHealthObjects)
+        // Pocet srdiecok v hre (musia chybat 2 zivoty)
+        if (freePoints.Count > 0)
         {
-            var obj = Instantiate(HealthPrefab, new Vector3(-12f, -4f, 0f), Quaternion.identity, this.transform);
-            healths.Add(obj);
+            Timer -= Time.deltaTime;
+            if (Timer < 0f)
+            {
+                var genR = new System.Random();
+                var idx = genR.Next(0, freePoints.Count);
+                Instantiate(HealthPrefab, freePoints[idx], Quaternion.identity, this.transform);
+
+                // Vymaz pouzity bod z volnych (obsadeny)
+                freePoints.Remove(freePoints[idx]);
+
+                // Resetuj casovac
+                Timer = maxTime;
+            }
         }
     }
 }
