@@ -31,6 +31,8 @@ public class AmmoCollectible : MonoBehaviour
     // Pri konci existencie objektu
     private void OnDestroy()
     {
-        GetComponentInParent<AmmoGenerator>().freePoints.Add(transform.position);
+        var generator = GetComponentInParent<AmmoGenerator>();
+        if (generator != null)
+            generator.freePoints.Add(transform.position);
     }
 }

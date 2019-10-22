@@ -14,7 +14,7 @@ public class AmmoGenerator : MonoBehaviour
     public GameObject AmmoPrefab;
 
     // Casovac pridavania municie
-    private const float maxTime = 3f;
+    private const float maxTime = 5f;
     private float Timer = maxTime;
 
     // Start is called before the first frame update

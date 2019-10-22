@@ -29,6 +29,8 @@ public class HealthCollectible : MonoBehaviour
     // Pri konci existencie objektu
     private void OnDestroy()
     {
-        GetComponentInParent<HealthsGenerator>().freePoints.Add(transform.position);
+        var generator = GetComponentInParent<HealthsGenerator>();
+        if (generator != null)
+            generator.freePoints.Add(transform.position);
     }
 }
