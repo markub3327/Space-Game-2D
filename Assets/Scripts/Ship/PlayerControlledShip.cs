@@ -19,7 +19,7 @@ public class PlayerControlledShip : ShipController
         Vector2 move = new Vector2(axisH, axisV).normalized;
 
         // Ak je lod v pohybe zapni motory
-        if (Mathf.Abs(move.magnitude) > 0.0f)
+        if (Mathf.Abs(move.magnitude) > 0f)
         {
             // Pohni s lodou podla vstupu od uzivatela
             MoveShip(move);

@@ -1,55 +1,54 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
 public class MainMenu : MonoBehaviour
 {
-    // Tlacidlo novej hry
-    public Button startButton;
-
-    // Tlacidlo ukoncenia hry
-    public Button exitButton;
-
     // Loading window
     public Slider loadingBar;
     public GameObject loadingImage;
 
-    // Referencia na asynchronnu operaciu
-    private AsyncOperation asyncOperation;
+    // Event system
+    public EventSystem eventSystem;
+
+    // Selected button
+    //public GameObject selectedButton;
+    //public bool buttonSelected;
 
     // Start is called before the first frame update
-    void Start()
-    {
-        startButton.onClick.AddListener(OnStartButtonClicked);
-        exitButton.onClick.AddListener(OnExitButtonClicked);
-    }
+    //private void Start()
+    //{
 
-    // Update is called once per frame
-    void Update()
-    {
-        // Kym nie je hra loadnuta vypisuj progres na bar
-        if (asyncOperation != null)
-        {
-            loadingBar.value = asyncOperation.progress;
-        }
-    }
+    //}
 
-    private void OnStartButtonClicked()
+    //private void Update()
+    //{
+        //if (Mathf.Abs(Input.GetAxisRaw("Vertical")) > 0f && !buttonSelected)
+        //{
+        //    eventSystem.SetSelectedGameObject(selectedButton);
+        //    buttonSelected = true;
+        //}
+    //}
+
+    //private void OnDisable()
+    //{
+        //buttonSelected = false;
+    //}
+
+    public void OnStartButtonClicked()
     {
         Debug.Log("start button pressed");
 
         // aktivuj loading obraz
         loadingImage.SetActive(true);
-        //StartCoroutine(LoadingBarUpdate());
-
-        // Load first scene
-        asyncOperation = SceneManager.LoadSceneAsync("Area1");
+        StartCoroutine(LoadingBarUpdate());
     }
 
-    private void OnExitButtonClicked()
+    public void OnExitButtonClicked()
     {
         Debug.Log("exit button pressed");
 
@@ -59,11 +58,11 @@ public class MainMenu : MonoBehaviour
             Application.Quit();
         #endif
     }
-
-    /*private IEnumerator LoadingBarUpdate()
+        
+    private IEnumerator LoadingBarUpdate()
     {
         // Load first scene
-        asyncOperation = SceneManager.LoadSceneAsync("Area1");
+        var asyncOperation = SceneManager.LoadSceneAsync("Area1");
 
         // Kym nie je hra loadnuta
         while (!asyncOperation.isDone)
@@ -71,5 +70,5 @@ public class MainMenu : MonoBehaviour
             loadingBar.value = asyncOperation.progress;
             yield return null;
         }
-    }*/
+    }
 }

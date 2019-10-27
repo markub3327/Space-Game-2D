@@ -5,25 +5,22 @@ using UnityEngine;
 
 public class MoonController : MonoBehaviour
 {
-    public float rotationSpeed = 20;
+    // Rychlost obiehania mesiaca okolo planety
+    public float rotationSpeed = 10;
 
+    // Suradnice planety
     public Transform planetTransform;
 
-    public GameObject dialogBox;
+    // UIDialogBox
+    public UIDialogBox dialogBox;
 
-    // Referencia na textBox
-    private TextMeshProUGUI textMesh;
 
     // Start is called before the first frame update
     void Start()
     {
-        textMesh = dialogBox.GetComponentInChildren<TextMeshProUGUI>();
-
-        dialogBox.SetActive(false);
-            
-        textMesh.SetText(
-            $"Moon {this.name}\n\n" +
-            $"Planet: {planetTransform.name}");
+        // Vypis do dialogoveho okna
+        dialogBox.WriteLine($"Moon: {this.name}");
+        dialogBox.WriteLine($"Planet: {planetTransform.name}");
     }
 
     // Update is called once per frame
@@ -31,29 +28,19 @@ public class MoonController : MonoBehaviour
     {
         // Spin the object around the world origin at 20 degrees/second.
 		transform.RotateAround(planetTransform.position, Vector3.forward, rotationSpeed * Time.deltaTime);
-	}
 
-    // Na zaiatku kolizie
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.tag == "Player")
-        {
-            dialogBox.transform.position = this.transform.position;
-            dialogBox.SetActive(true);
-        }
+        // Vyrovnaj text aby bol citatelny
+        dialogBox.transform.rotation = Quaternion.Euler(0f, 0f, -Mathf.Atan2(transform.position.y, transform.position.x) * Mathf.Rad2Deg - 40f);
     }
 
-    // Pocas kolizie (sleduj poziciu mesiaca)
-    private void OnCollisionStay2D(Collision2D collision)
+    public void ShowDialog()
     {
-        if (collision.gameObject.tag == "Player")
-            dialogBox.transform.position = this.transform.position;
+        dialogBox.gameObject.SetActive(true);
     }
 
-    // Na konci kolizie
-    private void OnCollisionExit2D(Collision2D collision)
+    public void CloseDialog()
     {
-        if (collision.gameObject.tag == "Player")
-            dialogBox.SetActive(false);
+        // Deaktivuj dialogove okno
+        dialogBox.gameObject.SetActive(false);
     }
 }

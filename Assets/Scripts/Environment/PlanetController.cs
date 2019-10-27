@@ -1,43 +1,39 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 
 public class PlanetController : MonoBehaviour
 {
-    public GameObject dialogBox;
-
-    // Referencia na textBox
-    private TextMeshProUGUI textMesh;
+    // UIDialogBox
+    public UIDialogBox dialogBox;
 
     // Vlastnik planety (lod, ktora na planete pristala)
     public GameObject OwnerPlanet { get; private set; }
     private float landTimer;
 
-    // Use this for initialization
-    void Start()
-    {
-        textMesh = dialogBox.GetComponentInChildren<TextMeshProUGUI>();
-
-        dialogBox.transform.position = this.transform.position;
-    }
-
-    // Update is called once per frame
-    void Update() 
-    {
-
-    }
+    // Zoznam mesiacov patriacich planete
+    public List<MoonController> Moons;
 
     // Na zaiatku kolizie
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Player")
         {
-            dialogBox.SetActive(true);
+            // Aktivuj dialogove okno
+            dialogBox.gameObject.SetActive(true);
+
+            // Resetuj casovac pristatia lode na planete
             landTimer = 1f;
 
-            textMesh.SetText(
-                $"Planet: {this.name}\n\n" +
-                $"Owner: {(OwnerPlanet != null ? OwnerPlanet.name : null)}");
+            // Vypis do dialogoveho okna
+            dialogBox.WriteLine($"Planet: {this.name}");
+            dialogBox.WriteLine($"Owner: {(OwnerPlanet != null ? OwnerPlanet.name : string.Empty)}");
+
+            // Zapni dialogBox na vsetkych mesiacoch planety
+            foreach (var moon in Moons)
+            {
+                moon.ShowDialog();
+            }
         }
     }
 
@@ -46,16 +42,23 @@ public class PlanetController : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player")
         {
+            // ak casovac pristatia vyprsal
             if (landTimer < 0f)
             {
+                // Zapis vlastnika planety
                 OwnerPlanet = collision.gameObject;
 
-                textMesh.SetText(
-                    $"Planet: {this.name}\n\n" +
-                    $"Owner: {(OwnerPlanet != null ? OwnerPlanet.name : null)}");
+                // Vycisti dialogove okno
+                dialogBox.Clear();
 
+                // Vypis do dialogoveho okna
+                dialogBox.WriteLine($"Planet: {this.name}");
+                dialogBox.WriteLine($"Owner: {(OwnerPlanet != null ? OwnerPlanet.name : string.Empty)}");
+
+                // Reset casovaca
                 landTimer = 0f;
             }
+            // odpocitavaj cas
             else if (landTimer > 0f)
                 landTimer -= Time.deltaTime;
         }
@@ -66,7 +69,15 @@ public class PlanetController : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player")
         {
-            dialogBox.SetActive(false);
+            // Vycisti a deaktivuj dialogove okno
+            dialogBox.Clear();
+            dialogBox.gameObject.SetActive(false);
+
+            // Zatvor dialogBox na vsetkych mesiacoch planety
+            foreach (var moon in Moons)
+            {
+                moon.CloseDialog();
+            }
         }
     }
 }

@@ -31,7 +31,7 @@ public class TurretController : MonoBehaviour
         //transform.rotation = Quaternion.Euler(0, 0, Mathf.LerpAngle(transform.rotation.eulerAngles.z, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90.0f, turret_rotation_speed * Time.deltaTime));
 
         // Hned :D
-        transform.rotation = Quaternion.Euler(0, 0, (Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90.0f));
+        transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90.0f);
     }
 
     // Funkcie strelby zbrane
