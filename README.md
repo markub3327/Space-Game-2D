@@ -5,6 +5,7 @@
 [![Issues](https://img.shields.io/github/issues/marhor3327/Space-Game-2D.svg)](https://github.com/marhor3327/Space-Game-2D/issues)
 ![Size](https://img.shields.io/github/repo-size/marhor3327/Space-Game-2D.svg)
 ![Stars](https://img.shields.io/github/stars/marhor3327/Space-Game-2D.svg)
+![Commits](https://img.shields.io/github/commit-activity/w/markub3327/Space-Game-2D.svg)
 
 **Documentation**
 
