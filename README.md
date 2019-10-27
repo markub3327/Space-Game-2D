@@ -1,10 +1,13 @@
 ## Space Game 2D
 
 [![Release](https://img.shields.io/github/release/markub3327/Space-Game-2D.svg)](https://github.com/marhor3327/Space-Game/releases)
-![Languages](https://img.shields.io/github/languages/count/markub3327/Space-Game-2D)
+![Tag](https://img.shields.io/github/v/tag/markub3327/Space-Game-2D.svg)
+
 [![Issues](https://img.shields.io/github/issues/markub3327/Space-Game-2D.svg)](https://github.com/markub3327/Space-Game-2D/issues)
-![Size](https://img.shields.io/github/repo-size/markub3327/Space-Game-2D.svg)
 ![Commits](https://img.shields.io/github/commit-activity/w/markub3327/Space-Game-2D.svg)
+
+![Languages](https://img.shields.io/github/languages/count/markub3327/Space-Game-2D)
+![Size](https://img.shields.io/github/repo-size/markub3327/Space-Game-2D.svg)
 
 **Documentation**
 
