@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class PlayerControlledShip : ShipController
 {
@@ -11,7 +10,7 @@ public class PlayerControlledShip : ShipController
     }
 
     // Update is called once per frame
-    public void Update()
+    public override void Update()
     {
         // Nacitaj zmenu polohy z klavesnice alebo joysticku
         float axisH = Input.GetAxis("Horizontal");
@@ -25,15 +24,6 @@ public class PlayerControlledShip : ShipController
             MoveShip(move);
         }
 
-        // Ak je lod znicena
-        if (IsDestroyed)
-        {
-            respawnTimer -= Time.deltaTime;
-            if (respawnTimer < 0.0f)
-            {
-                RespawnShip();
-                animator.SetTrigger("Respawn");
-            }
-        }
+        base.Update();
     }
 }

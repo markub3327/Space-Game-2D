@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Sensors
-{    
+{
     public static class Radar
     {
         // Matica zasiahnutych objektov lucom (uhly x okruhy)

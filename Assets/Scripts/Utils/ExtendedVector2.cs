@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 // Rozsirujuca trieda pre triedu UnityEngine.Vector2
 public static class ExtendedVector2

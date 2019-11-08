@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using TMPro;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class PlanetController : MonoBehaviour
 {

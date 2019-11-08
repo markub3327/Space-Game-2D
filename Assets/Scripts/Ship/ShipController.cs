@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ShipController : MonoBehaviour
 {
@@ -104,6 +102,20 @@ public class ShipController : MonoBehaviour
 
         // Zacina v mieste respawnu
         RespawnShip();
+    }
+
+    public virtual void Update()
+    {
+        // Ak je lod znicena
+        if (IsDestroyed)
+        {
+            respawnTimer -= Time.deltaTime;
+            if (respawnTimer < 0.0f)
+            {
+                RespawnShip();
+                animator.SetTrigger("Respawn");
+            }
+        }
     }
 
     /// <summary>
