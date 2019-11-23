@@ -11,7 +11,9 @@ public struct Neuron
     // Id neuronu vramci matice vah
     public int IndexW;
 
-    public NeuronType type;
-
     public int num_of_inputs;
+
+    public float momentum;
+
+    public float learning_rate;    
 }

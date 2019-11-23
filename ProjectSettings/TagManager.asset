@@ -7,6 +7,10 @@ TagManager:
   - Planet
   - Star
   - Moon
+  - Nebula
+  - Asteroid
+  - Health
+  - Ammo
   layers:
   - Default
   - TransparentFX

@@ -163,7 +163,7 @@ MonoBehaviour:
   maxAmmo: 100
   fuelBar: {fileID: 0}
   maxFuel: 5
-  timeRespawn: 10
+  timeRespawn: 5
 --- !u!50 &7561708683362344633
 Rigidbody2D:
   serializedVersion: 4
@@ -516,7 +516,8 @@ PrefabInstance:
       propertyPath: m_FlipX
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3923725894147193817, guid: 4855ce631a22b48fbac0caaf8fff47cb, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 4855ce631a22b48fbac0caaf8fff47cb, type: 3}
 --- !u!198 &1851684994981722422 stripped
 ParticleSystem:
@@ -704,7 +705,8 @@ PrefabInstance:
       propertyPath: m_SortingOrder
       value: -1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3923725894147193817, guid: 4855ce631a22b48fbac0caaf8fff47cb, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 4855ce631a22b48fbac0caaf8fff47cb, type: 3}
 --- !u!198 &3108122883843289932 stripped
 ParticleSystem:
@@ -806,7 +808,8 @@ PrefabInstance:
       propertyPath: m_SortingOrder
       value: -1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3923725894147193817, guid: 4855ce631a22b48fbac0caaf8fff47cb, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 4855ce631a22b48fbac0caaf8fff47cb, type: 3}
 --- !u!4 &1066680546190077688 stripped
 Transform:

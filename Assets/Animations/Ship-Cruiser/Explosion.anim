@@ -146,9 +146,9 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    attribute: m_IsActive
+    attribute: m_Enabled
     path: Engine/Motor1
-    classID: 1
+    classID: 199
     script: {fileID: 0}
   m_PPtrCurves:
   - curve:
@@ -223,9 +223,9 @@ AnimationClip:
       isPPtrCurve: 0
     - serializedVersion: 2
       path: 1280480007
-      attribute: 2086281974
+      attribute: 3305885265
       script: {fileID: 0}
-      typeID: 1
+      typeID: 199
       customType: 0
       isPPtrCurve: 0
     - serializedVersion: 2
@@ -394,9 +394,9 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    attribute: m_IsActive
+    attribute: m_Enabled
     path: Engine/Motor1
-    classID: 1
+    classID: 199
     script: {fileID: 0}
   m_EulerEditorCurves: []
   m_HasGenericRootTransform: 0

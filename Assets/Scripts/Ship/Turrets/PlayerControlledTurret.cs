@@ -8,13 +8,7 @@ public class PlayerControlledTurret : TurretController
     // Update is called once per frame
     public void Update()
     {
-        // Tlacidlo mierenia na najblizsi ciel
-        if (Input.GetButton("Fire2"))
-        {
-            AutoAim();
-        }
-        else
-            SetPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+        SetPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition));
 
         // Tlacidlo strelby
         if (Input.GetButton("Fire1"))

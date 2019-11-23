@@ -77,7 +77,7 @@ public class ShipController : MonoBehaviour
     protected float respawnTimer;   // casovac pre obnovu lode
 
     // Dynamika herneho objektu
-    private Rigidbody2D rigidbody2d;
+    protected Rigidbody2D rigidbody2d;
 
     // Reproduktor lode
     private AudioSource audioSource;
@@ -192,7 +192,7 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav municie hraca
     /// </summary>
     /// <param name="amount">Mnozstvo municie, ktore sa pripocita k sucasnemu stavu municie</param>
-    public void ChangeAmmo(int amount)
+    public virtual void ChangeAmmo(int amount)
     {
         if (!IsDestroyed)
         {
@@ -204,11 +204,11 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav municie hraca
     /// </summary>
     /// <param name="amount">Mnozstvo municie, ktore sa pripocita k sucasnemu stavu municie</param>
-    public void ChangeFuel(int amount)
+    public virtual void ChangeFuel(int amount)
     {
         if (!IsDestroyed)
         {
-            Fuel = Mathf.Clamp(Fuel + amount, 0, maxFuel);
+            Fuel = Mathf.Clamp(Fuel + amount, 1, maxFuel);
         }
     }
 
@@ -216,7 +216,7 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav zivota hraca
     /// </summary>
     /// <param name="amount">Mnozstvo zivota, ktore sa pripocita k sucasnemu stavu zivota</param>
-    public void ChangeHealth(int amount)
+    public virtual void ChangeHealth(int amount)
     {
         if (!IsDestroyed)
         {

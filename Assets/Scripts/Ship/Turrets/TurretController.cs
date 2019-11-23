@@ -20,7 +20,7 @@ public class TurretController : MonoBehaviour
         controller = GetComponentInParent<ShipController>();
     }
     
-    protected void SetPosition(Vector3 position)
+    public void SetPosition(Vector3 position)
     {
         Vector3 direction = position - transform.position;
 
@@ -32,7 +32,7 @@ public class TurretController : MonoBehaviour
     }
 
     // Funkcie strelby zbrane
-    protected void Fire()
+    public void Fire()
     {
         if (controller.Ammo > 0)
         {
@@ -51,22 +51,5 @@ public class TurretController : MonoBehaviour
             // Uber z municie hraca jeden naboj
             controller.ChangeAmmo(-1);
         }
-    }
-
-    // Funkcia automatickeho zameriavania na najblizsi ciel (lod)
-    protected void AutoAim()
-    {
-        Sensors.Radar.Scan(transform.position, controller.LookDirection);
-
-        // Najde najblizsi videny objekt
-        var obj = Sensors.Radar.GetNearestObject(controller.gameObject);
-
-        // Nastav mierenie zbarni na najblizsi objekt ak ide o lod
-        if (obj != null)
-        {
-            SetPosition(obj.Value.point);
-
-            Debug.Log($"{this.name}'s nearest object: name = {obj.Value.transform.name}, distance = {obj.Value.distance}");
-        }
-    }
+    }    
 }

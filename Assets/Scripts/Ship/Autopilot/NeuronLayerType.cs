@@ -1,5 +1,5 @@
 
-public enum NeuronType : byte
+public enum NeuronLayerType : byte
 {
     HIDDEN =  0,
     INPUT  =  1,
