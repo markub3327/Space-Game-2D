@@ -151,7 +151,14 @@ public class AIControlledShip : ShipController
                 }
 
                 var reward = GetReward();
-                var o = new float[5] { 0f, 0f, 0f, 0f, 0f };
+                var o = new float[5] 
+                { 
+                    net1.neuronLayers[2].Neurons[0].output, 
+                    net1.neuronLayers[2].Neurons[1].output, 
+                    net1.neuronLayers[2].Neurons[2].output, 
+                    net1.neuronLayers[2].Neurons[3].output, 
+                    net1.neuronLayers[2].Neurons[4].output, 
+                };
                 o[actionOld] = reward + 0.6f * net2.neuronLayers[2].Neurons[action].output;
 
                 // Vykonaj akciu
@@ -227,20 +234,20 @@ public class AIControlledShip : ShipController
 
         if (this.Ammo < this.ammoOld)
         {
-            reward += -0.01f;            
+            reward += -0.04f;            
         }
         else if (this.Ammo > this.ammoOld)
         {
-            reward += +0.01f;            
+            reward += +0.04f;            
         }
 
         if (this.Fuel < this.fuelOld)
         {
-            reward += -0.05f;            
+            reward += -0.04f;            
         }
         else if (this.Fuel > this.fuelOld)
         {
-            reward += +0.05f;            
+            reward += +0.04f;            
         }
         
         // Nenastala zmena ... hladna politika ... kroky, ktore nevedu k vyvoju su zbytocne
