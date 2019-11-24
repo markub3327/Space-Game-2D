@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Unity.Mathematics;
 
 public class AIControlledShip : ShipController
 {
@@ -22,7 +23,7 @@ public class AIControlledShip : ShipController
 
     private float[] stateOld = null;
 
-    private int actionOld;
+    private int actionOld = 0;
 
     public TurretController[] turretControllers;
 
@@ -64,7 +65,7 @@ public class AIControlledShip : ShipController
         net2.neuronLayers[2].BPG_egdes = net2.neuronLayers[3];
 
         // Vstupna vrstva
-        for (int i = 0; i < 34; i++)
+        for (int i = 0; i < 16; i++)
         {
             net1.neuronLayers[0].CreateNeuron(34);
             net2.neuronLayers[0].CreateNeuron(34);
@@ -75,25 +76,17 @@ public class AIControlledShip : ShipController
         }
 
         // Skryta vrstva #1
-        for (int i = 0; i < 68; i++)
+        for (int i = 0; i < 32; i++)
         {
             net1.neuronLayers[1].CreateNeuron();
             net2.neuronLayers[1].CreateNeuron();
-
-            // Skopiruj parametre sieti
-            net2.neuronLayers[1].deltaWeights = net1.neuronLayers[1].deltaWeights;
-            net2.neuronLayers[1].Weights      = net1.neuronLayers[1].Weights;
         }
 
         // Skryta vrstva #2
-        for (int i = 0; i < 36; i++)
+        for (int i = 0; i < 18; i++)
         {
             net1.neuronLayers[2].CreateNeuron();
             net2.neuronLayers[2].CreateNeuron();
-
-            // Skopiruj parametre sieti
-            net2.neuronLayers[2].deltaWeights = net1.neuronLayers[2].deltaWeights;
-            net2.neuronLayers[2].Weights      = net1.neuronLayers[2].Weights;
         }
 
         // Vystupna vrstva
@@ -101,17 +94,11 @@ public class AIControlledShip : ShipController
         {
             net1.neuronLayers[3].CreateNeuron();
             net2.neuronLayers[3].CreateNeuron();
-
-            // Skopiruj parametre sieti
-            net2.neuronLayers[3].deltaWeights = net1.neuronLayers[3].deltaWeights;
-            net2.neuronLayers[3].Weights      = net1.neuronLayers[3].Weights;
         }
     }
 
     public override void Update()
     {        
-        base.Update();
-        
         if (!this.IsDestroyed)
         {
             int action;
@@ -144,7 +131,7 @@ public class AIControlledShip : ShipController
                 net1.Run(state);
 
                 // Exploration/Exploitation problem
-                if (randomGen.NextFloat() <= 0.25f) // 20% nahoda, 80% podla vedomosti
+                if (randomGen.NextFloat() <= 0.20f) // 20% nahoda, 80% podla vedomosti
                 {
                     action = randomGen.NextInt(0,5);
                 }
@@ -176,16 +163,16 @@ public class AIControlledShip : ShipController
                 this.fitnessCounter += reward;
                 var o = new float[5] 
                 { 
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    0.0f
+                    0f,//net1.neuronLayers[3].Neurons[0].output,
+                    0f,//net1.neuronLayers[3].Neurons[1].output,
+                    0f,//net1.neuronLayers[3].Neurons[2].output,
+                    0f,//net1.neuronLayers[3].Neurons[3].output,
+                    0f//net1.neuronLayers[3].Neurons[4].output
                 };
                 // priprav ocakavany vystup
-                o[actionOld] = (reward + 0.9f * net2.neuronLayers[3].Neurons[action].output);
+                o[actionOld] = (reward + 0.8f * net2.neuronLayers[3].Neurons[action].output);
 
-                Debug.Log($"err = {o[actionOld] - net1.neuronLayers[3].Neurons[actionOld].output}");
+                //this.avgErr += math.pow(0.5f * math.pow(o[actionOld] - net1.neuronLayers[3].Neurons[actionOld].output, 2f), 2f);
 
                 // Vykonaj akciu
                 DoAction(action);
@@ -196,14 +183,33 @@ public class AIControlledShip : ShipController
                 // Skopiruj parametre sieti
                 for (int i = 0; i < 4; i++)
                 {
-                    net2.neuronLayers[i].deltaWeights = net1.neuronLayers[i].deltaWeights;
-                    net2.neuronLayers[i].Weights      = net1.neuronLayers[i].Weights;
+                    for (int j = 0; j < net2.neuronLayers[i].Weights.Count; j++)
+                    {
+                        net2.neuronLayers[i].deltaWeights[j] = 0.01f * net1.neuronLayers[i].deltaWeights[j] + (1f - 0.01f) * net2.neuronLayers[i].deltaWeights[j];
+                        net2.neuronLayers[i].Weights[j]      = 0.01f * net1.neuronLayers[i].Weights[j] + (1f - 0.01f) * net2.neuronLayers[i].Weights[j];
+                    }
                 }
 
                 this.waitingOnNextFrame = false;
             }
 
             //Debug.Log($"Action = {action}");    
+        }
+        else
+        {
+            respawnTimer -= Time.deltaTime;
+            if (respawnTimer < 0.0f)
+            {                
+                RespawnShip();
+                animator.SetTrigger("Respawn");
+
+                this.healthOld      =  this.Health;
+                this.ammoOld        =  this.Ammo;
+                this.fuelOld        =  this.Fuel;
+                this.planetsOld     =  this.NumOfPlanets;
+                this.fitnessCounter =  0f;
+                //this.fitness = 0f;
+            }
         }
     }
 
@@ -256,52 +262,60 @@ public class AIControlledShip : ShipController
             if (this.Health <= 0)
                 reward += (-1.0f);
             else
-                reward += (-0.16f);            
+                reward += (-0.1f);            
         }
         else if (this.Health > this.healthOld)
         {
-            reward += (+0.16f);
+            reward += (+0.1f);
         }
+
+        if (this.NumOfPlanets > this.planetsOld)
+            if (this.NumOfPlanets >= 5)
+                reward += (+1.0f);
 
         // Ziskaj skore z ukazatela poctu municie
         if (this.Ammo < this.ammoOld)
         {
-            reward += (-0.01f);
+            reward += (-0.1f);
         }
         else if (this.Ammo > this.ammoOld)
         {
-            reward += (+0.01f);            
+            reward += (+0.1f);            
         }
 
         // Ziskaj skore z ukazatela poctu paliva
         if (this.Fuel < this.fuelOld)
         {
-            reward += (-0.04f);            
+            reward += (-0.1f);
         }
         else if (this.Fuel > this.fuelOld)
         {
-            reward += (+0.04f);            
+            reward += (+0.1f);            
         }
         
-        if (this.NumOfPlanets < this.planetsOld)
+        /*if (this.NumOfPlanets < this.planetsOld)
         {
-            reward += (-0.08f);
+            reward += (-0.02f);
         }
         else if (this.NumOfPlanets > this.planetsOld)
         {
             if (this.NumOfPlanets >= 5)
                 reward += (+1.0f);
             else
-                reward += (+0.08f);
-        }
+                reward += (+0.02f);
+        }*/
 
         reward = Mathf.Clamp(reward, -1f, 1f);
+        if (reward == 0f)
+        {
+            reward = (-0.001f);
+        }
 
         Debug.Log($"reward = {reward}");
-        Debug.Log($"Num of planets = {this.NumOfPlanets}");
-        Debug.Log($"Health = {this.Health}");
-        Debug.Log($"Ammo = {this.Ammo}");
-        Debug.Log($"Fuel = {this.Fuel}");
+        //Debug.Log($"Num of planets = {this.NumOfPlanets}");
+        //Debug.Log($"Health = {this.Health}");
+        //Debug.Log($"Ammo = {this.Ammo}");
+        //Debug.Log($"Fuel = {this.Fuel}");
 
         return reward;
     }

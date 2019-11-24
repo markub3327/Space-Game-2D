@@ -202,11 +202,6 @@ public class ShipController : MonoBehaviour
         if (!IsDestroyed)
         {
             Ammo = Mathf.Clamp(Ammo + amount, 0, maxAmmo);
-
-            if (this.Ammo <= 0)
-            {
-                this.ChangeHealth(-this.Health);
-            }
         }
     }
 

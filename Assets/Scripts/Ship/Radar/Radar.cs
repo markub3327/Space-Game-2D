@@ -25,7 +25,7 @@ namespace Sensors
                         break;
                     }
                 }
-                Debug.DrawRay(origin, lookDirection.Shift(angle), Color.magenta);
+                //Debug.DrawRay(origin, lookDirection.Shift(angle), Color.magenta);
             }
 
             return hits;

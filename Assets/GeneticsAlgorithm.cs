@@ -6,8 +6,10 @@ public class GeneticsAlgorithm : MonoBehaviour
 {
     public AIControlledShip[] ships;
 
-    private const float maxSelectTime = 5f;        // kazdych 5 sekund
+    public int maxSelectTime = 5;        // kazdych 5 sekund vyber najlepsieho hraca, ktory sa bude klonovat
     private float selectTimer;                // casovac uchovavajuci cas do vyberu noveho najsilnejsieho jedinca
+
+    private Unity.Mathematics.Random randomGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
 
 
     // Start is called before the first frame update
@@ -27,7 +29,7 @@ public class GeneticsAlgorithm : MonoBehaviour
             foreach (var ship in ships)
             {
                 // Ak ma lod vyssie skore stava sa novou najlepsou v hre
-                if (ship.fitness > bestShip.fitness)
+                if (ship.fitness != 0f && ship.fitness > bestShip.fitness)
                 {
                     bestShip = ship;
                 }                
@@ -42,8 +44,19 @@ public class GeneticsAlgorithm : MonoBehaviour
                     // Skopiruj parametre sieti
                     for (int i = 0; i < 4; i++)
                     {
-                        ship.net2.neuronLayers[i].deltaWeights = ship.net1.neuronLayers[i].deltaWeights = bestShip.net1.neuronLayers[i].deltaWeights;
-                        ship.net2.neuronLayers[i].Weights      = ship.net1.neuronLayers[i].Weights      = bestShip.net1.neuronLayers[i].Weights;
+                        for (int j = 0; j < bestShip.net1.neuronLayers[i].Weights.Count; j++)
+                        {
+                            if (randomGen.NextFloat() <= 0.20f) // 20% nahoda, 80% podla vedomosti
+                            {
+                                ship.net2.neuronLayers[i].deltaWeights[j] = ship.net1.neuronLayers[i].deltaWeights[j] = 0f;
+                                ship.net2.neuronLayers[i].Weights[j]      = ship.net1.neuronLayers[i].Weights[j]      = randomGen.NextFloat(-1f, 1f);
+                            }
+                            else
+                            {
+                                ship.net2.neuronLayers[i].deltaWeights[j] = ship.net1.neuronLayers[i].deltaWeights[j] = bestShip.net1.neuronLayers[i].deltaWeights[j];
+                                ship.net2.neuronLayers[i].Weights[j]      = ship.net1.neuronLayers[i].Weights[j]      = bestShip.net1.neuronLayers[i].Weights[j];
+                            }
+                        }
                     }
                 }
             }
