@@ -24,6 +24,9 @@ public class PlanetController : MonoBehaviour
             // Resetuj casovac pristatia lode na planete
             landTimer = 1f;
 
+            // Vycisti dialogove okno
+            dialogBox.Clear();
+
             // Vypis do dialogoveho okna
             dialogBox.WriteLine($"Planet: {this.name}");
             dialogBox.WriteLine($"Owner: {(OwnerPlanet != null ? OwnerPlanet.name : string.Empty)}");
@@ -41,25 +44,36 @@ public class PlanetController : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player")
         {
-            // ak casovac pristatia vyprsal
-            if (landTimer < 0f)
+            if (collision.gameObject != OwnerPlanet)
             {
-                // Zapis vlastnika planety
-                OwnerPlanet = collision.gameObject;
+                // ak casovac pristatia vyprsal
+                if (landTimer < 0f)
+                {
+                    // Zapis noveho vlastnika planety
+                    if (this.OwnerPlanet != null)
+                    {
+                        var shipOld = OwnerPlanet.GetComponent<ShipController>();
+                        shipOld.NumOfPlanets -= 1;
+                    }
+                    OwnerPlanet = collision.gameObject;
+                    var ship = OwnerPlanet.GetComponent<ShipController>();                    
+                    OwnerPlanet.GetComponent<AIControlledShip>().planetsOld = ship.NumOfPlanets;
+                    ship.NumOfPlanets += 1;
 
-                // Vycisti dialogove okno
-                dialogBox.Clear();
+                    // Vycisti dialogove okno
+                    dialogBox.Clear();
+    
+                    // Vypis do dialogoveho okna
+                    dialogBox.WriteLine($"Planet: {this.name}");
+                    dialogBox.WriteLine($"Owner: {(OwnerPlanet != null ? OwnerPlanet.name : string.Empty)}");
 
-                // Vypis do dialogoveho okna
-                dialogBox.WriteLine($"Planet: {this.name}");
-                dialogBox.WriteLine($"Owner: {(OwnerPlanet != null ? OwnerPlanet.name : string.Empty)}");
-
-                // Reset casovaca
-                landTimer = 0f;
+                    // Reset casovaca
+                    landTimer = 0f;
+                }
+                // odpocitavaj cas
+                else if (landTimer > 0f)
+                    landTimer -= Time.deltaTime;                
             }
-            // odpocitavaj cas
-            else if (landTimer > 0f)
-                landTimer -= Time.deltaTime;
         }
     }
 

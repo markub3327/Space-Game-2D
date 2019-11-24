@@ -71,6 +71,9 @@ public class ShipController : MonoBehaviour
     private bool isEmptyFuel;               // je nadrz prazdna?
     private float fuelTimer;                // casovac uchovavajuci cas do minutia jednej nadrze paliva
 
+    // Pocet planet vo vlastnictve hraca
+    public int NumOfPlanets { get; set; }
+
     // Respawn
     public float timeRespawn = 10.0f;       // 10 seconds do obnovenia lode v bode respawn
     public bool IsDestroyed { get; private set; }   // je lod znicena?
@@ -99,6 +102,8 @@ public class ShipController : MonoBehaviour
         animator = GetComponent<Animator>();
         collider2d = GetComponent<PolygonCollider2D>();
         respawn = GameObject.FindGameObjectWithTag("Respawn");
+
+        NumOfPlanets = 0;
 
         // Zacina v mieste respawnu
         RespawnShip();
@@ -197,6 +202,11 @@ public class ShipController : MonoBehaviour
         if (!IsDestroyed)
         {
             Ammo = Mathf.Clamp(Ammo + amount, 0, maxAmmo);
+
+            if (this.Ammo <= 0)
+            {
+                this.ChangeHealth(-this.Health);
+            }
         }
     }
 
@@ -208,7 +218,12 @@ public class ShipController : MonoBehaviour
     {
         if (!IsDestroyed)
         {
-            Fuel = Mathf.Clamp(Fuel + amount, 1, maxFuel);
+            Fuel = Mathf.Clamp(Fuel + amount, 0, maxFuel);
+
+            if (this.Fuel <= 0)
+            {
+                this.ChangeHealth(-this.Health);
+            }
         }
     }
 
@@ -220,18 +235,23 @@ public class ShipController : MonoBehaviour
     {
         if (!IsDestroyed)
         {
-            // Ak uz hrac nema zivoty znici sa lod
-            if (this.Health <= 0.0f)
-            {
-                IsDestroyed = true;
-                collider2d.enabled = false;
-                respawnTimer = timeRespawn;
-
-                animator.SetTrigger("Destroyed");
-            }
-
             Health = Mathf.Clamp(Health + amount, 0, maxHealth);
+
+            // Ak uz hrac nema zivoty znici sa lod
+            if (this.Health <= 0)
+            {
+                DestroyShip();
+            }
         }
+    }
+
+    protected void DestroyShip()
+    {
+        IsDestroyed = true;
+        collider2d.enabled = false;
+        respawnTimer = timeRespawn;
+
+        animator.SetTrigger("Destroyed");
     }
 
     /// <summary>

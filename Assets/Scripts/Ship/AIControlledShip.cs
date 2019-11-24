@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 public class AIControlledShip : ShipController
 {
-    NeuralNetwork net1 = new NeuralNetwork();
-    NeuralNetwork net2 = new NeuralNetwork();
+    public NeuralNetwork net1 = new NeuralNetwork();
+    public NeuralNetwork net2 = new NeuralNetwork();
 
     private bool waitingOnNextFrame = false;
 
@@ -13,6 +13,12 @@ public class AIControlledShip : ShipController
     private int ammoOld;
 
     private int fuelOld;
+
+    public int planetsOld;
+
+    // Geneticky algoritmus vyberu najsilnejsieho jedinca v hre
+    private float fitnessCounter;
+    public float fitness { get; set; }       // ohodnotenie jedinca v ramci hre
 
     private float[] stateOld = null;
 
@@ -29,26 +35,36 @@ public class AIControlledShip : ShipController
         this.healthOld = this.Health;
         this.ammoOld = this.Ammo;
         this.fuelOld = this.Fuel;
+        this.planetsOld = this.NumOfPlanets;
+        this.fitnessCounter = 0f;
+        this.fitness = 0f;
 
         net1.CreateLayer(NeuronLayerType.INPUT);
+        net1.CreateLayer(NeuronLayerType.HIDDEN);
         net1.CreateLayer(NeuronLayerType.HIDDEN);
         net1.CreateLayer(NeuronLayerType.OUTPUT);
 
         net2.CreateLayer(NeuronLayerType.INPUT);
         net2.CreateLayer(NeuronLayerType.HIDDEN);
+        net2.CreateLayer(NeuronLayerType.HIDDEN);
         net2.CreateLayer(NeuronLayerType.OUTPUT);
 
         net1.neuronLayers[1].Edge = net1.neuronLayers[0];
         net1.neuronLayers[2].Edge = net1.neuronLayers[1];
+        net1.neuronLayers[3].Edge = net1.neuronLayers[2];
         net1.neuronLayers[0].BPG_egdes = net1.neuronLayers[1];
         net1.neuronLayers[1].BPG_egdes = net1.neuronLayers[2];
+        net1.neuronLayers[2].BPG_egdes = net1.neuronLayers[3];
 
         net2.neuronLayers[1].Edge = net2.neuronLayers[0];
         net2.neuronLayers[2].Edge = net2.neuronLayers[1];
+        net2.neuronLayers[3].Edge = net2.neuronLayers[2];
         net2.neuronLayers[0].BPG_egdes = net2.neuronLayers[1];
         net2.neuronLayers[1].BPG_egdes = net2.neuronLayers[2];
+        net2.neuronLayers[2].BPG_egdes = net2.neuronLayers[3];
 
-        for (int i = 0; i < 24; i++)
+        // Vstupna vrstva
+        for (int i = 0; i < 34; i++)
         {
             net1.neuronLayers[0].CreateNeuron(34);
             net2.neuronLayers[0].CreateNeuron(34);
@@ -58,7 +74,8 @@ public class AIControlledShip : ShipController
             net2.neuronLayers[0].Weights      = net1.neuronLayers[0].Weights;
         }
 
-        for (int i = 0; i < 14; i++)
+        // Skryta vrstva #1
+        for (int i = 0; i < 68; i++)
         {
             net1.neuronLayers[1].CreateNeuron();
             net2.neuronLayers[1].CreateNeuron();
@@ -68,7 +85,8 @@ public class AIControlledShip : ShipController
             net2.neuronLayers[1].Weights      = net1.neuronLayers[1].Weights;
         }
 
-        for (int i = 0; i < 5; i++)
+        // Skryta vrstva #2
+        for (int i = 0; i < 36; i++)
         {
             net1.neuronLayers[2].CreateNeuron();
             net2.neuronLayers[2].CreateNeuron();
@@ -76,6 +94,17 @@ public class AIControlledShip : ShipController
             // Skopiruj parametre sieti
             net2.neuronLayers[2].deltaWeights = net1.neuronLayers[2].deltaWeights;
             net2.neuronLayers[2].Weights      = net1.neuronLayers[2].Weights;
+        }
+
+        // Vystupna vrstva
+        for (int i = 0; i < 5; i++)
+        {
+            net1.neuronLayers[3].CreateNeuron();
+            net2.neuronLayers[3].CreateNeuron();
+
+            // Skopiruj parametre sieti
+            net2.neuronLayers[3].deltaWeights = net1.neuronLayers[3].deltaWeights;
+            net2.neuronLayers[3].Weights      = net1.neuronLayers[3].Weights;
         }
     }
 
@@ -87,7 +116,7 @@ public class AIControlledShip : ShipController
         {
             int action;
             var radarResult = Sensors.Radar.Scan(this.transform.position, this.LookDirection, this.transform);
-            var state = new float[(radarResult.Length * 2) + 2];
+            var state = new float[34];
             
             // Poloha lode v ramci herneho sveta
             state[0] = this.rigidbody2d.position.x / 20f;
@@ -99,7 +128,7 @@ public class AIControlledShip : ShipController
                 if (radarResult[j] != null)
                 {
                     state[i] = (float)radarResult[j].Value.transform.tag.GetHashCode() / (float)int.MaxValue;
-                    state[i+1] = radarResult[j].Value.distance / 10f;
+                    state[i+1] = radarResult[j].Value.distance / 16f;
                 }
                 else
                 {
@@ -115,14 +144,14 @@ public class AIControlledShip : ShipController
                 net1.Run(state);
 
                 // Exploration/Exploitation problem
-                if (randomGen.NextFloat() <= 0.2f)
+                if (randomGen.NextFloat() <= 0.25f) // 20% nahoda, 80% podla vedomosti
                 {
                     action = randomGen.NextInt(0,5);
                 }
                 else
                 {
                     // Vyber akciu
-                    action = GetMaxQ(net1.neuronLayers[2].Neurons);
+                    action = GetMaxQ(net1.neuronLayers[3].Neurons);
                 }
 
                 // Vykonaj akciu
@@ -139,27 +168,24 @@ public class AIControlledShip : ShipController
                 // Spusti sekundarnu siet
                 net2.Run(state);
 
-                // Exploration/Exploitation problem
-                if (randomGen.NextFloat() <= 0.2f)
-                {
-                    action = randomGen.NextInt(0,5);
-                }
-                else
-                {
-                    // Vyber akciu
-                    action = GetMaxQ(net2.neuronLayers[2].Neurons);
-                }
+                // Vyber akciu
+                action = GetMaxQ(net2.neuronLayers[3].Neurons);
 
+                // Ziskaj spatnu vazbu z hry
                 var reward = GetReward();
+                this.fitnessCounter += reward;
                 var o = new float[5] 
                 { 
-                    net1.neuronLayers[2].Neurons[0].output, 
-                    net1.neuronLayers[2].Neurons[1].output, 
-                    net1.neuronLayers[2].Neurons[2].output, 
-                    net1.neuronLayers[2].Neurons[3].output, 
-                    net1.neuronLayers[2].Neurons[4].output, 
+                    0.0f,
+                    0.0f,
+                    0.0f,
+                    0.0f,
+                    0.0f
                 };
-                o[actionOld] = reward + 0.6f * net2.neuronLayers[2].Neurons[action].output;
+                // priprav ocakavany vystup
+                o[actionOld] = (reward + 0.9f * net2.neuronLayers[3].Neurons[action].output);
+
+                Debug.Log($"err = {o[actionOld] - net1.neuronLayers[3].Neurons[actionOld].output}");
 
                 // Vykonaj akciu
                 DoAction(action);
@@ -168,11 +194,16 @@ public class AIControlledShip : ShipController
                 net1.Training(stateOld, o);
 
                 // Skopiruj parametre sieti
-                net2.neuronLayers[2].deltaWeights = net1.neuronLayers[2].deltaWeights;
-                net2.neuronLayers[2].Weights      = net1.neuronLayers[2].Weights;
+                for (int i = 0; i < 4; i++)
+                {
+                    net2.neuronLayers[i].deltaWeights = net1.neuronLayers[i].deltaWeights;
+                    net2.neuronLayers[i].Weights      = net1.neuronLayers[i].Weights;
+                }
 
                 this.waitingOnNextFrame = false;
-            }    
+            }
+
+            //Debug.Log($"Action = {action}");    
         }
     }
 
@@ -208,7 +239,6 @@ public class AIControlledShip : ShipController
             {
                 foreach (var turret in turretControllers)
                 {
-                    //turret.SetPosition();
                     turret.Fire();
                 }
                 break;
@@ -220,42 +250,59 @@ public class AIControlledShip : ShipController
     {
         float reward = 0f;
 
+        // Ziskaj skore z ukazatela poctu zivotov
         if (this.Health < this.healthOld)
         {
             if (this.Health <= 0)
-                reward += -100f;
+                reward += (-1.0f);
             else
-                reward += -1f;            
+                reward += (-0.16f);            
         }
         else if (this.Health > this.healthOld)
         {
-            reward += +1f;            
+            reward += (+0.16f);
         }
 
+        // Ziskaj skore z ukazatela poctu municie
         if (this.Ammo < this.ammoOld)
         {
-            reward += -0.04f;            
+            reward += (-0.01f);
         }
         else if (this.Ammo > this.ammoOld)
         {
-            reward += +0.04f;            
+            reward += (+0.01f);            
         }
 
+        // Ziskaj skore z ukazatela poctu paliva
         if (this.Fuel < this.fuelOld)
         {
-            reward += -0.04f;            
+            reward += (-0.04f);            
         }
         else if (this.Fuel > this.fuelOld)
         {
-            reward += +0.04f;            
+            reward += (+0.04f);            
         }
         
-        // Nenastala zmena ... hladna politika ... kroky, ktore nevedu k vyvoju su zbytocne
-        if (reward == 0f)
-            reward = -0.01f;
+        if (this.NumOfPlanets < this.planetsOld)
+        {
+            reward += (-0.08f);
+        }
+        else if (this.NumOfPlanets > this.planetsOld)
+        {
+            if (this.NumOfPlanets >= 5)
+                reward += (+1.0f);
+            else
+                reward += (+0.08f);
+        }
 
-        //Debug.Log($"reward = {reward}");
-        
+        reward = Mathf.Clamp(reward, -1f, 1f);
+
+        Debug.Log($"reward = {reward}");
+        Debug.Log($"Num of planets = {this.NumOfPlanets}");
+        Debug.Log($"Health = {this.Health}");
+        Debug.Log($"Ammo = {this.Ammo}");
+        Debug.Log($"Fuel = {this.Fuel}");
+
         return reward;
     }
 
@@ -263,7 +310,16 @@ public class AIControlledShip : ShipController
     {
         this.healthOld = this.Health;
 
-        base.ChangeHealth(amount);
+        if (!this.IsDestroyed)
+        {
+            base.ChangeHealth(amount);
+
+            if (this.Health <= 0f)
+            {
+                this.fitness = this.fitnessCounter;
+                this.fitnessCounter = 0f;
+            }
+        }
     }
 
     public override void ChangeAmmo(int amount)
