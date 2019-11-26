@@ -94,6 +94,9 @@ public class ShipController : MonoBehaviour
     // Respawn
     private GameObject respawn;
 
+    protected Unity.Mathematics.Random randomGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
+
+
     // Start is called before the first frame update
     public virtual void Start()
     {
@@ -119,6 +122,14 @@ public class ShipController : MonoBehaviour
             {
                 RespawnShip();
                 animator.SetTrigger("Respawn");
+            }
+        }
+        else
+        {
+            // Ak uz hrac nema zivoty znici sa lod
+            if (this.Health <= 0)
+            {
+                DestroyShip();
             }
         }
     }
@@ -187,8 +198,14 @@ public class ShipController : MonoBehaviour
         Fuel = maxFuel;
 
         // Nastav lod do bodu respawn
-        rigidbody2d.position = respawn.transform.position;
-        rigidbody2d.rotation = respawn.transform.rotation.eulerAngles.z;
+        Vector2 point = randomGen.NextFloat2(-10f, 10f);
+        while ((point.x > -8.1f && point.x < 8.1f) || (point.y > -8.3f && point.y < 8.2f))
+        {
+            point = randomGen.NextFloat2(-10f, 10f);
+        }
+
+        rigidbody2d.position = point; //respawn.transform.position;
+        rigidbody2d.rotation = randomGen.NextFloat(0f, 360f); //respawn.transform.rotation.eulerAngles.z;
         IsDestroyed = false;
         collider2d.enabled = true;
     }
@@ -231,17 +248,13 @@ public class ShipController : MonoBehaviour
         if (!IsDestroyed)
         {
             Health = Mathf.Clamp(Health + amount, 0, maxHealth);
-
-            // Ak uz hrac nema zivoty znici sa lod
-            if (this.Health <= 0)
-            {
-                DestroyShip();
-            }
         }
     }
 
     protected void DestroyShip()
     {
+        Debug.Log($"Lod bude znicena!");
+
         IsDestroyed = true;
         collider2d.enabled = false;
         respawnTimer = timeRespawn;

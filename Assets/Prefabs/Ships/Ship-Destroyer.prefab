@@ -145,7 +145,8 @@ MonoBehaviour:
   maxAmmo: 100
   fuelBar: {fileID: 0}
   maxFuel: 5
-  timeRespawn: 1
+  timeRespawn: 10
+  planetsOld: 0
   turretControllers:
   - {fileID: 2543498457003502307}
   - {fileID: 4479283902917631910}

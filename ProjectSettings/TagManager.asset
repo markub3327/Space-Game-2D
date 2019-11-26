@@ -11,6 +11,7 @@ TagManager:
   - Asteroid
   - Health
   - Ammo
+  - Space
   layers:
   - Default
   - TransparentFX
