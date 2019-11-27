@@ -42,19 +42,12 @@ public struct NeuronInTrainingJob : IJobParallelFor
             sum += BPG_egdes[i].sigma * BPG_weights[BPG_egdes[i].IndexW + index];
             //Debug.Log($"BPG_sigma[{i}] = {BPG_egdes[i].sigma}, BPG_weights[{BPG_egdes[i].IndexW + index}] = {BPG_weights[BPG_egdes[i].IndexW + index]}");
         }                
-        neuron.sigma = sum * NeuronFn.derivELU(neuron.output/*, neuron.alpha*/);
+        neuron.sigma = sum * NeuronFn.derivELU(neuron.output);
         
         // Adaptuj vahy podla chyby neuronu
-        for (int n = 0; n < neuron.num_of_inputs; n++)
-        {
-            deltaWeights[neuron.IndexW + n] = neuron.learning_rate * neuron.sigma * Input[n] + neuron.momentum * deltaWeights[neuron.IndexW + n];
-            Weights[neuron.IndexW + n] += deltaWeights[neuron.IndexW + n];
-        }
-        
-        // Bias
-        deltaWeights[neuron.IndexW + neuron.num_of_inputs] = neuron.learning_rate * neuron.sigma + neuron.momentum * deltaWeights[neuron.IndexW + neuron.num_of_inputs];
-        Weights[neuron.IndexW + neuron.num_of_inputs] += deltaWeights[neuron.IndexW + neuron.num_of_inputs];
-        
+        deltaWeights[neuron.IndexW] = neuron.learning_rate * neuron.sigma * Input[index] + neuron.momentum * deltaWeights[neuron.IndexW];
+        Weights[neuron.IndexW] += deltaWeights[neuron.IndexW];
+                
         // Copy back
         this.Neurons[index] = neuron;
     }

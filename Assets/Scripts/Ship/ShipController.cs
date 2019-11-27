@@ -198,10 +198,10 @@ public class ShipController : MonoBehaviour
         Fuel = maxFuel;
 
         // Nastav lod do bodu respawn
-        Vector2 point = randomGen.NextFloat2(-10f, 10f);
+        Vector2 point = randomGen.NextFloat2(-9f, 9f);
         while ((point.x > -8.1f && point.x < 8.1f) || (point.y > -8.3f && point.y < 8.2f))
         {
-            point = randomGen.NextFloat2(-10f, 10f);
+            point = randomGen.NextFloat2(-9f, 9f);
         }
 
         rigidbody2d.position = point; //respawn.transform.position;
@@ -214,7 +214,7 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav municie hraca
     /// </summary>
     /// <param name="amount">Mnozstvo municie, ktore sa pripocita k sucasnemu stavu municie</param>
-    public virtual void ChangeAmmo(int amount)
+    public void ChangeAmmo(int amount)
     {
         if (!IsDestroyed)
         {
@@ -226,7 +226,7 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav municie hraca
     /// </summary>
     /// <param name="amount">Mnozstvo municie, ktore sa pripocita k sucasnemu stavu municie</param>
-    public virtual void ChangeFuel(int amount)
+    public void ChangeFuel(int amount)
     {
         if (!IsDestroyed)
         {
@@ -243,7 +243,7 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav zivota hraca
     /// </summary>
     /// <param name="amount">Mnozstvo zivota, ktore sa pripocita k sucasnemu stavu zivota</param>
-    public virtual void ChangeHealth(int amount)
+    public void ChangeHealth(int amount)
     {
         if (!IsDestroyed)
         {

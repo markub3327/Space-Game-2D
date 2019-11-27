@@ -29,7 +29,7 @@ public class GeneticsAlgorithm : MonoBehaviour
             foreach (var ship in ships)
             {
                 // Ak ma lod vyssie skore stava sa novou najlepsou v hre
-                if (ship.fitness > bestShip.fitness)
+                if (bestShip.fitness == 0f || (ship.fitness != 0f && ship.fitness > bestShip.fitness))
                 {
                     bestShip = ship;
                 }                
@@ -46,15 +46,19 @@ public class GeneticsAlgorithm : MonoBehaviour
                     {
                         for (int j = 0; j < bestShip.Qnet.neuronLayers[i].Weights.Count; j++)
                         {
-                            if (randomGen.NextFloat() <= 0.10f) // 10% nahoda, 90% podla vedomosti
+                            if (randomGen.NextFloat() > (ship.eps/10f)) // 15% nahoda, 85% podla vedomosti
                             {
-                                ship.QTargetNet.neuronLayers[i].deltaWeights[j] = ship.Qnet.neuronLayers[i].deltaWeights[j] = 0f;
-                                ship.QTargetNet.neuronLayers[i].Weights[j]      = ship.Qnet.neuronLayers[i].Weights[j]      = randomGen.NextFloat(-1f, 1f);
+                                ship.Qnet.neuronLayers[i].Weights[j] = bestShip.Qnet.neuronLayers[i].Weights[j];
+                                ship.QTargetNet.neuronLayers[i].Weights[j] = bestShip.QTargetNet.neuronLayers[i].Weights[j];
+
+                                ship.Qnet.neuronLayers[i].deltaWeights[j] = bestShip.Qnet.neuronLayers[i].deltaWeights[j];
                             }
                             else
                             {
-                                ship.QTargetNet.neuronLayers[i].deltaWeights[j] = ship.Qnet.neuronLayers[i].deltaWeights[j] = bestShip.Qnet.neuronLayers[i].deltaWeights[j];
-                                ship.QTargetNet.neuronLayers[i].Weights[j]      = ship.Qnet.neuronLayers[i].Weights[j]      = bestShip.Qnet.neuronLayers[i].Weights[j];
+                                ship.Qnet.neuronLayers[i].Weights[j] = randomGen.NextFloat(-1f, 1f);
+                                ship.QTargetNet.neuronLayers[i].Weights[j] = bestShip.QTargetNet.neuronLayers[i].Weights[j];
+
+                                ship.Qnet.neuronLayers[i].deltaWeights[j] = bestShip.Qnet.neuronLayers[i].deltaWeights[j];
                             }
                         }
                     }

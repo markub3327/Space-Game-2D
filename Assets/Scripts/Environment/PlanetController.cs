@@ -8,7 +8,7 @@ public class PlanetController : MonoBehaviour
 
     // Vlastnik planety (lod, ktora na planete pristala)
     public GameObject OwnerPlanet { get; private set; }
-    private float landTimer;
+    //private float landTimer;
 
     // Zoznam mesiacov patriacich planete
     public List<MoonController> Moons;
@@ -22,7 +22,7 @@ public class PlanetController : MonoBehaviour
             dialogBox.gameObject.SetActive(true);
 
             // Resetuj casovac pristatia lode na planete
-            landTimer = 1f;
+            //landTimer = 1f;
 
             // Vycisti dialogove okno
             dialogBox.Clear();
@@ -47,9 +47,9 @@ public class PlanetController : MonoBehaviour
             if (collision.gameObject != OwnerPlanet)
             {
                 // ak casovac pristatia vyprsal
-                if (landTimer < 0f)
-                {
-                    // Zapis noveho vlastnika planety                   
+                //if (landTimer < 0f)
+                //{
+                    // Zapis noveho vlastnika planety
                     if (this.OwnerPlanet != null)
                     {
                         var shipOld = OwnerPlanet.GetComponent<ShipController>();
@@ -57,7 +57,6 @@ public class PlanetController : MonoBehaviour
                     }
                     OwnerPlanet = collision.gameObject;
                     var ship = OwnerPlanet.GetComponent<AIControlledShip>();                    
-                    ship.planetsOld = ship.NumOfPlanets;
                     ship.NumOfPlanets += 1;
 
                     // Vycisti dialogove okno
@@ -66,10 +65,10 @@ public class PlanetController : MonoBehaviour
                     // Vypis do dialogoveho okna
                     dialogBox.WriteLine($"Planet: {this.name}");
                     dialogBox.WriteLine($"Owner: {(OwnerPlanet != null ? OwnerPlanet.name : string.Empty)}");
-                }
+                //}
                 // odpocitavaj cas
-                else if (landTimer > 0f)
-                    landTimer -= Time.deltaTime;                
+                //else if (landTimer > 0f)
+                //    landTimer -= Time.deltaTime;                
             }
         }
     }

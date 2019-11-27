@@ -40,10 +40,10 @@ public class NeuronLayer
             IndexW = this.Weights.Count,
             num_of_inputs = num_of_inputs,
             momentum = 0.001f,
-            learning_rate = 0.001f
+            learning_rate = 0.0005f
         });
 
-        for (int n = 0; n <= num_of_inputs; n++)
+        for (int n = 0; n < num_of_inputs; n++)
         {
             var w = randGen.NextFloat(-1f, 1f);
             this.Weights.Add(w);
@@ -59,7 +59,7 @@ public class NeuronLayer
             IndexW = this.Weights.Count,
             num_of_inputs = Edge.Neurons.Count,
             momentum = 0.001f,
-            learning_rate = 0.001f
+            learning_rate = 0.0005f
         });
 
         for (int n = 0; n <= Edge.Neurons.Count; n++)

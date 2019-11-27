@@ -1,39 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &2543498457003502307
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1784118926407534250}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48fa3980500e9462f89a91c35306a539, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 2917896089770542357, guid: ebd63f22f45124a63be1208ba149776b,
-    type: 3}
-  throwClip: {fileID: 8300000, guid: b2edfd40873655249ba0e01a5cf705be, type: 3}
-  shot_speed: 75
-  shootEffect: {fileID: 7587686998070369515}
---- !u!114 &4479283902917631910
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7510902585353134967}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48fa3980500e9462f89a91c35306a539, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 2917896089770542357, guid: ebd63f22f45124a63be1208ba149776b,
-    type: 3}
-  throwClip: {fileID: 8300000, guid: b2edfd40873655249ba0e01a5cf705be, type: 3}
-  shot_speed: 75
-  shootEffect: {fileID: 1851684994981722422}
 --- !u!1 &7561708683362344634
 GameObject:
   m_ObjectHideFlags: 0
@@ -145,11 +111,10 @@ MonoBehaviour:
   maxAmmo: 100
   fuelBar: {fileID: 0}
   maxFuel: 5
-  timeRespawn: 10
-  planetsOld: 0
+  timeRespawn: 20
   turretControllers:
-  - {fileID: 2543498457003502307}
-  - {fileID: 4479283902917631910}
+  - {fileID: 5363525619576419900}
+  - {fileID: 4220280275228480481}
 --- !u!50 &7561708683362344633
 Rigidbody2D:
   serializedVersion: 4
@@ -474,24 +439,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4855ce631a22b48fbac0caaf8fff47cb, type: 3}
---- !u!1 &7510902585353134967 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7268453001880701775, guid: 4855ce631a22b48fbac0caaf8fff47cb,
-    type: 3}
-  m_PrefabInstance: {fileID: 928495124998121528}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4805179759213373545 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5642378035005915217, guid: 4855ce631a22b48fbac0caaf8fff47cb,
     type: 3}
   m_PrefabInstance: {fileID: 928495124998121528}
   m_PrefabAsset: {fileID: 0}
---- !u!198 &1851684994981722422 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 1535776764880457998, guid: 4855ce631a22b48fbac0caaf8fff47cb,
+--- !u!114 &4220280275228480481 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3923725894147193817, guid: 4855ce631a22b48fbac0caaf8fff47cb,
     type: 3}
   m_PrefabInstance: {fileID: 928495124998121528}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48fa3980500e9462f89a91c35306a539, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2388093821967643779
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -743,21 +708,21 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4855ce631a22b48fbac0caaf8fff47cb, type: 3}
---- !u!1 &1784118926407534250 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7268453001880701775, guid: 4855ce631a22b48fbac0caaf8fff47cb,
-    type: 3}
-  m_PrefabInstance: {fileID: 8943249232721743333}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3625693634400390580 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5642378035005915217, guid: 4855ce631a22b48fbac0caaf8fff47cb,
     type: 3}
   m_PrefabInstance: {fileID: 8943249232721743333}
   m_PrefabAsset: {fileID: 0}
---- !u!198 &7587686998070369515 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 1535776764880457998, guid: 4855ce631a22b48fbac0caaf8fff47cb,
+--- !u!114 &5363525619576419900 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3923725894147193817, guid: 4855ce631a22b48fbac0caaf8fff47cb,
     type: 3}
   m_PrefabInstance: {fileID: 8943249232721743333}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48fa3980500e9462f89a91c35306a539, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
