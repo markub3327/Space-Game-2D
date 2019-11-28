@@ -25,16 +25,29 @@ public class GeneticsAlgorithm : MonoBehaviour
         this.selectTimer -= Time.deltaTime;
         if (this.selectTimer <= 0.0f)
         {
+            // Ak maju vsetky lode 0 score z hry, pre pripad ze este hraju epizodu
+            var count = ships.Where(s => s.fitness == 0f).Count();
+            if (count == ships.Length)
+                return;
+
+            Debug.Log($"count = {count}");
+
             AIControlledShip bestShip = ships[0];
             foreach (var ship in ships)
             {
                 // Ak ma lod vyssie skore stava sa novou najlepsou v hre
-                if (bestShip.fitness == 0f || (ship.fitness != 0f && ship.fitness > bestShip.fitness))
+                if (ship.fitness > bestShip.fitness)
                 {
                     bestShip = ship;
                 }                
             }
             Debug.Log($"bestShip.fitness = {bestShip.fitness}, Best ship is {bestShip.gameObject.name}!");
+
+            // Vycisti pouzite score
+            //foreach (var ship in ships)
+            //{
+            //    ship.fitness = 0f;
+            //}
 
             // Skopiruj vedomost najlepsej lode do ostatnych lodi
             foreach (var ship in ships)
@@ -46,7 +59,7 @@ public class GeneticsAlgorithm : MonoBehaviour
                     {
                         for (int j = 0; j < bestShip.Qnet.neuronLayers[i].Weights.Count; j++)
                         {
-                            if (randomGen.NextFloat() > (ship.eps/10f)) // 15% nahoda, 85% podla vedomosti
+                            if (randomGen.NextFloat() > (ship.eps/10f)) // 10% nahoda, 85% podla vedomosti
                             {
                                 ship.Qnet.neuronLayers[i].Weights[j] = bestShip.Qnet.neuronLayers[i].Weights[j];
                                 ship.QTargetNet.neuronLayers[i].Weights[j] = bestShip.QTargetNet.neuronLayers[i].Weights[j];

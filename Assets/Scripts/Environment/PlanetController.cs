@@ -6,13 +6,13 @@ public class PlanetController : MonoBehaviour
     // UIDialogBox
     public UIDialogBox dialogBox;
 
-    // Vlastnik planety (lod, ktora na planete pristala)
-    public GameObject OwnerPlanet { get; private set; }
     //private float landTimer;
+
+    private ShipController OwnerPlanet;    
 
     // Zoznam mesiacov patriacich planete
     public List<MoonController> Moons;
-
+    
     // Na zaiatku kolizie
     void OnCollisionEnter2D(Collision2D collision)
     {
@@ -44,7 +44,8 @@ public class PlanetController : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player")
         {
-            if (collision.gameObject != OwnerPlanet)
+            var ship = collision.gameObject.GetComponent<ShipController>();
+            if (this.OwnerPlanet != ship)
             {
                 // ak casovac pristatia vyprsal
                 //if (landTimer < 0f)
@@ -52,13 +53,11 @@ public class PlanetController : MonoBehaviour
                     // Zapis noveho vlastnika planety
                     if (this.OwnerPlanet != null)
                     {
-                        var shipOld = OwnerPlanet.GetComponent<ShipController>();
-                        shipOld.NumOfPlanets -= 1;
+                        this.OwnerPlanet.myPlanets.Remove(this);
                     }
-                    OwnerPlanet = collision.gameObject;
-                    var ship = OwnerPlanet.GetComponent<AIControlledShip>();                    
-                    ship.NumOfPlanets += 1;
-
+                    this.OwnerPlanet = ship;
+                    ship.myPlanets.Add(this);
+                    
                     // Vycisti dialogove okno
                     dialogBox.Clear();
     

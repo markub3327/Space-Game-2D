@@ -12,6 +12,7 @@ TagManager:
   - Health
   - Ammo
   - Space
+  - Projectile
   layers:
   - Default
   - TransparentFX

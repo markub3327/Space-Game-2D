@@ -15,8 +15,8 @@ namespace Sensors
             {
                 hits[idx] = null;
 
-                // Maximalna dlzka lucu - 10 units
-                var ray = Physics2D.RaycastAll(origin, lookDirection.Shift(angle));                
+                // Maximalna dlzka lucu - 5 units
+                var ray = Physics2D.RaycastAll(origin, lookDirection.Shift(angle), 5f);                
                 for (int i = 0; i < ray.Length; i++)
                 {
                     if (ray[i].transform != parent)

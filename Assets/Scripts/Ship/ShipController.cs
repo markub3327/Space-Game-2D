@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class ShipController : MonoBehaviour
 {
@@ -71,8 +72,11 @@ public class ShipController : MonoBehaviour
     private bool isEmptyFuel;               // je nadrz prazdna?
     private float fuelTimer;                // casovac uchovavajuci cas do minutia jednej nadrze paliva
 
+    // Zoznam planet, ktore vlastni lod
+    public List<PlanetController> myPlanets;
+
     // Pocet planet vo vlastnictve hraca
-    public int NumOfPlanets { get; set; }
+    public int NumOfPlanets { get { return myPlanets.Count; } }
 
     // Respawn
     public float timeRespawn = 10.0f;       // 10 seconds do obnovenia lode v bode respawn
@@ -105,8 +109,6 @@ public class ShipController : MonoBehaviour
         animator = GetComponent<Animator>();
         collider2d = GetComponent<PolygonCollider2D>();
         respawn = GameObject.FindGameObjectWithTag("Respawn");
-
-        NumOfPlanets = 0;
 
         // Zacina v mieste respawnu
         RespawnShip();
@@ -176,7 +178,6 @@ public class ShipController : MonoBehaviour
             if (isEmptyFuel)
             {
                 ChangeFuel(-1);
-
                 isEmptyFuel = false;
                 fuelTimer = 5;
             }
@@ -205,7 +206,7 @@ public class ShipController : MonoBehaviour
         }
 
         rigidbody2d.position = point; //respawn.transform.position;
-        rigidbody2d.rotation = randomGen.NextFloat(0f, 360f); //respawn.transform.rotation.eulerAngles.z;
+        rigidbody2d.rotation = 0;//randomGen.NextFloat(0f, 360f); //respawn.transform.rotation.eulerAngles.z;
         IsDestroyed = false;
         collider2d.enabled = true;
     }
@@ -231,11 +232,6 @@ public class ShipController : MonoBehaviour
         if (!IsDestroyed)
         {
             Fuel = Mathf.Clamp(Fuel + amount, 0, maxFuel);
-
-            if (this.Fuel <= 0)
-            {
-                this.ChangeHealth(-this.Health);
-            }
         }
     }
 
@@ -253,7 +249,7 @@ public class ShipController : MonoBehaviour
 
     protected void DestroyShip()
     {
-        Debug.Log($"Lod bude znicena!");
+        //Debug.Log($"Lod bude znicena!");
 
         IsDestroyed = true;
         collider2d.enabled = false;

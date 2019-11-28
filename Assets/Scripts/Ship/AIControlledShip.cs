@@ -24,6 +24,7 @@ public class AIControlledShip : ShipController
     {
         base.Start();
 
+        this.myPlanets = new List<PlanetController>();
         this.fitnessCounter = 0f;
         this.fitness = 0f;
 
@@ -52,7 +53,7 @@ public class AIControlledShip : ShipController
         QTargetNet.neuronLayers[2].BPG_egdes = QTargetNet.neuronLayers[3];
 
         // Vstupna vrstva = pocet neuronov je rovny poctu vstupov
-        for (int i = 0; i < 18; i++)
+        for (int i = 0; i < 19; i++)
         {
             Qnet.neuronLayers[0].CreateNeuron(1);
             QTargetNet.neuronLayers[0].CreateNeuron(1);
@@ -96,7 +97,7 @@ public class AIControlledShip : ShipController
         if (!this.IsDestroyed)
         {
             // Ak uz hrac nema zivoty znici sa lod
-            if (this.Health <= 0)
+            if (this.Health <= 0 || (this.Fuel <= 0))
             {
                 this.DestroyShip();
                 this.myBatch.done = true;
@@ -118,7 +119,7 @@ public class AIControlledShip : ShipController
 
                 this.Learn(this.myBatch);                       // Pretrenuj Qnet podla noveho balicku dat z hry
                 this.fitnessCounter += this.myBatch.reward;     // suma odmien (skore) za hernu epizodu lode
-                if (IsDestroyed) this.fitness = this.fitnessCounter;
+                if (IsDestroyed) this.fitness += this.fitnessCounter;
                 this.myBatch.state = this.myBatch.next_state;   // prejdi na dalsi stav a vykonaj akciu
                 this.waitingOnNextFrame = false;
             }
@@ -132,7 +133,7 @@ public class AIControlledShip : ShipController
                 animator.SetTrigger("Respawn");
         
                 this.fitnessCounter = 0f;
-                this.fitness = 0f;
+                //this.fitness = 0f;
 
                 // inicializuj pociatocny stav hry
                 this.myBatch = new Batch 
@@ -158,24 +159,40 @@ public class AIControlledShip : ShipController
     private float[] GetState()
     {
         var radarResult = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this.transform);
-        var state = new float[18];
+        var state = new float[19];
             
         // Poloha lode v ramci herneho sveta
         state[0] = this.rigidbody2d.position.x / 20f;
         state[1] = this.rigidbody2d.position.y / 20f;
         //Debug.Log($"state({this.name})[X] = {state[0]}, state({this.name})[Y] = {state[1]}");
+        
+        // Vstup z pamate o vlastnictve planet
+        string hash = string.Empty;
+        foreach (var p in myPlanets)
+        {
+            //Debug.Log($"planet({this.name}) = {p.name}");
+            hash += p.name + "+";
+        }
+        if (hash.Length > 0)
+            state[2] = hash.GetHashCode() / (float)int.MaxValue;
+        else
+            state[2] = 0x00;    // kod pre prazdnu pamet planet
+        //Debug.Log($"state({this.name})[PlanetMemmory] = {state[2]}, hash = {hash}");
 
-        for (int i = 2, j = 0; i < state.Length; i++, j++)
+        // Radar lode
+        for (int i = 3, j = 0; i < state.Length; i++, j++)
         {
             if (radarResult[j] != null)
             {
                 state[i] = (float)radarResult[j].Value.transform.tag.GetHashCode() / (float)int.MaxValue;
+    
+                //Debug.Log($"state({this.name})[Radar{j}] = {state[i]}, tag = {radarResult[j].Value.transform.tag}, name = {radarResult[j].Value.transform.name}");
             }
             else
             {
                 state[i] = 0x00;
+                //Debug.Log($"state({this.name})[Radar{j}] = {state[i]}");
             }
-            //Debug.Log($"state({this.name})[Radar{j}] = {state[i]}, tag = {radarResult[j].Value.transform.tag}");
         }
 
         return state;
@@ -234,7 +251,7 @@ public class AIControlledShip : ShipController
 
         // Compute Q targets for current states
         float Q_target;
-        if (!this.IsDestroyed)
+        if (!batch.done)
         { 
             Q_target = batch.reward + (gamma * Q_targets_next);
         }
@@ -266,9 +283,12 @@ public class AIControlledShip : ShipController
         
         // Vazeny priemer
         avg += (this.Health / this.maxHealth) * 0.55f;   // vaha zivotov
-        avg += (this.Ammo / this.maxAmmo) * 0.03f;      // vaha municie
-        avg += (this.Fuel / this.maxFuel) * 0.14f;      // vaha paliva
-        avg += (this.NumOfPlanets / 5f) * 0.28f;        // vaha poctu ziskanych planet
+        avg += (this.Ammo / this.maxAmmo) * 0.03f;       // vaha municie
+        avg += (this.Fuel / this.maxFuel) * 0.14f;       // vaha paliva
+        avg += (this.NumOfPlanets / 5f) * 0.28f;         // vaha poctu ziskanych planet
+        
+        if (myPlanets.Count >= 4)
+            Debug.Log($"health({this.name}) = {this.Health}, ammo = {this.Ammo}, fuel = {this.Fuel}, planets = {this.NumOfPlanets}");
 
         return (avg / 4f);
     }
