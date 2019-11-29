@@ -30,7 +30,7 @@ public class GeneticsAlgorithm : MonoBehaviour
             if (count == ships.Length)
                 return;
 
-            Debug.Log($"count = {count}");
+            //Debug.Log($"count = {count}");
 
             AIControlledShip bestShip = ships[0];
             foreach (var ship in ships)
@@ -59,7 +59,7 @@ public class GeneticsAlgorithm : MonoBehaviour
                     {
                         for (int j = 0; j < bestShip.Qnet.neuronLayers[i].Weights.Count; j++)
                         {
-                            if (randomGen.NextFloat() > (ship.eps/10f)) // 10% nahoda, 85% podla vedomosti
+                            if (randomGen.NextFloat() > ship.eps) // 10% nahoda, 85% podla vedomosti
                             {
                                 ship.Qnet.neuronLayers[i].Weights[j] = bestShip.Qnet.neuronLayers[i].Weights[j];
                                 ship.QTargetNet.neuronLayers[i].Weights[j] = bestShip.QTargetNet.neuronLayers[i].Weights[j];
@@ -71,7 +71,7 @@ public class GeneticsAlgorithm : MonoBehaviour
                                 ship.Qnet.neuronLayers[i].Weights[j] = randomGen.NextFloat(-1f, 1f);
                                 ship.QTargetNet.neuronLayers[i].Weights[j] = bestShip.QTargetNet.neuronLayers[i].Weights[j];
 
-                                ship.Qnet.neuronLayers[i].deltaWeights[j] = bestShip.Qnet.neuronLayers[i].deltaWeights[j];
+                                ship.Qnet.neuronLayers[i].deltaWeights[j] = 0f;//bestShip.Qnet.neuronLayers[i].deltaWeights[j];
                             }
                         }
                     }

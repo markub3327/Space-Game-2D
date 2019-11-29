@@ -53,8 +53,8 @@ public class ShipController : MonoBehaviour
     // Player's fuel
     public UIBarControl fuelBar;
     public int maxFuel = 5;                // maximalny pocet paliva v nadrzi hraca
-    private int _fuel;
-    public int Fuel {
+    private float _fuel;
+    public float Fuel {
         get
         {
             return _fuel;
@@ -69,8 +69,6 @@ public class ShipController : MonoBehaviour
               fuelBar.SetValue(_fuel / (float)maxFuel);
         }
     }
-    private bool isEmptyFuel;               // je nadrz prazdna?
-    private float fuelTimer;                // casovac uchovavajuci cas do minutia jednej nadrze paliva
 
     // Zoznam planet, ktore vlastni lod
     public List<PlanetController> myPlanets;
@@ -142,7 +140,7 @@ public class ShipController : MonoBehaviour
     /// <param name="move">Normalizovany vektor udavajuci smer a velkost pohybu</param>
     protected void MoveShip(Vector2 move)
     {
-        if (!IsDestroyed && this.Fuel > 0)
+        if (!IsDestroyed && this.Fuel > 0f)
         {
             // Vypocitaj zmenu rotacie hraca
             var pos = rigidbody2d.position;
@@ -174,20 +172,7 @@ public class ShipController : MonoBehaviour
                 }
             }
 
-            // Ak je nadrz prazdna pouzi dalsiu
-            if (isEmptyFuel)
-            {
-                ChangeFuel(-1);
-                isEmptyFuel = false;
-                fuelTimer = 5;
-            }
-            // Ak ma lod v nadrzi palivo
-            else
-            {
-                fuelTimer -= Time.deltaTime;
-                if (fuelTimer < 0.0f)   // ak vyprsal cas minul nadrz (je prazdna)
-                    isEmptyFuel = true;
-            }
+            ChangeFuel(-Time.deltaTime);
         }        
     }
 
@@ -227,11 +212,11 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav municie hraca
     /// </summary>
     /// <param name="amount">Mnozstvo municie, ktore sa pripocita k sucasnemu stavu municie</param>
-    public void ChangeFuel(int amount)
+    public void ChangeFuel(float amount)
     {
         if (!IsDestroyed)
         {
-            Fuel = Mathf.Clamp(Fuel + amount, 0, maxFuel);
+            Fuel = Mathf.Clamp(Fuel + amount, 0f, maxFuel);
         }
     }
 

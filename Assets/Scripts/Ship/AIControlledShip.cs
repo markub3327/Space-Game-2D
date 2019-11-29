@@ -18,7 +18,8 @@ public class AIControlledShip : ShipController
     // Balicek dat pripravenych k uceniu
     private Batch myBatch;
 
-    public float eps { get { return Mathf.Clamp((1f/(math.sqrt(Time.time/100f))), 0.01f, 0.99f); } }
+    private float epsCounter = 1f;
+    public float eps { get { var x = Mathf.Clamp(epsCounter, 0.01f, 1f); /*Debug.Log($"eps({this.name}) = {x}");*/ return x; } }
 
     public override void Start()
     {
@@ -64,24 +65,33 @@ public class AIControlledShip : ShipController
         }
 
         // Skryta vrstva #1
-        for (int i = 0; i < 128; i++)
+        for (int i = 0; i < 256; i++)
         {
             Qnet.neuronLayers[1].CreateNeuron();
             QTargetNet.neuronLayers[1].CreateNeuron();
         }
 
         // Skryta vrstva #2
-        for (int i = 0; i < 64; i++)
+        for (int i = 0; i < 128; i++)
         {
             Qnet.neuronLayers[2].CreateNeuron();
             QTargetNet.neuronLayers[2].CreateNeuron();
         }
 
         // Vystupna vrstva
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 4; i++)
         {
             Qnet.neuronLayers[3].CreateNeuron();
             QTargetNet.neuronLayers[3].CreateNeuron();
+        }
+
+        // Zrovnaj vahy siet
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < Qnet.neuronLayers[i].Weights.Count; j++)
+            {
+                QTargetNet.neuronLayers[i].Weights[j] = Qnet.neuronLayers[i].Weights[j];
+            }
         }
 
         // inicializuj pociatocny stav hry
@@ -97,10 +107,9 @@ public class AIControlledShip : ShipController
         if (!this.IsDestroyed)
         {
             // Ak uz hrac nema zivoty znici sa lod
-            if (this.Health <= 0 || (this.Fuel <= 0))
+            if ((this.Health <= 0) || (this.Fuel <= 0f))
             {
                 this.DestroyShip();
-                this.myBatch.done = true;
             }
 
             // Ak necaka na vykonanie akcie lode
@@ -115,6 +124,7 @@ public class AIControlledShip : ShipController
             {
                 this.myBatch.next_state = this.GetState();      // ziskaj novy stav z hry
                 this.myBatch.reward = this.GetReward();         // Odmena za akciu vykonana v minulom obraze
+                this.myBatch.done = this.IsDestroyed;
                 //Debug.Log($"reward({this.name}) = {this.myBatch.reward}");
 
                 this.Learn(this.myBatch);                       // Pretrenuj Qnet podla noveho balicku dat z hry
@@ -123,6 +133,8 @@ public class AIControlledShip : ShipController
                 this.myBatch.state = this.myBatch.next_state;   // prejdi na dalsi stav a vykonaj akciu
                 this.waitingOnNextFrame = false;
             }
+
+            epsCounter *= 0.9999f;
         }
         else
         {
@@ -209,7 +221,7 @@ public class AIControlledShip : ShipController
         }
         else
         {
-            action = randomGen.NextInt(0,5);            
+            action = randomGen.NextInt(0,4);            
         }
         //Debug.Log($"action({this.name}) = {action}, epsilon = {epsilon}");
 
@@ -219,16 +231,16 @@ public class AIControlledShip : ShipController
             case 0x00:  // Sipka hore
                 this.MoveShip(Vector2.up);
                 break;
-            case 0x01:  // Sipka dole
-                this.MoveShip(Vector2.down);
-                break;
-            case 0x02:  // Sipka vlavo
+            //case 0x01:  // Sipka dole
+            //    this.MoveShip(Vector2.down);
+            //    break;
+            case 0x01:  // Sipka vlavo
                 this.MoveShip(Vector2.left);
                 break;
-            case 0x03:  // Sipka vpravo
+            case 0x02:  // Sipka vpravo
                 this.MoveShip(Vector2.right);
                 break;
-            case 0x04:  // Fire
+            case 0x03:  // Fire
             {
                 foreach (var turret in turretControllers)
                 {
@@ -242,12 +254,14 @@ public class AIControlledShip : ShipController
         return action;
     }
 
-    private void Learn(Batch batch, float gamma=0.9f, float tau=0.01f)
+    private void Learn(Batch batch, float gamma=0.99f, float tau=0.01f)
     {
         QTargetNet.Run(batch.next_state);
 
+        var next_action = this.GetMaxAction(QTargetNet.neuronLayers[3].Neurons);
+        
         // Get max predicted Q values (for next states) from target model
-        var Q_targets_next = QTargetNet.neuronLayers[3].Neurons[GetMaxAction(QTargetNet.neuronLayers[3].Neurons)].output;
+        var Q_targets_next = QTargetNet.neuronLayers[3].Neurons[next_action].output;
 
         // Compute Q targets for current states
         float Q_target;
@@ -257,6 +271,7 @@ public class AIControlledShip : ShipController
         }
         else
         {
+            //Debug.Log("Koniec epizody");
             Q_target = batch.reward;
         }
 
@@ -282,10 +297,10 @@ public class AIControlledShip : ShipController
         float avg = 0f;
         
         // Vazeny priemer
-        avg += (this.Health / this.maxHealth) * 0.55f;   // vaha zivotov
-        avg += (this.Ammo / this.maxAmmo) * 0.03f;       // vaha municie
-        avg += (this.Fuel / this.maxFuel) * 0.14f;       // vaha paliva
-        avg += (this.NumOfPlanets / 5f) * 0.28f;         // vaha poctu ziskanych planet
+        avg += (this.Health / this.maxHealth) * 0.50f;   // vaha zivotov
+        avg += (this.Ammo / this.maxAmmo) * 0.05f;       // vaha municie
+        avg += (this.Fuel / this.maxFuel) * 0.15f;       // vaha paliva
+        avg += (this.NumOfPlanets / 5f) * 0.30f;         // vaha poctu ziskanych planet
         
         if (myPlanets.Count >= 4)
             Debug.Log($"health({this.name}) = {this.Health}, ammo = {this.Ammo}, fuel = {this.Fuel}, planets = {this.NumOfPlanets}");

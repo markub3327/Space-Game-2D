@@ -14,7 +14,7 @@ public class FuelCollectible : MonoBehaviour
         if (controller != null && controller.Fuel < controller.maxFuel)
         {
             // Pridaj zivot hracovi
-            controller.ChangeFuel(1);
+            controller.ChangeFuel(+1);
 
             // Prehraj klip
             controller.PlaySound(collectibleClip);
