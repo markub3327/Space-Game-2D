@@ -6573,7 +6573,7 @@ MonoBehaviour:
   - {fileID: 353022002}
   - {fileID: 941509648}
   - {fileID: 911164941}
-  maxSelectTime: 60
+  maxSelectTime: 30
 --- !u!1001 &911164939
 PrefabInstance:
   m_ObjectHideFlags: 0

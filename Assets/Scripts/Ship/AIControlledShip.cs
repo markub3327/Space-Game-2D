@@ -19,7 +19,7 @@ public class AIControlledShip : ShipController
     private Batch myBatch;
 
     private float epsCounter = 1f;
-    public float eps { get { return Mathf.Clamp(epsCounter, 0.01f, 1f); } }
+    public float eps { get { return Mathf.Clamp(epsCounter, 0.001f, 1f); } }
 
     public override void Start()
     {
@@ -72,7 +72,7 @@ public class AIControlledShip : ShipController
         }
 
         // Skryta vrstva #2
-        for (int i = 0; i < 128; i++)
+        for (int i = 0; i < 130; i++)
         {
             Qnet.neuronLayers[2].CreateNeuron();
             QTargetNet.neuronLayers[2].CreateNeuron();
@@ -124,7 +124,7 @@ public class AIControlledShip : ShipController
             {
                 this.myBatch.next_state = this.GetState();      // ziskaj novy stav z hry
                 this.myBatch.reward = this.GetReward();         // Odmena za akciu vykonana v minulom obraze
-                if (this.NumOfPlanets == 5)
+                if (this.NumOfPlanets == 4)
                     this.myBatch.done = true;
                 else
                     this.myBatch.done = this.IsDestroyed;
@@ -183,11 +183,12 @@ public class AIControlledShip : ShipController
         
         // Vstup z pamate o vlastnictve planet
         string hash = string.Empty;
-        foreach (var p in myPlanets)
+        for (int i = 0; i < this.myPlanets.Count; i++)
         {
             //Debug.Log($"planet({this.name}) = {p.name}");
-            hash += p.name + "+";
+            hash += this.myPlanets[i].name + "+";
         }
+
         if (hash.Length > 0)
             state[2] = hash.GetHashCode() / (float)int.MaxValue;
         else
@@ -205,8 +206,7 @@ public class AIControlledShip : ShipController
             }
             else
             {
-                state[i] = 0x00;
-                state[i+1] = 0x00;
+                state[i] = state[i+1] = 0x00;
                 //Debug.Log($"state({this.name})[Radar{j}] = {state[i]}:{state[i+1]}");
             }
         }
@@ -228,16 +228,13 @@ public class AIControlledShip : ShipController
             action = randomGen.NextInt(0,4);            
         }
         //Debug.Log($"action({this.name}) = {action}, epsilon = {epsilon}");
-
+            
         // Vykonaj akciu
         switch (action)
         {
             case 0x00:  // Sipka hore
                 this.MoveShip(Vector2.up);
                 break;
-            //case 0x01:  // Sipka dole
-            //    this.MoveShip(Vector2.down);
-            //    break;
             case 0x01:  // Sipka vlavo
                 this.MoveShip(Vector2.left);
                 break;
@@ -258,7 +255,7 @@ public class AIControlledShip : ShipController
         return action;
     }
 
-    private void Learn(Batch batch, float gamma=0.99f, float tau=0.01f)
+    private void Learn(Batch batch, float gamma=0.9f, float tau=0.01f)
     {
         QTargetNet.Run(batch.next_state);
 
@@ -304,14 +301,14 @@ public class AIControlledShip : ShipController
         avg += (this.Health / this.maxHealth) * 0.15f;   // vaha zivotov
         avg += (this.Ammo / this.maxAmmo) * 0.05f;       // vaha municie
         avg += (this.Fuel / this.maxFuel) * 0.10f;       // vaha paliva
-        avg += (this.NumOfPlanets / 5f) * 0.70f;         // vaha poctu ziskanych planet
+        avg += (this.NumOfPlanets / 4f) * 0.70f;         // vaha poctu ziskanych planet
         
         if (myPlanets.Count >= 4)
         {
             Debug.Log($"health({this.name}) = {this.Health}, ammo = {this.Ammo}, fuel = {this.Fuel}, planets = {this.NumOfPlanets}, avg = {avg/4f}");
-            foreach (var p in myPlanets)
+            for (int i = 0; i < this.myPlanets.Count; i++)
             {
-                Debug.Log($"planet({this.name}) = {p.name}");
+                Debug.Log($"planet({this.name}) = {this.myPlanets[i].name}");
             }
             Debug.Log($"state({this.name})[PlanetMemmory] = {myBatch.state[2]}, done = {this.myBatch.done.ToString()}");
         }

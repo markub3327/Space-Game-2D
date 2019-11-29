@@ -57,7 +57,8 @@ public class PlanetController : MonoBehaviour
                     }
                     this.OwnerPlanet = ship;
                     ship.myPlanets.Add(this);
-                    
+                    ship.myPlanets.Sort((a, b) => (a.name.CompareTo(b.name)));  // usporiadaj zoznam planet aby bolo poradie planet na kazdej lodi rovnaky
+
                     // Vycisti dialogove okno
                     dialogBox.Clear();
     

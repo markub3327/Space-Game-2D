@@ -39,7 +39,7 @@ public class NeuronLayer
             sigma = 0f,
             IndexW = this.Weights.Count,
             num_of_inputs = num_of_inputs,
-            momentum = 0.0001f,
+            momentum = 0.001f,
             learning_rate = 0.0005f
         });
 
@@ -58,7 +58,7 @@ public class NeuronLayer
             sigma = 0f,
             IndexW = this.Weights.Count,
             num_of_inputs = Edge.Neurons.Count,
-            momentum = 0.0001f,
+            momentum = 0.001f,
             learning_rate = 0.0005f
         });
 
