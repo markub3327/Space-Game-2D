@@ -19,7 +19,7 @@ public class AIControlledShip : ShipController
     private Batch myBatch;
 
     private float epsCounter = 1f;
-    public float eps { get { return Mathf.Clamp(epsCounter, 0.05f, 1f); } }
+    public float eps { get { return Mathf.Clamp(epsCounter, 0.01f, 1f); } }
 
     public override void Start()
     {
@@ -301,10 +301,10 @@ public class AIControlledShip : ShipController
         float avg = 0f;
         
         // Vazeny priemer
-        avg += (this.Health / this.maxHealth) * 0.25f;   // vaha zivotov
+        avg += (this.Health / this.maxHealth) * 0.15f;   // vaha zivotov
         avg += (this.Ammo / this.maxAmmo) * 0.05f;       // vaha municie
         avg += (this.Fuel / this.maxFuel) * 0.10f;       // vaha paliva
-        avg += (this.NumOfPlanets / 5f) * 0.60f;         // vaha poctu ziskanych planet
+        avg += (this.NumOfPlanets / 5f) * 0.70f;         // vaha poctu ziskanych planet
         
         if (myPlanets.Count >= 4)
         {
