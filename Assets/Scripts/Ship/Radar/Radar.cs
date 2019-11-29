@@ -4,6 +4,8 @@ namespace Sensors
 {
     public static class Radar
     {
+        public const float max_distance = 5f;
+
         // Radar okolo lode
         public static RaycastHit2D?[] Scan(Vector2 origin, Vector2 lookDirection, Transform parent)
         {
@@ -16,7 +18,7 @@ namespace Sensors
                 hits[idx] = null;
 
                 // Maximalna dlzka lucu - 5 units
-                var ray = Physics2D.RaycastAll(origin, lookDirection.Shift(angle), 5f);                
+                var ray = Physics2D.RaycastAll(origin, lookDirection.Shift(angle), max_distance);                
                 for (int i = 0; i < ray.Length; i++)
                 {
                     if (ray[i].transform != parent)

@@ -43,11 +43,11 @@ public class GeneticsAlgorithm : MonoBehaviour
             }
             Debug.Log($"bestShip.fitness = {bestShip.fitness}, Best ship is {bestShip.gameObject.name}!");
 
-            // Vycisti pouzite score
-            //foreach (var ship in ships)
-            //{
-            //    ship.fitness = 0f;
-            //}
+            // Vycisti pouzite score po 30sec hry (sucet niekolko epizod)
+            foreach (var ship in ships)
+            {
+                ship.fitness = 0f;
+            }
 
             // Skopiruj vedomost najlepsej lode do ostatnych lodi
             foreach (var ship in ships)
@@ -59,20 +59,17 @@ public class GeneticsAlgorithm : MonoBehaviour
                     {
                         for (int j = 0; j < bestShip.Qnet.neuronLayers[i].Weights.Count; j++)
                         {
-                            if (randomGen.NextFloat() > ship.eps) // 10% nahoda, 85% podla vedomosti
+                            if (randomGen.NextFloat() > 0.01f) // 10% nahoda, 85% podla vedomosti
                             {
-                                ship.Qnet.neuronLayers[i].Weights[j] = bestShip.Qnet.neuronLayers[i].Weights[j];
-                                ship.QTargetNet.neuronLayers[i].Weights[j] = bestShip.QTargetNet.neuronLayers[i].Weights[j];
-
+                                ship.Qnet.neuronLayers[i].Weights[j] = bestShip.Qnet.neuronLayers[i].Weights[j];                               
                                 ship.Qnet.neuronLayers[i].deltaWeights[j] = bestShip.Qnet.neuronLayers[i].deltaWeights[j];
                             }
                             else
                             {
                                 ship.Qnet.neuronLayers[i].Weights[j] = randomGen.NextFloat(-1f, 1f);
-                                ship.QTargetNet.neuronLayers[i].Weights[j] = bestShip.QTargetNet.neuronLayers[i].Weights[j];
-
                                 ship.Qnet.neuronLayers[i].deltaWeights[j] = 0f;//bestShip.Qnet.neuronLayers[i].deltaWeights[j];
                             }
+                            ship.QTargetNet.neuronLayers[i].Weights[j] = bestShip.QTargetNet.neuronLayers[i].Weights[j];
                         }
                     }
                 }

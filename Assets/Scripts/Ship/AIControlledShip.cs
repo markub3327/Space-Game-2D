@@ -19,7 +19,7 @@ public class AIControlledShip : ShipController
     private Batch myBatch;
 
     private float epsCounter = 1f;
-    public float eps { get { var x = Mathf.Clamp(epsCounter, 0.01f, 1f); /*Debug.Log($"eps({this.name}) = {x}");*/ return x; } }
+    public float eps { get { return Mathf.Clamp(epsCounter, 0.05f, 1f); } }
 
     public override void Start()
     {
@@ -54,7 +54,7 @@ public class AIControlledShip : ShipController
         QTargetNet.neuronLayers[2].BPG_egdes = QTargetNet.neuronLayers[3];
 
         // Vstupna vrstva = pocet neuronov je rovny poctu vstupov
-        for (int i = 0; i < 19; i++)
+        for (int i = 0; i < 35; i++)
         {
             Qnet.neuronLayers[0].CreateNeuron(1);
             QTargetNet.neuronLayers[0].CreateNeuron(1);
@@ -124,7 +124,10 @@ public class AIControlledShip : ShipController
             {
                 this.myBatch.next_state = this.GetState();      // ziskaj novy stav z hry
                 this.myBatch.reward = this.GetReward();         // Odmena za akciu vykonana v minulom obraze
-                this.myBatch.done = this.IsDestroyed;
+                if (this.NumOfPlanets == 5)
+                    this.myBatch.done = true;
+                else
+                    this.myBatch.done = this.IsDestroyed;
                 //Debug.Log($"reward({this.name}) = {this.myBatch.reward}");
 
                 this.Learn(this.myBatch);                       // Pretrenuj Qnet podla noveho balicku dat z hry
@@ -171,7 +174,7 @@ public class AIControlledShip : ShipController
     private float[] GetState()
     {
         var radarResult = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this.transform);
-        var state = new float[19];
+        var state = new float[35];
             
         // Poloha lode v ramci herneho sveta
         state[0] = this.rigidbody2d.position.x / 20f;
@@ -192,18 +195,19 @@ public class AIControlledShip : ShipController
         //Debug.Log($"state({this.name})[PlanetMemmory] = {state[2]}, hash = {hash}");
 
         // Radar lode
-        for (int i = 3, j = 0; i < state.Length; i++, j++)
+        for (int i = 3, j = 0; i < state.Length; i+=2, j++)
         {
             if (radarResult[j] != null)
             {
                 state[i] = (float)radarResult[j].Value.transform.tag.GetHashCode() / (float)int.MaxValue;
-    
-                //Debug.Log($"state({this.name})[Radar{j}] = {state[i]}, tag = {radarResult[j].Value.transform.tag}, name = {radarResult[j].Value.transform.name}");
+                state[i+1] = (float)radarResult[j].Value.distance / Sensors.Radar.max_distance;
+                //Debug.Log($"state({this.name})[Radar{j}] = {state[i]}:{state[i+1]}, tag = {radarResult[j].Value.transform.tag}");
             }
             else
             {
                 state[i] = 0x00;
-                //Debug.Log($"state({this.name})[Radar{j}] = {state[i]}");
+                state[i+1] = 0x00;
+                //Debug.Log($"state({this.name})[Radar{j}] = {state[i]}:{state[i+1]}");
             }
         }
 
@@ -297,13 +301,20 @@ public class AIControlledShip : ShipController
         float avg = 0f;
         
         // Vazeny priemer
-        avg += (this.Health / this.maxHealth) * 0.50f;   // vaha zivotov
+        avg += (this.Health / this.maxHealth) * 0.25f;   // vaha zivotov
         avg += (this.Ammo / this.maxAmmo) * 0.05f;       // vaha municie
-        avg += (this.Fuel / this.maxFuel) * 0.15f;       // vaha paliva
-        avg += (this.NumOfPlanets / 5f) * 0.30f;         // vaha poctu ziskanych planet
+        avg += (this.Fuel / this.maxFuel) * 0.10f;       // vaha paliva
+        avg += (this.NumOfPlanets / 5f) * 0.60f;         // vaha poctu ziskanych planet
         
         if (myPlanets.Count >= 4)
-            Debug.Log($"health({this.name}) = {this.Health}, ammo = {this.Ammo}, fuel = {this.Fuel}, planets = {this.NumOfPlanets}");
+        {
+            Debug.Log($"health({this.name}) = {this.Health}, ammo = {this.Ammo}, fuel = {this.Fuel}, planets = {this.NumOfPlanets}, avg = {avg/4f}");
+            foreach (var p in myPlanets)
+            {
+                Debug.Log($"planet({this.name}) = {p.name}");
+            }
+            Debug.Log($"state({this.name})[PlanetMemmory] = {myBatch.state[2]}, done = {this.myBatch.done.ToString()}");
+        }
 
         return (avg / 4f);
     }
