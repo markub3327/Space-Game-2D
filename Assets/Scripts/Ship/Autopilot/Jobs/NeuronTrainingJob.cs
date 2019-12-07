@@ -1,7 +1,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
-
+using UnityEngine;
 
 [BurstCompile]
 public struct NeuronTrainingJob : IJobParallelFor
@@ -44,17 +44,17 @@ public struct NeuronTrainingJob : IJobParallelFor
             sum += BPG_egdes[i].sigma * BPG_weights[BPG_egdes[i].IndexW + index];
             //Debug.Log($"BPG_sigma[{i}] = {BPG_egdes[i].sigma}, BPG_weights[{BPG_egdes[i].IndexW + index}] = {BPG_weights[BPG_egdes[i].IndexW + index]}");
         }                
-        neuron.sigma = sum * NeuronFn.derivELU(neuron.output/*, neuron.alpha*/);
-                
+        neuron.sigma = sum * NeuronFn.derivELU(neuron.output);
+                               
         // Adaptuj vahy podla chyby neuronu
         for (int n = 0; n < neuron.num_of_inputs; n++)
         {
-            deltaWeights[neuron.IndexW + n] = neuron.learning_rate * neuron.sigma * Edges[n].output + neuron.momentum * deltaWeights[neuron.IndexW + n];
+            deltaWeights[neuron.IndexW + n] = neuron.learning_rate * neuron.sigma * Edges[n].output + (neuron.momentum * deltaWeights[neuron.IndexW + n]);
             Weights[neuron.IndexW + n] += deltaWeights[neuron.IndexW + n];
         }
 
         // Bias
-        deltaWeights[neuron.IndexW + neuron.num_of_inputs] = neuron.learning_rate * neuron.sigma + neuron.momentum * deltaWeights[neuron.IndexW + neuron.num_of_inputs];
+        deltaWeights[neuron.IndexW + neuron.num_of_inputs] = neuron.learning_rate * neuron.sigma + (neuron.momentum * deltaWeights[neuron.IndexW + neuron.num_of_inputs]);
         Weights[neuron.IndexW + neuron.num_of_inputs] += deltaWeights[neuron.IndexW + neuron.num_of_inputs];
         
         // Copy back

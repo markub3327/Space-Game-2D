@@ -2,11 +2,11 @@ using Unity.Mathematics;
 
 public static class NeuronFn
 {
-    public static float ELU(float x/*, float a*/)
+    public static float ELU(float x)
     {
         if (x < 0f)
         {
-            return (math.exp(x) - 1f);  /*a * */
+            return (math.exp(x) - 1f);
         }
         else if (x >= 1f)
         {
@@ -18,11 +18,11 @@ public static class NeuronFn
         }
     }
 
-    public static float derivELU(float y/*, float a*/)
+    public static float derivELU(float y)
     {
-        if (y <= 0f) 
+        if (y <= 0f)
         {
-            return y + 1f; //a;
+            return y + 1f;
         }
         else if (y >= 1f)
         {

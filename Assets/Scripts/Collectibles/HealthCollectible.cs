@@ -11,10 +11,10 @@ public class HealthCollectible : MonoBehaviour
         ShipController controller = other.gameObject.GetComponent<ShipController>();
 
         // Pouzi zivot ked nemas plny zivot
-        if (controller != null && controller.Health < controller.maxHealth)
+        if (controller != null && controller.Health < ShipController.maxHealth)
         {
             // Pridaj zivot hracovi
-            controller.ChangeHealth(1);
+            controller.ChangeHealth(+1);
 
             // Prehraj klip
             controller.PlaySound(collectibleClip);

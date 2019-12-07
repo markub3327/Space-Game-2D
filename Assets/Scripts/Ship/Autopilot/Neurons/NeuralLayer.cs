@@ -1,72 +1,72 @@
-using Unity.Burst;
 using Unity.Jobs;
 using Unity.Collections;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
-public class NeuronLayer
+public class NeuralLayer
 {
-    public List<Neuron> Neurons;
+    public List<Neuron> Neurons = new List<Neuron>();
 
-    public List<float> Weights;
+    public List<float> Weights = new List<float>();
+    
+    public List<float> deltaWeights = new List<float>(); 
 
-    public List<float> deltaWeights;
+    public NeuralLayer BPG_egdes = null;       // hrana ucenia BPG pre spatne sirenie chyby neuronu
 
-    public NeuronLayer BPG_egdes;        // hrana ucenia BPG pre spatne sirenie chyby neuronu
-
-    public NeuronLayer Edge;
+    public NeuralLayer Edges = null;
 
     private Unity.Mathematics.Random randGen;
 
-    public NeuronLayerType type;    
+    public NeuronLayerType type;
 
-    public NeuronLayer(NeuronLayerType type, NeuronLayer BPG_egdes = null, NeuronLayer Edge = null)
+    public NeuralLayer(NeuronLayerType type)
     {
-        this.Neurons = new List<Neuron>();
-        this.Weights = new List<float>();
-        this.deltaWeights = new List<float>();
-        this.randGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
-
-        this.BPG_egdes = BPG_egdes;
-        this.Edge = Edge;
         this.type = type;
+        this.randGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
     }
 
-    public void CreateNeuron(int num_of_inputs)
+    public void CreateNeurons(int num_of_inputs, int num_of_neurons)
     {
-        this.Neurons.Add(new Neuron {
-            output = 0f,
-            sigma = 0f,
-            IndexW = this.Weights.Count,
-            num_of_inputs = num_of_inputs,
-            momentum = 0.001f,
-            learning_rate = 0.0005f
-        });
-
-        for (int n = 0; n < num_of_inputs; n++)
+        for (int m = 0; m < num_of_neurons; m++)
         {
-            var w = randGen.NextFloat(-1f, 1f);
-            this.Weights.Add(w);
-            this.deltaWeights.Add(0f);
+            this.Neurons.Add(new Neuron {
+                output = 0f,
+                sigma = 0f,
+                IndexW = this.Weights.Count,
+                num_of_inputs = num_of_inputs,
+                momentum = 0.0010f,
+                learning_rate = 0.0010f
+            });
+            for (int n = 0; n <= num_of_inputs; n++)
+            {
+                var w = randGen.NextFloat(-1f, 1f);
+                this.Weights.Add(w);
+                this.deltaWeights.Add(0f);
+            }
         }
     }
 
-    public void CreateNeuron()
+    public void CreateNeurons(int num_of_neurons)
     {
-        this.Neurons.Add(new Neuron {
-            output = 0f,
-            sigma = 0f,
-            IndexW = this.Weights.Count,
-            num_of_inputs = Edge.Neurons.Count,
-            momentum = 0.001f,
-            learning_rate = 0.0005f
-        });
-
-        for (int n = 0; n <= Edge.Neurons.Count; n++)
+        var num_of_inputs = Edges.Neurons.Count;
+        
+        for (int m = 0; m < num_of_neurons; m++)
         {
-            var w = randGen.NextFloat(-1f, 1f);
-            this.Weights.Add(w);
-            this.deltaWeights.Add(0f);
+            this.Neurons.Add(new Neuron {
+                output = 0f,
+                sigma = 0f,
+                IndexW = this.Weights.Count,
+                num_of_inputs = num_of_inputs,
+                momentum = 0.0010f,
+                learning_rate = 0.0010f
+            });
+            for (int n = 0; n <= num_of_inputs; n++)
+            {
+                var w = randGen.NextFloat(-1f, 1f);
+                this.Weights.Add(w);
+                this.deltaWeights.Add(0f);
+            }
         }
     }
 
@@ -82,7 +82,7 @@ public class NeuronLayer
         
         var job = new NeuronJob
         {
-            Edges = new NativeArray<Neuron>(Edge.Neurons.ToArray(), Allocator.TempJob),
+            Edges        =  new NativeArray<Neuron>(Edges.Neurons.ToArray(), Allocator.TempJob),
             Neurons      =  neuronsNative,
             Weights      =  weightsNative
         };
@@ -91,12 +91,6 @@ public class NeuronLayer
         job.Schedule(this.Neurons.Count, batchSize).Complete();
         
         this.Neurons = new List<Neuron>(neuronsNative.ToArray());
-
-        //for (int i = 0; i < this.Neurons.Count; i++)
-        //{
-            //Debug.Log($"neuron[{i}].out = {this.Neurons[i].output}");
-            //Debug.Log($"neuron[{i}].alpha = {this.Neurons[i].alpha}");
-        //}
 
         neuronsNative.Dispose();
         weightsNative.Dispose();
@@ -124,12 +118,6 @@ public class NeuronLayer
         
         this.Neurons = new List<Neuron>(neuronsNative.ToArray());
 
-        //for (int i = 0; i < this.Neurons.Count; i++)
-        //{
-        //    Debug.Log($"neuron[{i}].out = {this.Neurons[i].output}");
-            //Debug.Log($"neuron[{i}].alpha = {this.Neurons[i].alpha}");
-        //}
-
         neuronsNative.Dispose();
         weightsNative.Dispose();
     }
@@ -147,7 +135,7 @@ public class NeuronLayer
         
         var job = new NeuronTrainingJob
         {
-            Edges        =  new NativeArray<Neuron>(Edge.Neurons.ToArray(), Allocator.TempJob),
+            Edges        =  new NativeArray<Neuron>(Edges.Neurons.ToArray(), Allocator.TempJob),
             BPG_egdes    =  new NativeArray<Neuron>(BPG_egdes.Neurons.ToArray(), Allocator.TempJob),
             BPG_weights  =  new NativeArray<float>(BPG_egdes.Weights.ToArray(), Allocator.TempJob),
             Neurons      =  neuronsNative,
@@ -219,7 +207,7 @@ public class NeuronLayer
 
         var job = new NeuronOutTrainingJob
         {
-            Edges    =  new NativeArray<Neuron>(Edge.Neurons.ToArray(), Allocator.TempJob),
+            Edges    =  new NativeArray<Neuron>(Edges.Neurons.ToArray(), Allocator.TempJob),
             Feedback =  new NativeArray<float>(o, Allocator.TempJob),
             Neurons  =  neuronsNative,
             Weights  =  weightsNative,

@@ -11,7 +11,7 @@ public class FuelCollectible : MonoBehaviour
         ShipController controller = other.gameObject.GetComponent<ShipController>();
 
         // Pouzi zivot ked nemas plny zivot
-        if (controller != null && controller.Fuel < controller.maxFuel)
+        if (controller != null && controller.Fuel < ShipController.maxFuel)
         {
             // Pridaj zivot hracovi
             controller.ChangeFuel(+1);

@@ -24,9 +24,15 @@ public struct NeuronInJob : IJobParallelFor
     {
         var neuron = this.Neurons[index];
 
-        // Matematicka operacia vyuzivajuca instrukcnu sadu SIMD
-        neuron.output = math.mul(Weights[neuron.IndexW], Input[index]);
-        //Debug.Log($"Input[{n}] = {Input[n]}");
+        // Vazena suma
+        neuron.output = 0f;
+        for (int n = 0; n < neuron.num_of_inputs; n++)
+        {                
+            // Matematicka operacia vyuzivajuca instrukcnu sadu SIMD
+            neuron.output += math.mul(Weights[neuron.IndexW + n], Input[n]);
+            //Debug.Log($"Input[{n}] = {Edges[n].output}");
+        }
+        neuron.output += Weights[neuron.IndexW + neuron.num_of_inputs];     // bias
         neuron.output = NeuronFn.ELU(neuron.output);
 
         // Copy back

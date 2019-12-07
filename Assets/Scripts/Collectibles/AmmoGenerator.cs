@@ -16,6 +16,8 @@ public class AmmoGenerator : MonoBehaviour
     private const float maxTime = 5f;
     private float Timer = maxTime;
 
+    private Unity.Mathematics.Random randomGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
+
     // Start is called before the first frame update
     void Start()
     {
@@ -26,13 +28,12 @@ public class AmmoGenerator : MonoBehaviour
     private void FixedUpdate()
     {
         // Pocet srdiecok v hre (musia chybat 2 zivoty)
-        if (freePoints.Count > 0)
+        if (freePoints.Count >= 3)
         {
             Timer -= Time.deltaTime;
             if (Timer < 0f)
             {
-                var genR = new System.Random();
-                var idx = genR.Next(0, freePoints.Count);
+                var idx = randomGen.NextInt(0, freePoints.Count);
                 Instantiate(AmmoPrefab, freePoints[idx], Quaternion.identity, this.transform);
 
                 // Vymaz pouzity bod z volnych (obsadeny)

@@ -600,7 +600,7 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     randomizeRotationDirection: 0
-    maxNumParticles: 1000
+    maxNumParticles: 5
     size3D: 0
     rotation3D: 0
     gravityModifier:
@@ -4852,5 +4852,5 @@ MonoBehaviour:
   projectilePrefab: {fileID: 2917896089770542357, guid: ebd63f22f45124a63be1208ba149776b,
     type: 3}
   throwClip: {fileID: 8300000, guid: b2edfd40873655249ba0e01a5cf705be, type: 3}
-  shot_speed: 50
+  shot_speed: 75
   shootEffect: {fileID: 1535776764880457998}

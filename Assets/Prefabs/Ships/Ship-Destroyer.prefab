@@ -10,11 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 7561708683362344632}
   - component: {fileID: 7561708683362344635}
-  - component: {fileID: 8548084380819351838}
   - component: {fileID: 7561708683362344633}
   - component: {fileID: 5643909071257595920}
   - component: {fileID: 1038945012877477378}
   - component: {fileID: 2981229496104507647}
+  - component: {fileID: 6973722366192470321}
   m_Layer: 10
   m_Name: Ship-Destroyer
   m_TagString: Player
@@ -87,35 +87,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 1
---- !u!114 &8548084380819351838
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7561708683362344634}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa66775b3b7064564bf20daf1e602b35, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Motors:
-  - {fileID: 5495537060841826277}
-  - {fileID: 2728702685953351279}
-  engineClip: {fileID: 8300000, guid: 13b966499bd964912a24e90a8a5d1bc6, type: 3}
-  maxSpeed: 5
-  maxTorque: 100
-  healthBar: {fileID: 0}
-  maxHealth: 10
-  ammoBar: {fileID: 0}
-  maxAmmo: 100
-  fuelBar: {fileID: 0}
-  maxFuel: 5
-  myPlanets: []
-  timeRespawn: 30
-  turretControllers:
-  - {fileID: 5363525619576419900}
-  - {fileID: 4220280275228480481}
 --- !u!50 &7561708683362344633
 Rigidbody2D:
   serializedVersion: 4
@@ -324,6 +295,35 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &6973722366192470321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7561708683362344634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 270f753fbd4c1416eb2b0ac31d76adff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Motors:
+  - {fileID: 5495537060841826277}
+  - {fileID: 2728702685953351279}
+  engineClip: {fileID: 8300000, guid: 13b966499bd964912a24e90a8a5d1bc6, type: 3}
+  maxSpeed: 5
+  maxTorque: 100
+  healthBar: {fileID: 0}
+  ammoBar: {fileID: 0}
+  fuelBar: {fileID: 0}
+  myPlanets: []
+  timeRespawn: 5
+  fitness: 0
+  num_of_episodes: 0
+  turretControllers:
+  - {fileID: 5363525619576419900}
+  - {fileID: 4220280275228480481}
+  novyJedinec: 1
 --- !u!1 &9101201141709214759
 GameObject:
   m_ObjectHideFlags: 0

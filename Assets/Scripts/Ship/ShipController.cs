@@ -3,6 +3,16 @@ using UnityEngine;
 
 public class ShipController : MonoBehaviour
 {
+    public static Vector2[] respawnPoints = 
+    { 
+        new Vector2(13, -5),
+        new Vector2(5, -10),
+        new Vector2(-9, 2),
+        new Vector2(-6, -12),
+        new Vector2(11, 0.5f),
+        new Vector2(-11, -1),
+    };
+
     // Engine systems
     public ParticleSystem[] Motors;             // animacia plamenov motora
     public AudioClip engineClip;                // zvukovy klip motorov
@@ -12,8 +22,8 @@ public class ShipController : MonoBehaviour
 
     // Player's health
     public UIBarControl healthBar;
-    public int maxHealth = 10;              // maximalny pocet zivotov hraca
-    private int _health;
+    public const int maxHealth = 10;              // maximalny pocet zivotov hraca
+    private int _health = maxHealth;
     public int Health {
         get
         {
@@ -32,8 +42,8 @@ public class ShipController : MonoBehaviour
 
     // Player's ammo
     public UIBarControl ammoBar;
-    public int maxAmmo = 100;               // maximalny pocet nabojov hraca
-    private int _ammo;
+    public const int maxAmmo = 100;               // maximalny pocet nabojov hraca
+    private int _ammo = maxAmmo;
     public int Ammo {
         get
         {
@@ -52,8 +62,8 @@ public class ShipController : MonoBehaviour
 
     // Player's fuel
     public UIBarControl fuelBar;
-    public int maxFuel = 5;                // maximalny pocet paliva v nadrzi hraca
-    private float _fuel;
+    public const int maxFuel = 5;                // maximalny pocet paliva v nadrzi hraca
+    private float _fuel = maxFuel;
     public float Fuel {
         get
         {
@@ -73,12 +83,9 @@ public class ShipController : MonoBehaviour
     // Zoznam planet, ktore vlastni lod
     public List<PlanetController> myPlanets;
 
-    // Pocet planet vo vlastnictve hraca
-    public int NumOfPlanets { get { return myPlanets.Count; } }
-
     // Respawn
-    public float timeRespawn = 10.0f;       // 10 seconds do obnovenia lode v bode respawn
-    public bool IsDestroyed { get; private set; }   // je lod znicena?
+    public float timeRespawn = 25.0f;       // 10 sekund do obnovenia lode v bode respawnu
+    public bool IsDestroyed { get; private set; } = false;  // stav lode, je lod znicena?
     protected float respawnTimer;   // casovac pre obnovu lode
 
     // Dynamika herneho objektu
@@ -96,8 +103,7 @@ public class ShipController : MonoBehaviour
     // Respawn
     private GameObject respawn;
 
-    protected Unity.Mathematics.Random randomGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
-
+    protected Unity.Mathematics.Random randGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
 
     // Start is called before the first frame update
     public virtual void Start()
@@ -107,9 +113,6 @@ public class ShipController : MonoBehaviour
         animator = GetComponent<Animator>();
         collider2d = GetComponent<PolygonCollider2D>();
         respawn = GameObject.FindGameObjectWithTag("Respawn");
-
-        // Zacina v mieste respawnu
-        RespawnShip();
     }
 
     public virtual void Update()
@@ -142,20 +145,20 @@ public class ShipController : MonoBehaviour
     {
         if (!IsDestroyed && this.Fuel > 0f)
         {
-            // Vypocitaj zmenu rotacie hraca
-            var pos = rigidbody2d.position;
-            var rot = rigidbody2d.rotation;
-            var deltaPos = maxSpeed * move.y * Time.deltaTime;
+            // Vypocitaj zmenu rychlosti rotacie a pozicie hraca
+            var position = rigidbody2d.position;
+            var rotation = rigidbody2d.rotation;
+            var velocity = maxSpeed * move.y * Time.deltaTime;
 
             // Vypocet prirastku zmeny pozicie a rotacie lode
-            rot += maxTorque * (-move.x) * Time.deltaTime;
-            var rotationRad = (rot + 90.0f) * Mathf.Deg2Rad;
-            LookDirection = new Vector2(Mathf.Cos(rotationRad), Mathf.Sin(rotationRad)); // normalizovany vektor smeru pohybu lode
-            pos += LookDirection * deltaPos;
+            rotation += maxTorque * (-move.x) * Time.deltaTime;
+            var rotationRad = (rotation + 90.0f) * Mathf.Deg2Rad;
+            this.LookDirection = new Vector2(Mathf.Cos(rotationRad), Mathf.Sin(rotationRad)); // normalizovany vektor smeru pohybu lode
+            position += LookDirection * velocity;
 
             // Zmen pohyb a rotaciu lode
-            rigidbody2d.rotation = rot;
-            rigidbody2d.MovePosition(pos);
+            rigidbody2d.rotation = rotation;
+            rigidbody2d.MovePosition(position);
 
             // Pre vsetky motory lode
             foreach (var motor in Motors)
@@ -172,7 +175,7 @@ public class ShipController : MonoBehaviour
                 }
             }
 
-            ChangeFuel(-Time.deltaTime);
+            ChangeFuel(-Time.deltaTime);    // plaivo sa znizi o 1 za 1 sekundu
         }        
     }
 
@@ -183,15 +186,12 @@ public class ShipController : MonoBehaviour
         Ammo = maxAmmo;
         Fuel = maxFuel;
 
-        // Nastav lod do bodu respawn
-        Vector2 point = randomGen.NextFloat2(-9f, 9f);
-        while ((point.x > -8.1f && point.x < 8.1f) || (point.y > -8.3f && point.y < 8.2f))
-        {
-            point = randomGen.NextFloat2(-9f, 9f);
-        }
+        var rotation = randGen.NextInt(0, 360);
+        var rotationRad = (rotation + 90.0f) * Mathf.Deg2Rad;
+        this.LookDirection = new Vector2(Mathf.Cos(rotationRad), Mathf.Sin(rotationRad));
 
-        rigidbody2d.position = point; //respawn.transform.position;
-        rigidbody2d.rotation = 0;//randomGen.NextFloat(0f, 360f); //respawn.transform.rotation.eulerAngles.z;
+        rigidbody2d.position = respawnPoints[randGen.NextInt(0, respawnPoints.Length)];        
+        rigidbody2d.rotation = rotation;
         IsDestroyed = false;
         collider2d.enabled = true;
     }
@@ -234,11 +234,16 @@ public class ShipController : MonoBehaviour
 
     protected void DestroyShip()
     {
-        //Debug.Log($"Lod bude znicena!");
-
         IsDestroyed = true;
         collider2d.enabled = false;
         respawnTimer = timeRespawn;
+
+        // Znicena lod straca vlastnictvo u planety
+        foreach (var planet in myPlanets)
+        {
+            planet.OwnerPlanet = null;
+        }
+        myPlanets.Clear();  // Vycisti zoznam vlastnenych planet
 
         animator.SetTrigger("Destroyed");
     }

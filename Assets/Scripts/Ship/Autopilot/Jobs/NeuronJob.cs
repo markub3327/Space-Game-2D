@@ -32,8 +32,8 @@ public struct NeuronJob : IJobParallelFor
             neuron.output += math.mul(Weights[neuron.IndexW + n], Edges[n].output);
             //Debug.Log($"Input[{n}] = {Edges[n].output}");
         }        
-        neuron.output += Weights[neuron.IndexW + neuron.num_of_inputs];
-        neuron.output = NeuronFn.ELU(neuron.output/*, neuron.alpha*/);
+        neuron.output += Weights[neuron.IndexW + neuron.num_of_inputs];     // bias
+        neuron.output = NeuronFn.ELU(neuron.output);
 
         // Copy back
         this.Neurons[index] = neuron;

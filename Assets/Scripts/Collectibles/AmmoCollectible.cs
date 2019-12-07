@@ -13,7 +13,7 @@ public class AmmoCollectible : MonoBehaviour
     {
         ShipController controller = other.gameObject.GetComponent<ShipController>();
 
-        if (controller != null && controller.Ammo < controller.maxAmmo)
+        if (controller != null && controller.Ammo < ShipController.maxAmmo)
         {
             // Pridaj zivot hracovi
             controller.ChangeAmmo(amount);
