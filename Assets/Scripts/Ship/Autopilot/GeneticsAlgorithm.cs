@@ -34,10 +34,6 @@ public class GeneticsAlgorithm : MonoBehaviour
                         bestAgent = a;
                         bestChanged = true;
                     }
-                    else if (a != bestAgent)
-                    {
-                        a.fitness = 0f;
-                    }
                 }
             }
         }
@@ -48,6 +44,8 @@ public class GeneticsAlgorithm : MonoBehaviour
             {
                 if (a != bestAgent || !a.novyJedinec)
                 {
+                    Debug.Log($"fitness[{a.name}] = {a.fitness}");
+
                     for (int i = 0; i < bestAgent.QNet.neuronLayers.Count; i++)
                     {
                         for (int j = 0; j < bestAgent.QNet.neuronLayers[i].Weights.Count; j++)
@@ -62,7 +60,9 @@ public class GeneticsAlgorithm : MonoBehaviour
                             }
                             else
                             {
-                                a.QNet.neuronLayers[i].Weights[j] = a.QTargetNet.neuronLayers[i].Weights[j] = randGen.NextFloat(-1f, 1f);
+                                a.QNet.neuronLayers[i].Weights[j] = randGen.NextFloat(-1f, 1f);
+                                a.QTargetNet.neuronLayers[i].Weights[j] = randGen.NextFloat(-1f, 1f);
+                                
                                 a.QNet.neuronLayers[i].deltaWeights[j] = a.QTargetNet.neuronLayers[i].deltaWeights[j] = 0f;
 
                                 Debug.Log($"Mutating W[{i}][{j}]!");
@@ -70,12 +70,23 @@ public class GeneticsAlgorithm : MonoBehaviour
                         }
                     }
                     a.novyJedinec = true;
+                    a.fitness = 0f;                    
                 }
             }
+            Debug.Log($"The best agent is {bestAgent.name}");
             bestChanged = false;
-
-            Debug.Log($"best_fitness = {bestAgent.fitness}");
             bestAgent.fitness = 0f;
+        }
+    }
+
+    public void OnApplicationQuit()
+    {
+        // Ak existuje bestAgent
+        if (this.bestAgent != null)
+        {
+            File.WriteAllText(Application.dataPath + "/DDQN_Weights_QNet.save", bestAgent.QNet.ToString());
+            File.WriteAllText(Application.dataPath + "/DDQN_Weights_QTargetNet.save", bestAgent.QTargetNet.ToString());                        
+            Debug.Log("DDQN saved!");
         }
     }
 }
