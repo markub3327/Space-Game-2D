@@ -179,6 +179,34 @@ public class ShipController : MonoBehaviour
         }        
     }
 
+    protected void DestroyShip()
+    {
+        IsDestroyed = true;
+        collider2d.enabled = false;
+        respawnTimer = timeRespawn;
+
+        // Znicena lod straca vlastnictvo u planety
+        foreach (var planet in myPlanets)
+        {
+            planet.OwnerPlanet = null;
+        }
+        myPlanets.Clear();  // Vycisti zoznam vlastnenych planet
+
+        animator.SetTrigger("Destroyed");
+    }
+
+    protected void WinnerShip()
+    {
+        // Znicena lod straca vlastnictvo u planety
+        foreach (var planet in myPlanets)
+        {
+            planet.OwnerPlanet = null;
+        }
+        myPlanets.Clear();  // Vycisti zoznam vlastnenych planet
+
+        animator.SetTrigger("Winner");
+    }
+
     protected void RespawnShip()
     {
         // obnov zivoty, palivo a municiu lode na maximum
@@ -194,6 +222,8 @@ public class ShipController : MonoBehaviour
         rigidbody2d.rotation = rotation;
         IsDestroyed = false;
         collider2d.enabled = true;
+
+        animator.SetTrigger("Respawn");
     }
 
     /// <summary>
@@ -230,22 +260,6 @@ public class ShipController : MonoBehaviour
         {
             Health = Mathf.Clamp(Health + amount, 0, maxHealth);
         }
-    }
-
-    protected void DestroyShip()
-    {
-        IsDestroyed = true;
-        collider2d.enabled = false;
-        respawnTimer = timeRespawn;
-
-        // Znicena lod straca vlastnictvo u planety
-        foreach (var planet in myPlanets)
-        {
-            planet.OwnerPlanet = null;
-        }
-        myPlanets.Clear();  // Vycisti zoznam vlastnenych planet
-
-        animator.SetTrigger("Destroyed");
     }
 
     /// <summary>

@@ -30,6 +30,8 @@ public class AgentDDQN : ShipController
 
     public bool novyJedinec = true;
 
+    // Meno lode
+    public UnityEngine.UI.Text nameBox;
 
     public override void Start()
     {
@@ -68,6 +70,8 @@ public class AgentDDQN : ShipController
         QTargetNet.neuronLayers[1].CreateNeurons(48);
         QTargetNet.neuronLayers[2].CreateNeurons(64);
         QTargetNet.neuronLayers[3].CreateNeurons(num_of_actions);
+
+        this.nameBox.text = this.name;
     }
 
     public override void Update()
@@ -102,13 +106,13 @@ public class AgentDDQN : ShipController
                     if (this.myPlanets.Count >= 1)
                         replayBufferItem.Done = true;
                     else
-                        replayBufferItem.Done = false; //this.IsDestroyed;
+                        replayBufferItem.Done = false;
                     replayBufferItem.Next_state = this.GetState();
                     replayBufferItem.Reward = this.GetReward();
                     this.replayMemory.Add(replayBufferItem);
 
                     if (this.myPlanets.Count >= 1)
-                        DestroyShip();
+                        WinnerShip();
                 }
                 isFirstFrame = true;
             }
@@ -118,7 +122,6 @@ public class AgentDDQN : ShipController
             if (respawnTimer < 0.0f) {
                 RespawnShip();
                 this.replayBufferItem = null;
-                animator.SetTrigger("Respawn");
             }
             else if (respawnTimer == this.timeRespawn) {
                 // Ak je v zasobniku dost vzorov k uceniu
