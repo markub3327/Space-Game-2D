@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
+using System.Linq;
+using UnityEngine.UI;
 
 public class AgentDDQN : ShipController
 {
     private const int num_of_frames = 4;
 
-    private const int num_of_states = 19;
+    private const int num_of_states = 35;
 
     private const int num_of_actions = 8;   // 4 + 4
 
@@ -28,10 +30,15 @@ public class AgentDDQN : ShipController
 
     public TurretController[] turretControllers;
 
-    public bool novyJedinec = true;
-
     // Meno lode
-    public UnityEngine.UI.Text nameBox;
+    public Text nameBox;
+    public Text levelBox;
+
+    private int num_of_planets_old = 0;
+
+    public bool presiel10Epizod = false;
+
+    public bool testMode = false;
 
     public override void Start()
     {
@@ -39,39 +46,32 @@ public class AgentDDQN : ShipController
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // 1st hidden
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 2nd hidden
-        QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 3rd hidden
         QNet.CreateLayer(NeuronLayerType.OUTPUT);   // Output
 
         QTargetNet.CreateLayer(NeuronLayerType.INPUT);    // 1st hidden
         QTargetNet.CreateLayer(NeuronLayerType.HIDDEN);   // 2nd hidden
-        QTargetNet.CreateLayer(NeuronLayerType.HIDDEN);   // 3rd hidden
         QTargetNet.CreateLayer(NeuronLayerType.OUTPUT);   // Output
 
         QNet.SetEdge(QNet.neuronLayers[1], QNet.neuronLayers[0]);
         QNet.SetEdge(QNet.neuronLayers[2], QNet.neuronLayers[1]);
-        QNet.SetEdge(QNet.neuronLayers[3], QNet.neuronLayers[2]);
         QNet.SetBPGEdge(QNet.neuronLayers[0], QNet.neuronLayers[1]);
         QNet.SetBPGEdge(QNet.neuronLayers[1], QNet.neuronLayers[2]);
-        QNet.SetBPGEdge(QNet.neuronLayers[2], QNet.neuronLayers[3]);
 
         QTargetNet.SetEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[0]);
         QTargetNet.SetEdge(QTargetNet.neuronLayers[2], QTargetNet.neuronLayers[1]);
-        QTargetNet.SetEdge(QTargetNet.neuronLayers[3], QTargetNet.neuronLayers[2]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[0], QTargetNet.neuronLayers[1]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
-        QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[2], QTargetNet.neuronLayers[3]);
 
-        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), (num_of_frames * num_of_states));
-        QNet.neuronLayers[1].CreateNeurons(64);
-        QNet.neuronLayers[2].CreateNeurons(64);
-        QNet.neuronLayers[3].CreateNeurons(num_of_actions);
+        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 64);
+        QNet.neuronLayers[1].CreateNeurons(128);
+        QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), (num_of_frames * num_of_states));
-        QTargetNet.neuronLayers[1].CreateNeurons(64);
-        QTargetNet.neuronLayers[2].CreateNeurons(64);
-        QTargetNet.neuronLayers[3].CreateNeurons(num_of_actions);
+        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 64);
+        QTargetNet.neuronLayers[1].CreateNeurons(128);
+        QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
+        this.levelBox.text = ((int)this.fitness).ToString();
     }
 
     public override void Update()
@@ -83,8 +83,9 @@ public class AgentDDQN : ShipController
             if (this.Health <= 0 || this.Fuel <= 0)
             {
                 DestroyShip();
-                if (num_of_episodes > 0 && num_of_episodes % 10 == 0) this.novyJedinec = false;
-                num_of_episodes ++;
+                if (num_of_episodes > 0 && num_of_episodes % 10 == 0) this.presiel10Epizod = true;
+                if (num_of_episodes > 1000) testMode = true;
+                num_of_episodes++;
             }
 
             // Ide o prvy obraz? => konaj akciu
@@ -96,14 +97,14 @@ public class AgentDDQN : ShipController
                     var action = this.Act(state, epsilon);
                     replayBufferItem = new ReplayBufferItem { State = state, Action = action };
                     isFirstFrame = false;
-                    epsilon = Mathf.Clamp((epsilon * 0.99999f), 0.01f, 1.0f);
+                    epsilon = Mathf.Clamp((epsilon * 0.999995f), 0.10f, 1.0f);
                 }
             }
             else    // Ide o druhy obraz? => ziskaj reakciu za akciu a uloz ju
             {
-                if (replayBufferItem != null)
+                if (replayBufferItem != null && !testMode)
                 {
-                    if (this.myPlanets.Count >= 1)
+                    if (this.myPlanets.Count > this.num_of_planets_old)
                         replayBufferItem.Done = true;
                     else
                         replayBufferItem.Done = false;
@@ -111,8 +112,10 @@ public class AgentDDQN : ShipController
                     replayBufferItem.Reward = this.GetReward();
                     this.replayMemory.Add(replayBufferItem);
 
-                    if (this.myPlanets.Count >= 1)
+                    if (this.myPlanets.Count > this.num_of_planets_old)
                         WinnerShip();
+
+                    this.num_of_planets_old = this.myPlanets.Count;
                 }
                 isFirstFrame = true;
             }
@@ -125,7 +128,7 @@ public class AgentDDQN : ShipController
             }
             else if (respawnTimer == this.timeRespawn) {
                 // Ak je v zasobniku dost vzorov k uceniu
-                if (this.replayMemory.Count > BATCH_SIZE)
+                if (this.replayMemory.Count > BATCH_SIZE && !testMode)
                 {
                     this.Training();
                 }
@@ -139,10 +142,10 @@ public class AgentDDQN : ShipController
         int action;
 
         // Vyuzivaj naucenu vedomost
-        if (randGen.NextFloat() > epsilon)
+        if (randGen.NextFloat() > epsilon || testMode)
         {
             QNet.Run(state);
-            GetMaxQ(QNet.neuronLayers[3].Neurons, out action);
+            GetMaxQ(QNet.neuronLayers[2].Neurons, out action);
         }
         else    // Skumaj prostredie
         {
@@ -241,8 +244,8 @@ public class AgentDDQN : ShipController
 
                 // Vyber nasledujuce Q 
                 var next_Q = math.min(
-                    GetMaxQ(QNet.neuronLayers[3].Neurons, out int a1),
-                    GetMaxQ(QTargetNet.neuronLayers[3].Neurons, out int a2)
+                    GetMaxQ(QNet.neuronLayers[2].Neurons, out int a1),
+                    GetMaxQ(QTargetNet.neuronLayers[2].Neurons, out int a2)
                 );
 
                 // TD
@@ -260,15 +263,15 @@ public class AgentDDQN : ShipController
             QNet.Training(sample[i].State, targets);
             QTargetNet.Training(sample[i].State, targets);
 
-            avgErr += math.pow((targets[sample[i].Action] - QNet.neuronLayers[3].Neurons[sample[i].Action].output), 2f);
-            avgErr += math.pow((targets[sample[i].Action] - QTargetNet.neuronLayers[3].Neurons[sample[i].Action].output), 2f);
+            avgErr += math.pow((targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output), 2f);
+            avgErr += math.pow((targets[sample[i].Action] - QTargetNet.neuronLayers[2].Neurons[sample[i].Action].output), 2f);
         }
 
         // Kvadraticky priemer chyby NN
         avgErr /= (float)(2*BATCH_SIZE);
         avgErr = math.sqrt(avgErr);
 
-        if ((int)Time.time % 10 == 0)
+        if ((int)Time.time % 30 == 0)
         {
             Debug.Log($"avgErr[{this.name}] = {avgErr}");
             Debug.Log($"epsilon[{this.name}] = {epsilon}");
@@ -287,14 +290,24 @@ public class AgentDDQN : ShipController
         state[2] = this.rigidbody2d.rotation / 360.0f;
 
         // Udaje o objektoch v okoli lodi
-        for (int i = 0, j = 3; i < 16; i++, j++)
+        for (int i = 0, j = 3; i < 16; i++, j+=2)
         {
             if (radarResult[i] != null)
             {                
-                state[j] = radarResult[i].Value.transform.tag.GetHashCode()/(float)int.MaxValue;
+                if (radarResult[i].Value.transform.tag == "Planet")
+                {
+                    if (this.myPlanets.Where(p => (p.name == radarResult[i].Value.transform.name)).Count() > 0)
+                        state[j] = ("My" + radarResult[i].Value.transform.tag).GetHashCode()/(float)int.MaxValue;
+                }
+                else    
+                    state[j] = radarResult[i].Value.transform.tag.GetHashCode()/(float)int.MaxValue;
+                
+                state[j+1] = radarResult[i].Value.distance / Sensors.Radar.max_distance;
             }
             else
-                state[j] = 0;
+            {
+                state[j] = state[j+1] = 0;
+            }
         }
 
         // LIFO
@@ -307,31 +320,39 @@ public class AgentDDQN : ShipController
 
     private float GetReward()
     {
-        float reward = 0f;
+        float reward;
 
         if (IsDestroyed)
         {
-            reward = 0.0f; //-1.0f;
+            reward = -1.0f;
         }
-        if (this.myPlanets.Count >= 1)
+        if (this.myPlanets.Count > this.num_of_planets_old)
         {
             reward = 1.0f;
         }
         else    // priemerne hodnotenie hry agenta
         {        
-            reward += ((float)this.Health / (float)ShipController.maxHealth) * 0.20f;
+            reward = ((float)this.Health / (float)ShipController.maxHealth) * 0.20f;
             reward += (this.Fuel / (float)ShipController.maxFuel) * 0.20f;
             reward += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.10f;
         }
         this.fitness += reward;
+        this.levelBox.text = ((int)this.fitness).ToString();
 
-        if (this.myPlanets.Count >= 1 || (int)Time.time % 100 == 0)
+        if (this.replayBufferItem.Done)
         {
             Debug.Log($"health[{this.name}] = {this.Health}");
             Debug.Log($"fuel[{this.name}] = {this.Fuel}");
             Debug.Log($"ammo[{this.name}] = {this.Ammo}");
             Debug.Log($"reward[{this.name}] = {reward}");
             Debug.Log($"done[{this.name}] = {this.replayBufferItem.Done}");
+            
+            var strPlanets = string.Empty;
+            foreach (var p in this.myPlanets)
+            {
+                strPlanets += p.name + ", ";
+            }
+            Debug.Log($"MyPlanets: {strPlanets}");           
         }
 
         return reward;

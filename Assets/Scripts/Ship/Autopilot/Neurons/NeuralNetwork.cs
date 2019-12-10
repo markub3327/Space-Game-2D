@@ -70,6 +70,8 @@ public class NeuralNetwork
     public override string ToString()
     {
         List<float> weights = new List<float>();
+        List<float> learning_rates = new List<float>();
+        //List<float> momentums = new List<float>();
 
         for (int i = 0; i < this.neuronLayers.Count; i++)
         {
@@ -77,8 +79,14 @@ public class NeuralNetwork
             {
                 weights.Add(this.neuronLayers[i].Weights[j]);
             }
+
+            for (int j = 0; j < this.neuronLayers[i].Neurons.Count; j++)
+            {
+                learning_rates.Add(this.neuronLayers[i].Neurons[j].learning_rate);
+                //momentums.Add(this.neuronLayers[i].Neurons[j].momentum);
+            }
         }
 
-        return JsonUtility.ToJson(new JSON_NET { Weights = weights }, true);
+        return JsonUtility.ToJson(new JSON_NET { Weights = weights, Learning_rates = learning_rates }, true);
     } 
 }

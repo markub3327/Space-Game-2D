@@ -105,6 +105,7 @@ public class ShipController : MonoBehaviour
 
     protected Unity.Mathematics.Random randGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
 
+
     // Start is called before the first frame update
     public virtual void Start()
     {
@@ -113,6 +114,8 @@ public class ShipController : MonoBehaviour
         animator = GetComponent<Animator>();
         collider2d = GetComponent<PolygonCollider2D>();
         respawn = GameObject.FindGameObjectWithTag("Respawn");
+
+        var rot = this.transform.rotation;
     }
 
     public virtual void Update()
@@ -159,7 +162,7 @@ public class ShipController : MonoBehaviour
             // Zmen pohyb a rotaciu lode
             rigidbody2d.rotation = rotation;
             rigidbody2d.MovePosition(position);
-
+            
             // Pre vsetky motory lode
             foreach (var motor in Motors)
             {
@@ -197,12 +200,8 @@ public class ShipController : MonoBehaviour
 
     protected void WinnerShip()
     {
-        // Znicena lod straca vlastnictvo u planety
-        foreach (var planet in myPlanets)
-        {
-            planet.OwnerPlanet = null;
-        }
-        myPlanets.Clear();  // Vycisti zoznam vlastnenych planet
+        IsDestroyed = true;
+        respawnTimer = 1f;
 
         animator.SetTrigger("Winner");
     }
