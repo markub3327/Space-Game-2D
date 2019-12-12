@@ -23,16 +23,19 @@ public class GeneticsAlgorithm : MonoBehaviour
     {        
         if (agents.Where(p => p.presiel10Epizod == true).Count() == agents.Count)
         {
-            agents.Sort(new AgentComparer());
             bestAgent = agents[0];
-            Debug.Log($"best_fitness[{bestAgent.name}] = {bestAgent.fitness}");
+            foreach (var a in agents)
+            {
+                if (a.fitness > bestAgent.fitness)
+                    bestAgent = a;
+            }
 
             foreach (var a in agents)
             {
+                Debug.Log($"fitness[{a.name}] = {a.fitness}");
+
                 if (a != bestAgent && !a.testMode)
                 {
-                    Debug.Log($"fitness[{a.name}] = {a.fitness}");
-
                     for (int i = 0; i < bestAgent.QNet.neuronLayers.Count; i++)
                     {
                         for (int j = 0; j < bestAgent.QNet.neuronLayers[i].Weights.Count; j++)
@@ -73,8 +76,8 @@ public class GeneticsAlgorithm : MonoBehaviour
                             }
                             else
                             {                            
-                                neuron_QNet.learning_rate = randGen.NextFloat(0f, 0.5f);
-                                neuron_QTargetNet.learning_rate = randGen.NextFloat(0f, 0.5f);
+                                neuron_QNet.learning_rate = randGen.NextFloat(0f, 0.25f);
+                                neuron_QTargetNet.learning_rate = randGen.NextFloat(0f, 0.25f);
                                 Debug.Log($"Mutating learning_rate[{i}][{j}]!");
                                 //Debug.Log($"Mutating momentum[{i}][{j}]!");
                             }
@@ -83,13 +86,11 @@ public class GeneticsAlgorithm : MonoBehaviour
                             a.QTargetNet.neuronLayers[i].Neurons[j] = neuron_QTargetNet;
                         }
                     }
-                    a.fitness = 0f;                    
                 }
                 a.presiel10Epizod = false;
+                a.fitness = 0f;                    
             }
             Debug.Log($"The best agent is {bestAgent.name}");
-            //bestChanged = false;
-            bestAgent.fitness = 0f;
         }
     }
 
@@ -110,13 +111,6 @@ public class JSON_NET
 {
     public List<float> Weights;
     public List<float> Learning_rates;
+    public List<float> error;
     //public List<float> Momentums;
-}
-
-class AgentComparer : IComparer<AgentDDQN>
-{
-    public int Compare(AgentDDQN x, AgentDDQN y)
-    {
-        return x.fitness.CompareTo(y.fitness);
-    }
 }

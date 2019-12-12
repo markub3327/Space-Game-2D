@@ -318,7 +318,7 @@ MonoBehaviour:
   ammoBar: {fileID: 2637749432310433811}
   fuelBar: {fileID: 120408872112281115}
   myPlanets: []
-  timeRespawn: 5
+  timeRespawn: 10
   fitness: 0
   num_of_episodes: 0
   turretControllers:
