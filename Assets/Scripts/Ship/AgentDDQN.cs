@@ -66,12 +66,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[0], QTargetNet.neuronLayers[1]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
-        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 64);
-        QNet.neuronLayers[1].CreateNeurons(128);
+        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 128);
+        QNet.neuronLayers[1].CreateNeurons(256);    // 1. 128, 2. 160, 3. 192, 4. 256, 5. 128 na 128
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 64);
-        QTargetNet.neuronLayers[1].CreateNeurons(128);
+        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 128);
+        QTargetNet.neuronLayers[1].CreateNeurons(256);
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -107,6 +107,7 @@ public class AgentDDQN : ShipController
                     this.QNet.neuronLayers[i].Neurons[j] = neuron;
                 }
             }
+            Debug.Log("QNet loaded from file.");
         }
         if (File.Exists(str2))
         {
@@ -124,6 +125,7 @@ public class AgentDDQN : ShipController
                     this.QTargetNet.neuronLayers[i].Neurons[j] = neuron;
                 }
             }
+            Debug.Log("QTargetNet loaded from file.");
         }
     }
 
@@ -135,8 +137,11 @@ public class AgentDDQN : ShipController
             // Ide o prvy obraz? => konaj akciu
             if (isFirstFrame)
             {
-                this.replayBufferItem.Action = this.Act(this.replayBufferItem.State, epsilon);                    
-                epsilon = Mathf.Clamp((epsilon * 0.99999f), 0.10f, 1.0f);
+                this.replayBufferItem.Action = this.Act(this.replayBufferItem.State, epsilon);        
+                
+                // Exploration/Exploitation parameter changed
+                epsilon = Mathf.Clamp((epsilon * 0.99999f), 0.010f, 1.0f);  // od 100% nahody po 1%            
+                
                 isFirstFrame = false;
             }
             else    // Ide o druhy obraz? => ziskaj reakciu za akciu a uloz ju
@@ -145,8 +150,8 @@ public class AgentDDQN : ShipController
                 if (this.Health <= 0 || this.Fuel <= 0)
                 {
                     DestroyShip();
-                    if (num_of_episodes > 0 && num_of_episodes % 20 == 0) this.presiel10Epizod = true;
-                    if (num_of_episodes > 1000) 
+                    if (num_of_episodes > 0 && num_of_episodes % 10 == 0) this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
+                    if (num_of_episodes > 10000) 
                     { 
                         #if UNITY_EDITOR
                             UnityEditor.EditorApplication.isPlaying = false;
@@ -324,15 +329,15 @@ public class AgentDDQN : ShipController
         }
 
         // Kvadraticky priemer chyby NN
-        avgErr1 /= (float)(BATCH_SIZE<<1);
+        avgErr1 /= (float)BATCH_SIZE;
         avgErr1 = math.sqrt(avgErr1);
         QNet.errorList.Add(avgErr1);
 
-        avgErr2 /= (float)(BATCH_SIZE<<1);
+        avgErr2 /= (float)BATCH_SIZE;
         avgErr2 = math.sqrt(avgErr2);
         QTargetNet.errorList.Add(avgErr2);
 
-        if ((int)Time.time % 30 == 0)
+        if (num_of_episodes % 10 == 0)
         {
             Debug.Log($"avgErr.QNet[{this.name}] = {avgErr1}");
             Debug.Log($"avgErr.QTargetNet[{this.name}] = {avgErr2}");
@@ -401,7 +406,7 @@ public class AgentDDQN : ShipController
         this.fitness += reward;
         this.levelBox.text = ((int)this.fitness).ToString();
 
-        if (this.replayBufferItem.Done)
+        if (this.replayBufferItem.Done && (num_of_episodes % 10 == 0))
         {
             Debug.Log($"health[{this.name}] = {this.Health}");
             Debug.Log($"fuel[{this.name}] = {this.Fuel}");

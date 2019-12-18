@@ -58,33 +58,6 @@ public class GeneticsAlgorithm : MonoBehaviour
                                 Debug.Log($"Mutating W[{i}][{j}]!");
                             }                            
                         }
-
-                        for (int j = 0; j < bestAgent.QNet.neuronLayers[i].Neurons.Count; j++)
-                        {
-                            var neuron_QNet = a.QNet.neuronLayers[i].Neurons[j];
-                            var neuron_QTargetNet = a.QTargetNet.neuronLayers[i].Neurons[j];
-
-                            var neuron_QNet_best = bestAgent.QNet.neuronLayers[i].Neurons[j];
-                            var neuron_QTargetNet_best = bestAgent.QTargetNet.neuronLayers[i].Neurons[j];
-
-                            if (randGen.NextFloat() > (1f/(float)bestAgent.QNet.neuronLayers[i].Neurons.Count))
-                            {
-                                neuron_QNet.learning_rate = neuron_QNet_best.learning_rate;
-                                //neuron_QNet.momentum = neuron_QNet_best.momentum;
-                                neuron_QTargetNet.learning_rate = neuron_QTargetNet_best.learning_rate;
-                                //neuron_QTargetNet.momentum = neuron_QTargetNet_best.momentum;
-                            }
-                            else
-                            {                            
-                                neuron_QNet.learning_rate = randGen.NextFloat(0f, 0.25f);
-                                neuron_QTargetNet.learning_rate = randGen.NextFloat(0f, 0.25f);
-                                Debug.Log($"Mutating learning_rate[{i}][{j}]!");
-                                //Debug.Log($"Mutating momentum[{i}][{j}]!");
-                            }
-
-                            a.QNet.neuronLayers[i].Neurons[j] = neuron_QNet;
-                            a.QTargetNet.neuronLayers[i].Neurons[j] = neuron_QTargetNet;
-                        }
                     }
                 }
                 a.presiel10Epizod = false;
