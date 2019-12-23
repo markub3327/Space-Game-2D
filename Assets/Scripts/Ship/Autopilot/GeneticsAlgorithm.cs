@@ -44,19 +44,14 @@ public class GeneticsAlgorithm : MonoBehaviour
                             {
                                 a.QNet.neuronLayers[i].Weights[j] = bestAgent.QNet.neuronLayers[i].Weights[j];
                                 a.QTargetNet.neuronLayers[i].Weights[j] = bestAgent.QTargetNet.neuronLayers[i].Weights[j];
-
-                                a.QNet.neuronLayers[i].deltaWeights[j] = bestAgent.QNet.neuronLayers[i].deltaWeights[j];
-                                a.QTargetNet.neuronLayers[i].deltaWeights[j] = bestAgent.QTargetNet.neuronLayers[i].deltaWeights[j];
                             }
                             else
                             {
                                 a.QNet.neuronLayers[i].Weights[j] = randGen.NextFloat(-1f, 1f);
                                 a.QTargetNet.neuronLayers[i].Weights[j] = randGen.NextFloat(-1f, 1f);
-
-                                a.QNet.neuronLayers[i].deltaWeights[j] = a.QTargetNet.neuronLayers[i].deltaWeights[j] = 0f;
-
                                 Debug.Log($"Mutating W[{i}][{j}]!");
                             }                            
+                            a.QNet.neuronLayers[i].deltaWeights[j] = a.QTargetNet.neuronLayers[i].deltaWeights[j] = 0f;
                         }
                     }
                 }
@@ -84,6 +79,6 @@ public class JSON_NET
 {
     public List<float> Weights;
     public List<float> Learning_rates;
-    public List<float> error;
+    //public List<float> error;
     //public List<float> Momentums;
 }

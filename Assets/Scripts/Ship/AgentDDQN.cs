@@ -66,12 +66,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[0], QTargetNet.neuronLayers[1]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
-        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 128);
-        QNet.neuronLayers[1].CreateNeurons(256);    // 1. 128, 2. 160, 3. 192, 4. 256, 5. 128 na 128
+        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 64);
+        QNet.neuronLayers[1].CreateNeurons(32);
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 128);
-        QTargetNet.neuronLayers[1].CreateNeurons(256);
+        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 64);
+        QTargetNet.neuronLayers[1].CreateNeurons(32);
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -140,7 +140,7 @@ public class AgentDDQN : ShipController
                 this.replayBufferItem.Action = this.Act(this.replayBufferItem.State, epsilon);        
                 
                 // Exploration/Exploitation parameter changed
-                epsilon = Mathf.Clamp((epsilon * 0.99999f), 0.010f, 1.0f);  // od 100% nahody po 1%            
+                epsilon = Mathf.Clamp((epsilon * 0.999999f), 0.010f, 1.0f);  // od 100% nahody po 1%            
                 
                 isFirstFrame = false;
             }
@@ -150,7 +150,7 @@ public class AgentDDQN : ShipController
                 if (this.Health <= 0 || this.Fuel <= 0)
                 {
                     DestroyShip();
-                    if (num_of_episodes > 0 && num_of_episodes % 10 == 0) this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
+                    if (num_of_episodes > 0 && num_of_episodes % 20 == 0) this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
                     if (num_of_episodes > 10000) 
                     { 
                         #if UNITY_EDITOR
@@ -331,13 +331,13 @@ public class AgentDDQN : ShipController
         // Kvadraticky priemer chyby NN
         avgErr1 /= (float)BATCH_SIZE;
         avgErr1 = math.sqrt(avgErr1);
-        QNet.errorList.Add(avgErr1);
+        //QNet.errorList.Add(avgErr1);
 
         avgErr2 /= (float)BATCH_SIZE;
         avgErr2 = math.sqrt(avgErr2);
-        QTargetNet.errorList.Add(avgErr2);
+        //QTargetNet.errorList.Add(avgErr2);
 
-        if (num_of_episodes % 10 == 0)
+        if (num_of_episodes % 100 == 0)
         {
             Debug.Log($"avgErr.QNet[{this.name}] = {avgErr1}");
             Debug.Log($"avgErr.QTargetNet[{this.name}] = {avgErr2}");
@@ -361,14 +361,13 @@ public class AgentDDQN : ShipController
         {
             if (radarResult[i] != null)
             {                
-                if (radarResult[i].Value.transform.tag == "Planet")
-                {
-                    if (this.myPlanets.Where(p => (p.name == radarResult[i].Value.transform.name)).Count() > 0)
-                        state[j] = ("My" + radarResult[i].Value.transform.tag).GetHashCode()/(float)int.MaxValue;
-                }
-                else    
-                    state[j] = radarResult[i].Value.transform.tag.GetHashCode()/(float)int.MaxValue;
-                
+                //if (radarResult[i].Value.transform.tag == "Planet")
+                //{
+                //    if (this.myPlanets.Where(p => (p.name == radarResult[i].Value.transform.name)).Count() > 0)
+                //        state[j] = ("My" + radarResult[i].Value.transform.tag).GetHashCode()/(float)int.MaxValue;
+                //}
+                //else    
+                state[j] = radarResult[i].Value.transform.tag.GetHashCode()/(float)int.MaxValue;
                 state[j+1] = radarResult[i].Value.distance / Sensors.Radar.max_distance;
             }
             else
@@ -406,7 +405,7 @@ public class AgentDDQN : ShipController
         this.fitness += reward;
         this.levelBox.text = ((int)this.fitness).ToString();
 
-        if (this.replayBufferItem.Done && (num_of_episodes % 10 == 0))
+        if (this.replayBufferItem.Done && (num_of_episodes % 100 == 0))
         {
             Debug.Log($"health[{this.name}] = {this.Health}");
             Debug.Log($"fuel[{this.name}] = {this.Fuel}");
@@ -434,13 +433,13 @@ public class ReplayBuffer
 
     public ReplayBuffer()
     {
-        this.items = new List<ReplayBufferItem>(1000000); // Ako ma standardny smart TV :D
+        this.items = new List<ReplayBufferItem>(10000); // Ako ma standardny smart TV :D
     }
 
     public void Add(ReplayBufferItem item)
     {
         // LIFO
-        if (this.Count >= 1000000)    
+        if (this.Count >= 10000)    
             this.items.RemoveAt(0);
         this.items.Add(item);        
     }

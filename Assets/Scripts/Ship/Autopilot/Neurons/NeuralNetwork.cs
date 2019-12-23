@@ -9,7 +9,7 @@ public class NeuralNetwork
 
 
     // Ukladanie chyb ucenia pre analyzu siete
-    public List<float> errorList { get; private set; } = new List<float>();
+    //public List<float> errorList { get; private set; } = new List<float>();
  
     public NeuralNetwork(string name=default(string))
     {
@@ -87,6 +87,6 @@ public class NeuralNetwork
             }
         }
 
-        return JsonUtility.ToJson(new JSON_NET { Weights = weights, Learning_rates = learning_rates, error = this.errorList }, true);
+        return JsonUtility.ToJson(new JSON_NET { Weights = weights, Learning_rates = learning_rates/*, error = this.errorList*/ }, true);
     } 
 }
