@@ -66,12 +66,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[0], QTargetNet.neuronLayers[1]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
-        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 64);
-        QNet.neuronLayers[1].CreateNeurons(32);
+        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 128);
+        QNet.neuronLayers[1].CreateNeurons(128);
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 64);
-        QTargetNet.neuronLayers[1].CreateNeurons(32);
+        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 128);
+        QTargetNet.neuronLayers[1].CreateNeurons(128);
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -205,7 +205,9 @@ public class AgentDDQN : ShipController
         if (randGen.NextFloat() > epsilon || testMode)
         {
             QNet.Run(state);
-            GetMaxQ(QNet.neuronLayers[2].Neurons, out action);
+            var q = GetMaxQ(QNet.neuronLayers[2].Neurons, out action);
+            if (num_of_episodes % 100 == 0)
+                Debug.Log($"Qval = {q}, {action}");
         }
         else    // Skumaj prostredie
         {
@@ -291,7 +293,17 @@ public class AgentDDQN : ShipController
         var sample = replayMemory.Sample(BATCH_SIZE);
         float avgErr1 = 0;
         float avgErr2 = 0;
-        
+
+        // clean old deltaW
+        for (int i = 0; i < this.QNet.neuronLayers.Count; i++)
+        {
+            for (int j = 0; j < this.QNet.neuronLayers[i].Weights.Count; j++)
+            {
+                this.QNet.neuronLayers[i].deltaWeights[j]       = 0f; 
+                this.QTargetNet.neuronLayers[i].deltaWeights[j] = 0f;
+            }
+        }
+
         for (int i = 0; i < BATCH_SIZE; i++)
         {
             float[] targets = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };

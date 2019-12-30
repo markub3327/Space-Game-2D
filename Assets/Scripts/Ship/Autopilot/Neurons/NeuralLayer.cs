@@ -28,28 +28,7 @@ public class NeuralLayer
 
     public void CreateNeurons(int num_of_inputs, int num_of_neurons)
     {
-        for (int m = 0; m < num_of_neurons; m++)
-        {
-            this.Neurons.Add(new Neuron {
-                output = 0f,
-                sigma = 0f,
-                IndexW = this.Weights.Count,
-                num_of_inputs = num_of_inputs,
-                momentum = 0.0010f,
-                learning_rate = 0.0010f
-            });
-            for (int n = 0; n <= num_of_inputs; n++)
-            {
-                var w = randGen.NextFloat(-1f, 1f);
-                this.Weights.Add(w);
-                this.deltaWeights.Add(0f);
-            }
-        }
-    }
-
-    public void CreateNeurons(int num_of_neurons)
-    {
-        var num_of_inputs = Edges.Neurons.Count;
+        var k = Unity.Mathematics.math.sqrt(2f/num_of_inputs);
         
         for (int m = 0; m < num_of_neurons; m++)
         {
@@ -63,7 +42,31 @@ public class NeuralLayer
             });
             for (int n = 0; n <= num_of_inputs; n++)
             {
-                var w = randGen.NextFloat(-1f, 1f);
+                var w = randGen.NextFloat(-1f, 1f) * k;
+                this.Weights.Add(w);
+                this.deltaWeights.Add(0f);
+            }
+        }
+    }
+
+    public void CreateNeurons(int num_of_neurons)
+    {
+        var num_of_inputs = Edges.Neurons.Count;        
+        var k = Unity.Mathematics.math.sqrt(2f/num_of_inputs);
+
+        for (int m = 0; m < num_of_neurons; m++)
+        {
+            this.Neurons.Add(new Neuron {
+                output = 0f,
+                sigma = 0f,
+                IndexW = this.Weights.Count,
+                num_of_inputs = num_of_inputs,
+                momentum = 0.0010f,
+                learning_rate = 0.0010f
+            });
+            for (int n = 0; n <= num_of_inputs; n++)
+            {
+                var w = randGen.NextFloat(-1f, 1f) * k;
                 this.Weights.Add(w);
                 this.deltaWeights.Add(0f);
             }

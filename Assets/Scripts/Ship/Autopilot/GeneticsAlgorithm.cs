@@ -51,7 +51,6 @@ public class GeneticsAlgorithm : MonoBehaviour
                                 a.QTargetNet.neuronLayers[i].Weights[j] = randGen.NextFloat(-1f, 1f);
                                 Debug.Log($"Mutating W[{i}][{j}]!");
                             }                            
-                            a.QNet.neuronLayers[i].deltaWeights[j] = a.QTargetNet.neuronLayers[i].deltaWeights[j] = 0f;
                         }
                     }
                 }
