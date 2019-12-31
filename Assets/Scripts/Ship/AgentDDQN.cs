@@ -38,7 +38,7 @@ public class AgentDDQN : ShipController
     private int Health_old;
     private float Fuel_old;
     private int Ammo_old;
-    private int num_of_planets_old = 0;
+    private int num_of_planets_old;
 
     public bool presiel10Epizod = false;
 
@@ -67,11 +67,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 64);
-        QNet.neuronLayers[1].CreateNeurons(64);
+        QNet.neuronLayers[1].CreateNeurons(128);
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 64);
-        QTargetNet.neuronLayers[1].CreateNeurons(64);
+        QTargetNet.neuronLayers[1].CreateNeurons(128);
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -87,6 +87,7 @@ public class AgentDDQN : ShipController
         this.Health_old = this.Health;
         this.Ammo_old = this.Ammo;
         this.Fuel_old  = this.Fuel;
+        this.num_of_planets_old = 0;
 
         // Nacitaj vahy zo subora ak existuje
         var str1 = Application.dataPath + "/DDQN_Weights_QNet.save";
@@ -181,18 +182,17 @@ public class AgentDDQN : ShipController
         }
         else    // Ak je lod znicena = cas na preucenie siete (nove vedomosti)
         {            
-            if (respawnTimer < 0.0f) 
+            if (respawnTimer <= 0.0f) 
             {
                 RespawnShip();
             }
-            else if (respawnTimer == this.timeRespawn) 
+            
+            // Ak je v zasobniku dost vzorov k uceniu
+            if ((this.replayMemory.Count > BATCH_SIZE && !testMode) && ((int)(respawnTimer * 1000f) % 100) == 0)
             {
-                // Ak je v zasobniku dost vzorov k uceniu
-                if (this.replayMemory.Count > BATCH_SIZE && !testMode)
-                {
-                    this.Training();
-                }
+                this.Training();
             }
+            
             respawnTimer -= Time.deltaTime;
         }
     }
@@ -335,9 +335,12 @@ public class AgentDDQN : ShipController
 
             QNet.Training(sample[i].State, targets);
             QTargetNet.Training(sample[i].State, targets);
+            
+            var e1 = (targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
+            avgErr1 += e1 * e1;
 
-            avgErr1 += math.pow((targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output), 2f);
-            avgErr2 += math.pow((targets[sample[i].Action] - QTargetNet.neuronLayers[2].Neurons[sample[i].Action].output), 2f);
+            var e2 = (targets[sample[i].Action] - QTargetNet.neuronLayers[2].Neurons[sample[i].Action].output);
+            avgErr2 += e2 * e2;
         }
 
         // Kvadraticky priemer chyby NN
@@ -398,22 +401,14 @@ public class AgentDDQN : ShipController
 
     private float GetReward()
     {
-        float reward;
+        float reward = 0f;
 
-        if (this.myPlanets.Count > this.num_of_planets_old)
-        {
-            reward = +1.0f;
-        }
-        else if (IsDestroyed)
-        {
-            reward = -1.0f;
-        }
-        else    // priemerne hodnotenie hry agenta
-        {        
-            reward = ((float)(this.Health - this.Health_old) / (float)ShipController.maxHealth) * 0.10f;
-            reward += ((this.Fuel - this.Fuel_old) / (float)ShipController.maxFuel) * 0.10f;
-            reward += ((float)(this.Ammo - this.Ammo_old) / (float)ShipController.maxAmmo) * 0.10f;
-        }
+        // odmeny za profil hraca (zivoty, municia, palivo, pocet vlastnenych planet)
+        reward += ((float)(this.Health - this.Health_old) / (float)ShipController.maxHealth) * 0.20f;
+        reward += ((this.Fuel - this.Fuel_old) / (float)ShipController.maxFuel) * 0.20f;
+        reward += ((float)(this.Ammo - this.Ammo_old) / (float)ShipController.maxAmmo) * 0.10f;
+        reward += ((float)(this.myPlanets.Count - this.num_of_planets_old) / 5f) * 0.50f;
+
         this.fitness += reward;
         this.levelBox.text = ((int)this.fitness).ToString();
 
@@ -424,7 +419,8 @@ public class AgentDDQN : ShipController
             Debug.Log($"ammo[{this.name}] = {this.Ammo}");
             Debug.Log($"reward[{this.name}] = {reward}");
             Debug.Log($"done[{this.name}] = {this.replayBufferItem.Done}");
-            
+            Debug.Log($"fitness = {this.fitness}");
+
             var strPlanets = string.Empty;
             foreach (var p in this.myPlanets)
             {

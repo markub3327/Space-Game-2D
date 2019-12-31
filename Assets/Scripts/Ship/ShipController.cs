@@ -84,7 +84,7 @@ public class ShipController : MonoBehaviour
     public List<PlanetController> myPlanets;
 
     // Respawn
-    public float timeRespawn = 25.0f;       // 10 sekund do obnovenia lode v bode respawnu
+    public float timeRespawn = 10.0f;       // 10 sekund do obnovenia lode v bode respawnu
     public bool IsDestroyed { get; private set; } = false;  // stav lode, je lod znicena?
     protected float respawnTimer;   // casovac pre obnovu lode
 
