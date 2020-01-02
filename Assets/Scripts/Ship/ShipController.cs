@@ -1,18 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class ShipController : MonoBehaviour
 {
-    public static Vector2[] respawnPoints = 
-    { 
-        new Vector2(13, -5),
-        new Vector2(5, -10),
-        new Vector2(-9, 2),
-        new Vector2(-6, -12),
-        new Vector2(11, 0.5f),
-        new Vector2(-11, -1),
-    };
-
     // Engine systems
     public ParticleSystem[] Motors;             // animacia plamenov motora
     public AudioClip engineClip;                // zvukovy klip motorov
@@ -102,9 +93,6 @@ public class ShipController : MonoBehaviour
 
     // Respawn
     private GameObject respawn;
-
-    protected Unity.Mathematics.Random randGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
-
 
     // Start is called before the first frame update
     public virtual void Start()
@@ -213,12 +201,8 @@ public class ShipController : MonoBehaviour
         Ammo = maxAmmo;
         Fuel = maxFuel;
 
-        var rotation = randGen.NextInt(0, 360);
-        var rotationRad = (rotation + 90.0f) * Mathf.Deg2Rad;
-        this.LookDirection = new Vector2(Mathf.Cos(rotationRad), Mathf.Sin(rotationRad));
-
-        rigidbody2d.position = respawnPoints[randGen.NextInt(0, respawnPoints.Length)];        
-        rigidbody2d.rotation = rotation;
+        rigidbody2d.position = Respawn.getPoint();        
+        rigidbody2d.rotation = 0f;
         IsDestroyed = false;
         collider2d.enabled = true;
 

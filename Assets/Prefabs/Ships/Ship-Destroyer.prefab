@@ -318,7 +318,7 @@ MonoBehaviour:
   ammoBar: {fileID: 2637749432310433811}
   fuelBar: {fileID: 120408872112281115}
   myPlanets: []
-  timeRespawn: 10
+  timeRespawn: 5
   fitness: 0
   num_of_episodes: 0
   turretControllers:
@@ -326,7 +326,7 @@ MonoBehaviour:
   - {fileID: 4220280275228480481}
   nameBox: {fileID: 6886705795503848144}
   levelBox: {fileID: 7190794469098261108}
-  presiel10Epizod: 0
+  presiel100Epizod: 0
   testMode: 0
 --- !u!1 &9101201141709214759
 GameObject:
@@ -367,12 +367,7 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7561708683362344632}
     m_Modifications:
-    - target: {fileID: 7268453001880701775, guid: 4855ce631a22b48fbac0caaf8fff47cb,
-        type: 3}
-      propertyPath: m_Name
-      value: Turret Large 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 7268453001880701775, guid: 4855ce631a22b48fbac0caaf8fff47cb,
+    - target: {fileID: 562172196990736657, guid: 4855ce631a22b48fbac0caaf8fff47cb,
         type: 3}
       propertyPath: m_Layer
       value: 10
@@ -432,15 +427,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 562172196990736657, guid: 4855ce631a22b48fbac0caaf8fff47cb,
-        type: 3}
-      propertyPath: m_Layer
-      value: 10
-      objectReference: {fileID: 0}
     - target: {fileID: 7040528982928546089, guid: 4855ce631a22b48fbac0caaf8fff47cb,
         type: 3}
       propertyPath: m_FlipX
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7268453001880701775, guid: 4855ce631a22b48fbac0caaf8fff47cb,
+        type: 3}
+      propertyPath: m_Name
+      value: Turret Large 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7268453001880701775, guid: 4855ce631a22b48fbac0caaf8fff47cb,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4855ce631a22b48fbac0caaf8fff47cb, type: 3}
@@ -469,16 +469,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3362583842856066665}
     m_Modifications:
-    - target: {fileID: 791437502805623661, guid: 43cb658df815f4988afe1d2be2382dd4,
-        type: 3}
-      propertyPath: m_Name
-      value: Motor2
-      objectReference: {fileID: 0}
-    - target: {fileID: 791437502805623661, guid: 43cb658df815f4988afe1d2be2382dd4,
-        type: 3}
-      propertyPath: m_Layer
-      value: 10
-      objectReference: {fileID: 0}
     - target: {fileID: 463878527547867188, guid: 43cb658df815f4988afe1d2be2382dd4,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -534,6 +524,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 791437502805623661, guid: 43cb658df815f4988afe1d2be2382dd4,
+        type: 3}
+      propertyPath: m_Name
+      value: Motor2
+      objectReference: {fileID: 0}
+    - target: {fileID: 791437502805623661, guid: 43cb658df815f4988afe1d2be2382dd4,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 43cb658df815f4988afe1d2be2382dd4, type: 3}
 --- !u!4 &2833944755652768951 stripped
@@ -555,16 +555,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3362583842856066665}
     m_Modifications:
-    - target: {fileID: 791437502805623661, guid: 43cb658df815f4988afe1d2be2382dd4,
-        type: 3}
-      propertyPath: m_Name
-      value: Motor1
-      objectReference: {fileID: 0}
-    - target: {fileID: 791437502805623661, guid: 43cb658df815f4988afe1d2be2382dd4,
-        type: 3}
-      propertyPath: m_Layer
-      value: 10
-      objectReference: {fileID: 0}
     - target: {fileID: 463878527547867188, guid: 43cb658df815f4988afe1d2be2382dd4,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -620,6 +610,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 791437502805623661, guid: 43cb658df815f4988afe1d2be2382dd4,
+        type: 3}
+      propertyPath: m_Name
+      value: Motor1
+      objectReference: {fileID: 0}
+    - target: {fileID: 791437502805623661, guid: 43cb658df815f4988afe1d2be2382dd4,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 43cb658df815f4988afe1d2be2382dd4, type: 3}
 --- !u!4 &5678595787036839229 stripped
@@ -641,11 +641,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7561708683362344632}
     m_Modifications:
-    - target: {fileID: 5292787280521485464, guid: 18eef31480c044d3db4771826a48bcc9,
-        type: 3}
-      propertyPath: m_Name
-      value: PlayerInfoBar
-      objectReference: {fileID: 0}
     - target: {fileID: 72971771570537143, guid: 18eef31480c044d3db4771826a48bcc9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -675,6 +670,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5292787280521485464, guid: 18eef31480c044d3db4771826a48bcc9,
+        type: 3}
+      propertyPath: m_Name
+      value: PlayerInfoBar
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 18eef31480c044d3db4771826a48bcc9, type: 3}
@@ -751,12 +751,7 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7561708683362344632}
     m_Modifications:
-    - target: {fileID: 7268453001880701775, guid: 4855ce631a22b48fbac0caaf8fff47cb,
-        type: 3}
-      propertyPath: m_Name
-      value: Turret Large 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7268453001880701775, guid: 4855ce631a22b48fbac0caaf8fff47cb,
+    - target: {fileID: 562172196990736657, guid: 4855ce631a22b48fbac0caaf8fff47cb,
         type: 3}
       propertyPath: m_Layer
       value: 10
@@ -816,7 +811,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 562172196990736657, guid: 4855ce631a22b48fbac0caaf8fff47cb,
+    - target: {fileID: 7268453001880701775, guid: 4855ce631a22b48fbac0caaf8fff47cb,
+        type: 3}
+      propertyPath: m_Name
+      value: Turret Large 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7268453001880701775, guid: 4855ce631a22b48fbac0caaf8fff47cb,
         type: 3}
       propertyPath: m_Layer
       value: 10

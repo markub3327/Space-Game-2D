@@ -16,14 +16,11 @@ public class NeuralLayer
 
     public NeuralLayer Edges = null;
 
-    private Unity.Mathematics.Random randGen;
-
     public NeuronLayerType type;
 
     public NeuralLayer(NeuronLayerType type)
     {
         this.type = type;
-        this.randGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
     }
 
     public void CreateNeurons(int num_of_inputs, int num_of_neurons)
@@ -37,14 +34,14 @@ public class NeuralLayer
                 sigma = 0f,
                 IndexW = this.Weights.Count,
                 num_of_inputs = num_of_inputs,
-                momentum = 0.0010f,
-                learning_rate = 0.0010f
+                momentum = 0.0050f,
+                learning_rate = 0.0050f
             });
             for (int n = 0; n <= num_of_inputs; n++)
             {
-                var w = randGen.NextFloat(-1f, 1f) * k;
+                var w = Random.Range(-1.0f, 1.0f) * k;
                 this.Weights.Add(w);
-                this.deltaWeights.Add(0f);
+                this.deltaWeights.Add(0.0f);
             }
         }
     }
@@ -61,14 +58,14 @@ public class NeuralLayer
                 sigma = 0f,
                 IndexW = this.Weights.Count,
                 num_of_inputs = num_of_inputs,
-                momentum = 0.0010f,
-                learning_rate = 0.0010f
+                momentum = 0.0050f,
+                learning_rate = 0.0050f
             });
             for (int n = 0; n <= num_of_inputs; n++)
             {
-                var w = randGen.NextFloat(-1f, 1f) * k;
+                var w = Random.Range(-1.0f, 1.0f) * k;
                 this.Weights.Add(w);
-                this.deltaWeights.Add(0f);
+                this.deltaWeights.Add(0.0f);
             }
         }
     }

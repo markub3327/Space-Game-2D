@@ -9,7 +9,7 @@ public class NeuralNetwork
 
 
     // Ukladanie chyb ucenia pre analyzu siete
-    //public List<float> errorList { get; private set; } = new List<float>();
+    public List<float> errorList { get; private set; } = new List<float>();
  
     public NeuralNetwork(string name=default(string))
     {
@@ -73,20 +73,15 @@ public class NeuralNetwork
     public override string ToString()
     {
         List<float> weights = new List<float>();
-        List<float> learning_rates = new List<float>();
 
         for (int i = 0; i < this.neuronLayers.Count; i++)
         {
             for (int j = 0; j < this.neuronLayers[i].Weights.Count; j++)
             {
                 weights.Add(this.neuronLayers[i].Weights[j]);
-            }
-            for (int j = 0; j < this.neuronLayers[i].Neurons.Count; j++)
-            {
-                learning_rates.Add(this.neuronLayers[i].Neurons[j].learning_rate);
-            }
+            }            
         }
 
-        return JsonUtility.ToJson(new JSON_NET { Weights = weights, Learning_rates = learning_rates/*, error = this.errorList*/ }, true);
+        return JsonUtility.ToJson(new JSON_NET { Weights = weights, error = this.errorList }, true);
     } 
 }

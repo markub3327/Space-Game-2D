@@ -16,8 +16,6 @@ public class HealthsGenerator : MonoBehaviour
     private const float maxTime = 10f;
     private float Timer = maxTime;
 
-    private Unity.Mathematics.Random randomGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
-
     // Start is called before the first frame update
     void Start()
     {
@@ -33,7 +31,7 @@ public class HealthsGenerator : MonoBehaviour
             Timer -= Time.deltaTime;
             if (Timer < 0f)
             {
-                var idx = randomGen.NextInt(0, freePoints.Count);
+                var idx = Random.Range(0, freePoints.Count);
                 Instantiate(HealthPrefab, freePoints[idx], Quaternion.identity, this.transform);
 
                 // Vymaz pouzity bod z volnych (obsadeny)
