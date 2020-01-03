@@ -49,8 +49,8 @@ public class GeneticsAlgorithm : MonoBehaviour
 				// Pick 2 parents
                 AgentDDQN parrentA, parrentB;
                 do {
-    				parrentA = agents[Random.Range(0, agents.Count)];
-	    			parrentB = agents[Random.Range(0, agents.Count)];
+    				parrentA = agents[Random.Range(0, agents.Count-1)];
+	    			parrentB = agents[Random.Range(0, agents.Count-1)];
                 } while (parrentA == parrentB);
 				//RouletteWheelMechanism(&_parrentA, &_parrentB);
 

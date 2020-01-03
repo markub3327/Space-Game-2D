@@ -17,15 +17,10 @@ public class PlanetController : MonoBehaviour
         if (collision.gameObject.tag == "Player")
         {
             var ship = collision.gameObject.GetComponent<ShipController>();
-            if (this.OwnerPlanet != ship)
+            if (this.OwnerPlanet == null)
             {
-                if (this.OwnerPlanet != null)   // ak planeta mala vlastnika uvolni ho zo zoznamu na lodi
-                {
-                    this.OwnerPlanet.myPlanets.Remove(this);
-                }
                 this.OwnerPlanet = ship;
-                ship.myPlanets.Add(this);
-                ship.myPlanets.Sort((a, b) => (a.name.CompareTo(b.name)));  // usporiadaj zoznam planet aby bolo poradie planet na kazdej lodi rovnaky
+                ship.myPlanet = this;
             }
 
             // Vycisti dialogove okno

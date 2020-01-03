@@ -1801,7 +1801,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 428e1bd01ec5842d6b08e9d105b3eeb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bestAgent: {fileID: 0}
   agents:
   - {fileID: 867288426}
   - {fileID: 1372139351}

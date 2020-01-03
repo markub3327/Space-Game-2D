@@ -11,7 +11,7 @@ public class AgentDDQN : ShipController
 
     private const int num_of_states = 34;
 
-    private const int num_of_actions = 8;   // 4 + 4
+    private const int num_of_actions = 18;
 
     private bool isFirstFrame = true;
 
@@ -21,12 +21,11 @@ public class AgentDDQN : ShipController
     private ReplayBuffer replayMemory = new ReplayBuffer();
     private List<float> framesBuffer = new List<float>(num_of_frames * num_of_states);
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 48; // size of minibatch
+    private const int BATCH_SIZE = 32; // size of minibatch
 
     // Epsilon
-    private float epsilon = 0.5f;
-    private float epsilonMin = 0.05f;
-    private float epsilonMax = 1.0f;
+    private float epsilon = 1.0f;
+    private float epsilonMin = 0.01f;
 
     public float fitness = 0;
 
@@ -42,7 +41,6 @@ public class AgentDDQN : ShipController
     private int Health_old;
     private float Fuel_old;
     private int Ammo_old;
-    private int num_of_planets_old;
 
     public bool presiel100Epizod = false;
 
@@ -71,11 +69,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), (num_of_frames * num_of_states));
-        QNet.neuronLayers[1].CreateNeurons(48); // 16, 24
+        QNet.neuronLayers[1].CreateNeurons(24); // 24, 48
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), (num_of_frames * num_of_states));
-        QTargetNet.neuronLayers[1].CreateNeurons(48);   // 16, 24
+        QTargetNet.neuronLayers[1].CreateNeurons(24);   // 24, 48
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -92,7 +90,6 @@ public class AgentDDQN : ShipController
         this.Health_old = this.Health;
         this.Ammo_old = this.Ammo;
         this.Fuel_old  = this.Fuel;
-        this.num_of_planets_old = 0;
 
         // Nacitaj vahy zo subora ak existuje
         var str1 = Application.dataPath + "/DDQN_Weights_QNet.save";
@@ -142,7 +139,6 @@ public class AgentDDQN : ShipController
             if (isFirstFrame)
             {
                 this.replayBufferItem.Action = this.Act(this.replayBufferItem.State, epsilon);        
-                                
                 isFirstFrame = false;
             }
             else    // Ide o druhy obraz? => ziskaj reakciu za akciu a uloz ju
@@ -151,8 +147,8 @@ public class AgentDDQN : ShipController
                 if (this.Health <= 0 || this.Fuel <= 0)
                 {
                     DestroyShip();
-                    if (num_of_episodes > 0 && num_of_episodes % 100 == 0) this.presiel100Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
-                    if (num_of_episodes > 100000) 
+                    if (num_of_episodes > 0 && num_of_episodes % 10 == 0) this.presiel100Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
+                    if (num_of_episodes > 10000) 
                     { 
                         #if UNITY_EDITOR
                             UnityEditor.EditorApplication.isPlaying = false;
@@ -161,54 +157,76 @@ public class AgentDDQN : ShipController
                         #endif
                     }
                     num_of_episodes++;
+                    
+                    replayBufferItem.Done = true;
+                    replayBufferItem.Reward = -1.0f;
                 }
-                else if (this.myPlanets.Count > this.num_of_planets_old)
+                else if (this.myPlanet != null)
                 {
-                    WinnerShip();             
+                    WinnerShip();                   
+                    replayBufferItem.Done = true;
+                    replayBufferItem.Reward = +1.0f;
+                }                
+                else
+                {
+                    replayBufferItem.Done = false;
+
+                    replayBufferItem.Reward = 0f;
+                    replayBufferItem.Reward += ((float)(this.Health - this.Health_old) / (float)ShipController.maxHealth) * 0.10f;
+                    replayBufferItem.Reward += ((float)(this.Fuel - this.Fuel_old) / (float)ShipController.maxFuel) * 0.10f;
+                    replayBufferItem.Reward += ((float)(this.Ammo - this.Ammo_old) / (float)ShipController.maxAmmo) * 0.10f;
                 }
 
+                this.fitness += replayBufferItem.Reward;
+                this.levelBox.text = ((int)this.fitness).ToString();
+
+                if (this.replayBufferItem.Done && (num_of_episodes % 10 == 0))
+                {
+                    Debug.Log($"health[{this.name}] = {this.Health}");
+                    Debug.Log($"fuel[{this.name}] = {this.Fuel}");
+                    Debug.Log($"ammo[{this.name}] = {this.Ammo}");
+                    Debug.Log($"reward[{this.name}] = {replayBufferItem.Reward}");
+                    Debug.Log($"done[{this.name}] = {this.replayBufferItem.Done}");
+                    Debug.Log($"fitness = {this.fitness}");
+                    Debug.Log($"MyPlanet: {this.myPlanet}");           
+                }
+
+                // Uloz udalost do bufferu
                 replayBufferItem.Next_state = this.GetState();
-                replayBufferItem.Done = this.IsDestroyed;
-                replayBufferItem.Reward = this.GetReward();
                 this.replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
 
+                // Uchovaj stav predoslej hry
                 this.Health_old = this.Health;
                 this.Ammo_old = this.Ammo;
                 this.Fuel_old  = this.Fuel;
-                this.num_of_planets_old = this.myPlanets.Count;
                 this.replayBufferItem = new ReplayBufferItem { State = replayBufferItem.Next_state };
+
+                // Exploration/Exploitation parameter changed
+                this.epsilon = math.max(epsilonMin, (epsilon * 0.999995f));  // od 100% nahody po 1%
                 
                 isFirstFrame = true;                
-            }            
+            }                        
         }
         else    // Ak je lod znicena = cas na preucenie siete (nove vedomosti)
         {            
-            if (respawnTimer <= 0.0f) 
+            // Ak je v zasobniku dost vzorov k uceniu
+            if (this.replayMemory.Count >= BATCH_SIZE && !testMode)
             {
-                RespawnShip();
+                // Vyber vzorku a natrenuj sa
+                this.Training();
+            }
+            
+            //if (respawnTimer <= 0.0f) 
+            //{
+            RespawnShip();
 
-                // inicializuj pocitadlo pre t-1
-                this.Health_old = this.Health;
-                this.Ammo_old = this.Ammo;
-                this.Fuel_old  = this.Fuel;
-                this.num_of_planets_old = this.myPlanets.Count;
-            }
-            else if (respawnTimer == timeRespawn)
-            {
-                // Ak je v zasobniku dost vzorov k uceniu
-                if (this.replayMemory.Count >= BATCH_SIZE && !testMode)
-                {
-                    // Vyber vzorku a natrenuj sa
-                    this.Training();
-                }
-            }
-                        
-            respawnTimer -= Time.deltaTime;
+            // inicializuj pocitadlo pre t-1
+            this.Health_old = this.Health;
+            this.Ammo_old = this.Ammo;
+            this.Fuel_old  = this.Fuel;
+            //}                                    
+            //respawnTimer -= Time.deltaTime;
         }
-
-        // Exploration/Exploitation parameter changed
-        //this.epsilon = Mathf.Clamp((epsilon * 0.999999f), 0.01f, 1.0f);  // od 100% nahody po 1%
-        this.epsilon = math.max(epsilonMin, epsilonMax - (epsilonMax-epsilonMin) * this.num_of_episodes/100000f); // Decaying policy with more steps
     }
 
     private int Act(float[] state, float epsilon=0.20f)
@@ -221,73 +239,92 @@ public class AgentDDQN : ShipController
             QNet.Run(state);
             var q = GetMaxQ(QNet.neuronLayers[2].Neurons, out action);
             if (num_of_episodes % 100 == 0)
-                Debug.Log($"Qval = {q}, {action}");
+                Debug.Log($"Qval[{this.name}] = {q}, {action}");
         }
         else    // Skumaj prostredie
         {
             action = UnityEngine.Random.Range(0, num_of_actions);
         }
         
-        //Debug.Log($"eps = {epsilon}");
-
         // Vykonaj akciu => koordinacia pohybu lode
         switch (action)
         {
-            case 0:
+            case 0:         // Nothing action
+                break;
+
+            case 1:         // Up
                 this.MoveShip(Vector2.up);
                 break;
-            case 1:
-                this.MoveShip(Vector2.left);
+            case 2:         // Up-Right
+                this.MoveShip(new Vector2(1f, 1f));
                 break;
-            case 2:
-                this.MoveShip(Vector2.down);
-                break;
-            case 3:
+            case 3:         // Right
                 this.MoveShip(Vector2.right);
                 break;
-            case 4:
-                {
-                    this.MoveShip(Vector2.up);
-                    foreach (var turret in turretControllers)
-                    {
-                        if (turret != null)                    
-                            turret.Fire();
-                    }
-                    break;
-                }
-            case 5:
-                {
-                    this.MoveShip(Vector2.left);
-                    foreach (var turret in turretControllers)
-                    {
-                        if (turret != null)                    
-                            turret.Fire();
-                    }
-                    break;
-                }
-            case 6:
-                {
-                    this.MoveShip(Vector2.down);
-                    foreach (var turret in turretControllers)
-                    {
-                        if (turret != null)                    
-                            turret.Fire();
-                    }
-                    break;
-                }
-            case 7:
-                {
-                    this.MoveShip(Vector2.right);
-                    foreach (var turret in turretControllers)
-                    {
-                        if (turret != null)                    
-                            turret.Fire();
-                    }
-                    break;
-                }
+            case 4:         // Down-Right
+                this.MoveShip(new Vector2(1f, -1f));
+                break;
+            case 5:         // Down
+                this.MoveShip(Vector2.down);
+                break;
+            case 6:         // Down-Left
+                this.MoveShip(new Vector2(-1f, -1f));
+                break;
+            case 7:         // Left
+                this.MoveShip(Vector2.left);
+                break;
+            case 8:         // Left-Up
+                this.MoveShip(new Vector2(-1f, 1f));
+                break;
+
+            case 9:
+                this.Fire();
+                break;
+                
+            case 10:         // Up
+                this.MoveShip(Vector2.up);
+                this.Fire();
+                break;
+            case 11:         // Up-Right
+                this.MoveShip(new Vector2(1f, 1f));
+                this.Fire();
+                break;
+            case 12:         // Right
+                this.MoveShip(Vector2.right);
+                this.Fire();
+                break;
+            case 13:         // Down-Right
+                this.MoveShip(new Vector2(1f, -1f));
+                this.Fire();
+                break;
+            case 14:         // Down
+                this.MoveShip(Vector2.down);
+                this.Fire();
+                break;
+            case 15:         // Down-Left
+                this.MoveShip(new Vector2(-1f, -1f));
+                this.Fire();
+                break;
+            case 16:         // Left
+                this.MoveShip(Vector2.left);
+                this.Fire();
+                break;
+            case 17:         // Left-Up
+                this.MoveShip(new Vector2(-1f, 1f));
+                this.Fire();
+                break;
         }
 
         return action;
+    }
+
+    private void Fire()
+    {
+        foreach (var turret in turretControllers)
+        {
+            if (turret != null)                    
+            turret.Fire();
+        }
     }
 
     private float GetMaxQ(List<Neuron> qValues, out int action)
@@ -307,21 +344,12 @@ public class AgentDDQN : ShipController
         var sample = replayMemory.Sample(BATCH_SIZE);
         float avgErr1 = 0;
         float avgErr2 = 0;
-
-        // clean old deltaW
-        for (int i = 0; i < this.QNet.neuronLayers.Count; i++)
-        {
-            for (int j = 0; j < this.QNet.neuronLayers[i].Weights.Count; j++)
-            {
-                this.QNet.neuronLayers[i].deltaWeights[j]       = 0f; 
-                this.QTargetNet.neuronLayers[i].deltaWeights[j] = 0f;
-            }
-        }
-
+        
         for (int i = 0; i < BATCH_SIZE; i++)
         {
-            float[] targets = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-                        
+            float[] targets = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+            // Non-terminal state     
             if (sample[i].Done == false)
             {
                 // Ziskaj najvyssie Q
@@ -338,6 +366,7 @@ public class AgentDDQN : ShipController
                 // TD
                 targets[sample[i].Action] = sample[i].Reward + (gamma * next_Q);
             }
+            // terminal state
             else
             {
                 // TD
@@ -386,20 +415,27 @@ public class AgentDDQN : ShipController
         // Udaje o polohe
         state[0] = this.rigidbody2d.position.x / 20.0f;
         state[1] = this.rigidbody2d.position.y / 20.0f;
+        //Debug.Log($"state[{this.name}] = {state[0]}, {state[1]}");
 
         // Udaje o objektoch v okoli lodi
         for (int i = 0, j = 2; i < 16; i++, j+=2)
         {
             if (radarResult[i] != null)
             {
-                state[j] = (float)radarResult[i].Value.transform.tag.GetHashCode()/(float)int.MaxValue;
-                state[j+1] = radarResult[i].Value.distance / Sensors.Radar.max_distance;
+                var code = DecodeTagObject(radarResult[i].Value.transform.gameObject);
+
+                state[j] = (float)code / 128.0f;
+                if (code > 0)
+                    state[j+1] = radarResult[i].Value.distance / Sensors.Radar.max_distance;
+                else
+                    state[j+1] = 0f;
             }
             else
             {
                 state[j] = 0f;
                 state[j+1] = 0f;
             }
+            //Debug.Log($"state[{this.name}] = {state[j]}, {state[j+1]}");
         }
 
         // LIFO
@@ -410,39 +446,46 @@ public class AgentDDQN : ShipController
         return this.framesBuffer.ToArray();
     }
 
-    private float GetReward()
+    private int DecodeTagObject(GameObject obj)
     {
-        float reward = 0.0f;
+        int code;
 
-        // odmeny za profil hraca (zivoty, municia, palivo, pocet vlastnenych planet)
-        reward += ((float)(this.Health - this.Health_old) / (float)ShipController.maxHealth);
-        reward += ((this.Fuel - this.Fuel_old) / (float)ShipController.maxFuel);
-        reward += ((float)(this.Ammo - this.Ammo_old) / (float)ShipController.maxAmmo);
-        reward += ((float)(this.myPlanets.Count - this.num_of_planets_old) / 1f);
-        reward /= 4.0f;
-
-        this.fitness += reward;
-        this.levelBox.text = this.fitness.ToString("0.000");
-
-        if (this.replayBufferItem.Done && (num_of_episodes % 100 == 0))
+        switch (obj.tag)
         {
-            Debug.Log($"health[{this.name}] = {this.Health}");
-            Debug.Log($"fuel[{this.name}] = {this.Fuel}");
-            Debug.Log($"ammo[{this.name}] = {this.Ammo}");
-            Debug.Log($"reward[{this.name}] = {reward}");
-            Debug.Log($"done[{this.name}] = {this.replayBufferItem.Done}");
-            Debug.Log($"fitness = {this.fitness}");
-
-            var strPlanets = string.Empty;
-            foreach (var p in this.myPlanets)
-            {
-                strPlanets += p.name + ", ";
-            }
-            Debug.Log($"MyPlanets: {strPlanets}");           
+            case "Planet":
+                code = 0x80; 
+                break;
+            case "Moon":
+                code = 0x40; 
+                break;
+            case "Star":
+                code = 0x20; 
+                break;
+            case "Nebula":
+                code = 0x10; 
+                break;
+            case "Health":
+                code = 0x08; 
+                break;
+            case "Ammo":
+                code = 0x04; 
+                break;
+            case "Projectile":
+                code = 0x02; 
+                break;
+            case "Player":
+                code = 0x01; 
+                break;
+            case "Space":
+                code = 0x00; 
+                break;
+            default:
+                code = 0x00;
+                break;
         }
 
-        return reward;
-    }
+        return code;
+    }    
 }
 
 public class ReplayBuffer
@@ -451,7 +494,7 @@ public class ReplayBuffer
 
     public List<ReplayBufferItem> items;
 
-    private const int max_count = 20000;
+    private const int max_count = 10000;
 
     public ReplayBuffer()
     {

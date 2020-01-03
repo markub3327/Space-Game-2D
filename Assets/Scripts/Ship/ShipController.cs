@@ -72,7 +72,7 @@ public class ShipController : MonoBehaviour
     }
 
     // Zoznam planet, ktore vlastni lod
-    public List<PlanetController> myPlanets;
+    public PlanetController myPlanet;
 
     // Respawn
     public float timeRespawn = 10.0f;       // 10 sekund do obnovenia lode v bode respawnu
@@ -174,23 +174,14 @@ public class ShipController : MonoBehaviour
     {
         IsDestroyed = true;
         collider2d.enabled = false;
-        respawnTimer = timeRespawn;
-
-        // Znicena lod straca vlastnictvo u planety
-        foreach (var planet in myPlanets)
-        {
-            planet.OwnerPlanet = null;
-        }
-        myPlanets.Clear();  // Vycisti zoznam vlastnenych planet
-
+        //respawnTimer = timeRespawn;
         animator.SetTrigger("Destroyed");
     }
 
     protected void WinnerShip()
     {
         IsDestroyed = true;
-        respawnTimer = 1f;
-
+        //respawnTimer = 1f;
         animator.SetTrigger("Winner");
     }
 
@@ -200,6 +191,11 @@ public class ShipController : MonoBehaviour
         Health = maxHealth;
         Ammo = maxAmmo;
         Fuel = maxFuel;
+
+        // Znicena lod straca vlastnictvo u planety
+        if (myPlanet != null)
+            myPlanet.OwnerPlanet = null;
+        myPlanet = null;
 
         rigidbody2d.position = Respawn.getPoint();        
         rigidbody2d.rotation = 0f;
