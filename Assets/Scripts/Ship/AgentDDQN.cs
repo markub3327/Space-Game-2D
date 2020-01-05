@@ -69,11 +69,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
-        QNet.neuronLayers[1].CreateNeurons(24); // 8(bad), 16(bad), 24, 32, 48, 64
+        QNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64, 128
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
-        QTargetNet.neuronLayers[1].CreateNeurons(24);   // 8(bad), 16(bad), 24, 32, 48, 64
+        QTargetNet.neuronLayers[1].CreateNeurons(128);   // 24, 32, 48, 64, 128
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;

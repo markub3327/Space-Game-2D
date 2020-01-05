@@ -16,12 +16,15 @@ public static class Respawn
     
     private static RespawnPoint[] respawnPoints = 
     { 
-        new RespawnPoint(13, -5),
-        new RespawnPoint(5, -10),
-        new RespawnPoint(-9, 2),
-        new RespawnPoint(-6, -12),
-        new RespawnPoint(11, 0.5f),
-        new RespawnPoint(-11, -1),
+        new RespawnPoint(14, 6),    // ok
+        new RespawnPoint(13, -2),   // ok
+        new RespawnPoint(5, -10),   // ok
+        new RespawnPoint(11, -1f),  // ok 
+
+        new RespawnPoint(-11, -1),  // ok
+        new RespawnPoint(-10, 0),   // ok
+        new RespawnPoint(-6, -12),  // ok
+        new RespawnPoint(-13, 0)    // ok
     };
 
     private static int usedCount = 0;
