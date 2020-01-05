@@ -432,9 +432,9 @@ public class AgentDDQN : ShipController
             {
                 var code = DecodeTagObject(radarResult[i].Value.transform.gameObject);
 
-                state[j] = (float)code / 512.0f;
+                state[j] = (float)code;
                 if (code > 0)
-                    state[j+1] = radarResult[i].Value.distance / Sensors.Radar.max_distance;
+                    state[j+1] = radarResult[i].Value.distance;
                 else
                     state[j+1] = 0f;
             }
@@ -463,26 +463,26 @@ public class AgentDDQN : ShipController
             case "Planet":
                 var planet = obj.GetComponent<PlanetController>();
                 if (this.myPlanets.Contains(planet))                
-                    code = 0x100;       // moja planeta
+                    code = 0x0A;       // moja planeta
                 else if (planet.OwnerPlanet != null)
-                    code = 0x200;       // planeta uz vlastnena
+                    code = 0x09;       // planeta uz vlastnena
                 else
-                    code = 0x80;        // planeta bez vlastnika
+                    code = 0x08;        // planeta bez vlastnika
                 break;
             case "Moon":
-                code = 0x40; 
+                code = 0x07; 
                 break;
             case "Star":
-                code = 0x20; 
+                code = 0x06; 
                 break;
             case "Nebula":
-                code = 0x10; 
+                code = 0x05; 
                 break;
             case "Health":
-                code = 0x08; 
+                code = 0x04; 
                 break;
             case "Ammo":
-                code = 0x04; 
+                code = 0x03; 
                 break;
             case "Projectile":
                 code = 0x02; 
