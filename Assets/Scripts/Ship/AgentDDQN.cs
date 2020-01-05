@@ -69,11 +69,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
-        QNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64, 128
+        QNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64, 128
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
-        QTargetNet.neuronLayers[1].CreateNeurons(128);   // 24, 32, 48, 64, 128
+        QTargetNet.neuronLayers[1].CreateNeurons(64);   // 24, 32, 48, 64, 128
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -167,14 +167,30 @@ public class AgentDDQN : ShipController
                 {
                     WinnerShip();                   
                     this.hasNewPlanet = false;
-
-                    replayBufferItem.Done = true;
+                    
+                    replayBufferItem.Done = false;
                     replayBufferItem.Reward = +1.0f;
+
+                    if (num_of_episodes % 10 == 0)
+                    {
+                        Debug.Log($"health[{this.name}] = {this.Health}");
+                        Debug.Log($"fuel[{this.name}] = {this.Fuel}");
+                        Debug.Log($"ammo[{this.name}] = {this.Ammo}");
+                        Debug.Log($"reward[{this.name}] = {replayBufferItem.Reward}");
+                        Debug.Log($"done[{this.name}] = {this.replayBufferItem.Done}");
+                        Debug.Log($"fitness[{this.name}] = {this.fitness}");
+
+                        var strPlanets = string.Empty;
+                        foreach (var p in this.myPlanets)
+                        {
+                            strPlanets += p.name + ", ";
+                        }
+                        Debug.Log($"MyPlanets: {strPlanets}"); 
+                    }
                 }                
                 else
                 {
                     replayBufferItem.Done = false;
-
                     replayBufferItem.Reward = 0f;
                     replayBufferItem.Reward += ((float)(this.Health - this.Health_old) / (float)ShipController.maxHealth) * 0.10f;
                     replayBufferItem.Reward += ((float)(this.Fuel - this.Fuel_old) / (float)ShipController.maxFuel) * 0.10f;
@@ -183,23 +199,6 @@ public class AgentDDQN : ShipController
 
                 this.fitness += replayBufferItem.Reward;
                 this.levelBox.text = ((int)this.fitness).ToString();
-
-                if (this.replayBufferItem.Done && (num_of_episodes % 10 == 0))
-                {
-                    Debug.Log($"health[{this.name}] = {this.Health}");
-                    Debug.Log($"fuel[{this.name}] = {this.Fuel}");
-                    Debug.Log($"ammo[{this.name}] = {this.Ammo}");
-                    Debug.Log($"reward[{this.name}] = {replayBufferItem.Reward}");
-                    Debug.Log($"done[{this.name}] = {this.replayBufferItem.Done}");
-                    Debug.Log($"fitness[{this.name}] = {this.fitness}");
-
-                    var strPlanets = string.Empty;
-                    foreach (var p in this.myPlanets)
-                    {
-                        strPlanets += p.name + ", ";
-                    }
-                    Debug.Log($"MyPlanets: {strPlanets}"); 
-                }
 
                 // Uloz udalost do bufferu
                 replayBufferItem.Next_state = this.GetState();
