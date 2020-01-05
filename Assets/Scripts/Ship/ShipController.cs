@@ -13,7 +13,7 @@ public class ShipController : MonoBehaviour
 
     // Player's health
     public UIBarControl healthBar;
-    public const int maxHealth = 10;              // maximalny pocet zivotov hraca
+    public const int maxHealth = 5;              // maximalny pocet zivotov hraca
     private int _health = maxHealth;
     public int Health {
         get
@@ -33,7 +33,7 @@ public class ShipController : MonoBehaviour
 
     // Player's ammo
     public UIBarControl ammoBar;
-    public const int maxAmmo = 100;               // maximalny pocet nabojov hraca
+    public const int maxAmmo = 200;               // maximalny pocet nabojov hraca
     private int _ammo = maxAmmo;
     public int Ammo {
         get
@@ -72,7 +72,8 @@ public class ShipController : MonoBehaviour
     }
 
     // Zoznam planet, ktore vlastni lod
-    public PlanetController myPlanet;
+    public List<PlanetController> myPlanets;
+    public bool hasNewPlanet = false;
 
     // Respawn
     public float timeRespawn = 10.0f;       // 10 sekund do obnovenia lode v bode respawnu
@@ -175,14 +176,25 @@ public class ShipController : MonoBehaviour
         IsDestroyed = true;
         collider2d.enabled = false;
         //respawnTimer = timeRespawn;
-        animator.SetTrigger("Destroyed");
+
+        // Znicena lod straca vlastnictvo u planety
+        foreach (var p in this.myPlanets)
+        {
+            p.OwnerPlanet = null;
+        }
+        this.myPlanets.Clear();
+        
+        animator.SetBool("Respawn", false);
+        animator.SetBool("Destroyed", true);
     }
 
     protected void WinnerShip()
     {
         IsDestroyed = true;
+        collider2d.enabled = false;
         //respawnTimer = 1f;
-        animator.SetTrigger("Winner");
+        animator.SetBool("Respawn", false);
+        animator.SetBool("Winner", true);
     }
 
     protected void RespawnShip()
@@ -192,17 +204,14 @@ public class ShipController : MonoBehaviour
         Ammo = maxAmmo;
         Fuel = maxFuel;
 
-        // Znicena lod straca vlastnictvo u planety
-        if (myPlanet != null)
-            myPlanet.OwnerPlanet = null;
-        myPlanet = null;
-
         rigidbody2d.position = Respawn.getPoint();        
         rigidbody2d.rotation = 0f;
         IsDestroyed = false;
         collider2d.enabled = true;
 
-        animator.SetTrigger("Respawn");
+        animator.SetBool("Winner", false);
+        animator.SetBool("Destroyed", false);
+        animator.SetBool("Respawn", true);
     }
 
     /// <summary>

@@ -2,9 +2,6 @@
 
 public class AmmoCollectible : MonoBehaviour
 {
-    // Mnozstvo municie ziskane z tohoto baliku
-    public int amount = 20;
-
     // Zvukovy klip
     public AudioClip collectibleClip;
 
@@ -16,7 +13,7 @@ public class AmmoCollectible : MonoBehaviour
         if (controller != null && controller.Ammo < ShipController.maxAmmo)
         {
             // Pridaj zivot hracovi
-            controller.ChangeAmmo(amount);
+            controller.ChangeAmmo(+50);
 
             // Prehraj klip
             controller.PlaySound(collectibleClip);

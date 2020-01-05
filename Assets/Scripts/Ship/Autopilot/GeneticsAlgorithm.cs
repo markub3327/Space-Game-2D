@@ -49,8 +49,8 @@ public class GeneticsAlgorithm : MonoBehaviour
 				// Pick 2 parents
                 AgentDDQN parrentA, parrentB;
                 do {
-    				parrentA = agents[Random.Range(0, agents.Count-1)];
-	    			parrentB = agents[Random.Range(0, agents.Count-1)];
+    				parrentA = agents[Random.Range(0, agents.Count)];
+	    			parrentB = agents[Random.Range(0, agents.Count)];
                 } while (parrentA == parrentB);
 				//RouletteWheelMechanism(&_parrentA, &_parrentB);
 
@@ -87,11 +87,11 @@ public class GeneticsAlgorithm : MonoBehaviour
                 {
                     for (int j = 0; j < a.QNet.neuronLayers[i].Weights.Count; j++)
                     {                        
-                        if (Random.Range(0.0f, 1.0f) < (0.5f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
+                        if (Random.Range(0.0f, 1.0f) < (1.0f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
                         {
                             a.QNet.neuronLayers[i].Weights[j] = Random.Range(-1.0f, 1.0f);
                             a.QTargetNet.neuronLayers[i].Weights[j] = Random.Range(-1.0f, 1.0f);
-                            Debug.Log($"Mutating W[{i}][{j}]!");
+                            Debug.Log($"Mutating W[{i}][{j}]({a.name})!");
                         }                            
                     }
                 }

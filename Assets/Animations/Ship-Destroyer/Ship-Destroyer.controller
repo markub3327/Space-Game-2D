@@ -9,24 +9,24 @@ AnimatorController:
   m_Name: Ship-Destroyer
   serializedVersion: 5
   m_AnimatorParameters:
-  - m_Name: Destroyed
-    m_Type: 9
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
-  - m_Name: Respawn
-    m_Type: 9
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
   - m_Name: Winner
-    m_Type: 9
+    m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
+  - m_Name: Destroyed
+    m_Type: 4
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
+  - m_Name: Respawn
+    m_Type: 4
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -158,7 +158,7 @@ AnimatorStateTransition:
   m_TransitionOffset: 0
   m_ExitTime: 1
   m_HasExitTime: 1
-  m_HasFixedDuration: 1
+  m_HasFixedDuration: 0
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
@@ -282,13 +282,13 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 1102441361314419810}
-    m_Position: {x: 300, y: 0, z: 0}
+    m_Position: {x: 312, y: -252, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102147158085858728}
     m_Position: {x: 300, y: 144, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102247359894002754}
-    m_Position: {x: 576, y: 0, z: 0}
+    m_Position: {x: 576, y: -60, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102509330915469144}
     m_Position: {x: 48, y: -72, z: 0}

@@ -33,8 +33,7 @@ public class TurretController : MonoBehaviour
 
     // Funkcie strelby zbrane
     public void Fire()
-    {
-        
+    {        
         if (controller.Ammo > 0)
         {
             GameObject projectileObject = Instantiate(projectilePrefab, transform.position, transform.rotation);

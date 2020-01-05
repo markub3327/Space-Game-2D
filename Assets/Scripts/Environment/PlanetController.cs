@@ -20,7 +20,8 @@ public class PlanetController : MonoBehaviour
             if (this.OwnerPlanet == null)
             {
                 this.OwnerPlanet = ship;
-                ship.myPlanet = this;
+                ship.myPlanets.Add(this);
+                ship.hasNewPlanet = true;
             }
 
             // Vycisti dialogove okno

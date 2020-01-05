@@ -25,7 +25,7 @@ public class AgentDDQN : ShipController
 
     // Epsilon
     private float epsilon = 1.0f;
-    private float epsilonMin = 0.01f;
+    private float epsilonMin = 0.10f;
 
     public float fitness = 0;
 
@@ -68,12 +68,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[0], QTargetNet.neuronLayers[1]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
-        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), (num_of_frames * num_of_states));
-        QNet.neuronLayers[1].CreateNeurons(24); // 24, 48
+        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
+        QNet.neuronLayers[1].CreateNeurons(32); // 8(bad), 16(bad), 24, 32, 48, 64
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), (num_of_frames * num_of_states));
-        QTargetNet.neuronLayers[1].CreateNeurons(24);   // 24, 48
+        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
+        QTargetNet.neuronLayers[1].CreateNeurons(32);   // 8(bad), 16(bad), 24, 32, 48, 64
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -147,8 +147,10 @@ public class AgentDDQN : ShipController
                 if (this.Health <= 0 || this.Fuel <= 0)
                 {
                     DestroyShip();
-                    if (num_of_episodes > 0 && num_of_episodes % 10 == 0) this.presiel100Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
-                    if (num_of_episodes > 10000) 
+                    this.hasNewPlanet = false;
+
+                    if (num_of_episodes > 0 && num_of_episodes % 100 == 0) this.presiel100Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
+                    if (num_of_episodes > 100000) 
                     { 
                         #if UNITY_EDITOR
                             UnityEditor.EditorApplication.isPlaying = false;
@@ -161,9 +163,11 @@ public class AgentDDQN : ShipController
                     replayBufferItem.Done = true;
                     replayBufferItem.Reward = -1.0f;
                 }
-                else if (this.myPlanet != null)
+                else if (this.hasNewPlanet == true)
                 {
                     WinnerShip();                   
+                    this.hasNewPlanet = false;
+
                     replayBufferItem.Done = true;
                     replayBufferItem.Reward = +1.0f;
                 }                
@@ -187,8 +191,14 @@ public class AgentDDQN : ShipController
                     Debug.Log($"ammo[{this.name}] = {this.Ammo}");
                     Debug.Log($"reward[{this.name}] = {replayBufferItem.Reward}");
                     Debug.Log($"done[{this.name}] = {this.replayBufferItem.Done}");
-                    Debug.Log($"fitness = {this.fitness}");
-                    Debug.Log($"MyPlanet: {this.myPlanet}");           
+                    Debug.Log($"fitness[{this.name}] = {this.fitness}");
+
+                    var strPlanets = string.Empty;
+                    foreach (var p in this.myPlanets)
+                    {
+                        strPlanets += p.name + ", ";
+                    }
+                    Debug.Log($"MyPlanets: {strPlanets}"); 
                 }
 
                 // Uloz udalost do bufferu
@@ -204,7 +214,7 @@ public class AgentDDQN : ShipController
                 // Exploration/Exploitation parameter changed
                 this.epsilon = math.max(epsilonMin, (epsilon * 0.999995f));  // od 100% nahody po 1%
                 
-                isFirstFrame = true;                
+                this.isFirstFrame = true;                
             }                        
         }
         else    // Ak je lod znicena = cas na preucenie siete (nove vedomosti)
@@ -238,8 +248,6 @@ public class AgentDDQN : ShipController
         {
             QNet.Run(state);
             var q = GetMaxQ(QNet.neuronLayers[2].Neurons, out action);
-            if (num_of_episodes % 100 == 0)
-                Debug.Log($"Qval[{this.name}] = {q}, {action}");
         }
         else    // Skumaj prostredie
         {
@@ -379,7 +387,7 @@ public class AgentDDQN : ShipController
             QNet.Training(sample[i].State, targets);
             QTargetNet.Training(sample[i].State, targets);
             
-            if (num_of_episodes % 100 == 0)
+            if (num_of_episodes % 10 == 0)
             {        
                 var e1 = (targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
                 avgErr1 += e1 * e1;
@@ -389,7 +397,7 @@ public class AgentDDQN : ShipController
             }
         }
 
-        if (num_of_episodes % 100 == 0)
+        if (num_of_episodes % 10 == 0)
         {        
             // Kvadraticky priemer chyby NN
             avgErr1 /= (float)BATCH_SIZE;
@@ -413,8 +421,8 @@ public class AgentDDQN : ShipController
         float[] state = new float[num_of_states];  // 2 + 32 = 34
 
         // Udaje o polohe
-        state[0] = this.rigidbody2d.position.x / 20.0f;
-        state[1] = this.rigidbody2d.position.y / 20.0f;
+        state[0] = this.rigidbody2d.position.x;
+        state[1] = this.rigidbody2d.position.y;
         //Debug.Log($"state[{this.name}] = {state[0]}, {state[1]}");
 
         // Udaje o objektoch v okoli lodi
@@ -424,7 +432,7 @@ public class AgentDDQN : ShipController
             {
                 var code = DecodeTagObject(radarResult[i].Value.transform.gameObject);
 
-                state[j] = (float)code / 128.0f;
+                state[j] = (float)code / 512.0f;
                 if (code > 0)
                     state[j+1] = radarResult[i].Value.distance / Sensors.Radar.max_distance;
                 else
@@ -449,11 +457,17 @@ public class AgentDDQN : ShipController
     private int DecodeTagObject(GameObject obj)
     {
         int code;
-
+        
         switch (obj.tag)
         {
             case "Planet":
-                code = 0x80; 
+                var planet = obj.GetComponent<PlanetController>();
+                if (this.myPlanets.Contains(planet))                
+                    code = 0x100;       // moja planeta
+                else if (planet.OwnerPlanet != null)
+                    code = 0x200;       // planeta uz vlastnena
+                else
+                    code = 0x80;        // planeta bez vlastnika
                 break;
             case "Moon":
                 code = 0x40; 
@@ -475,10 +489,7 @@ public class AgentDDQN : ShipController
                 break;
             case "Player":
                 code = 0x01; 
-                break;
-            case "Space":
-                code = 0x00; 
-                break;
+                break;            
             default:
                 code = 0x00;
                 break;
