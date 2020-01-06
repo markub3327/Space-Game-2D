@@ -18,7 +18,7 @@ public class GeneticsAlgorithm : MonoBehaviour
 
     public void Update()
     {        
-        if (agents.Where(p => p.presiel100Epizod == true).Count() == agents.Count)
+        if (agents.Where(p => p.presiel10Epizod == true).Count() == agents.Count)
         {
             // Replace agents with agents list ordered by his fitness
             this.agents.Sort(new AgentsComparer());
@@ -34,8 +34,10 @@ public class GeneticsAlgorithm : MonoBehaviour
             for (int i = 0; i < agents.Count; i++)
             {
                 Debug.Log($"order = {i+1}., name = {agents[i].name}, fitness = {agents[i].fitness}");
-                agents[i].presiel100Epizod = false;
-                agents[i].fitness = 0f;
+                agents[i].presiel10Epizod = false;
+
+                // Vynuluj meranie skore agentom
+                agents[i].fitness = 0.0f;
             }
         }
     }
@@ -85,12 +87,17 @@ public class GeneticsAlgorithm : MonoBehaviour
             {
                 for (int i = 0; i < a.QNet.neuronLayers.Count; i++)
                 {
+                    var num_of_inputs = a.QNet.neuronLayers[i].Weights.Count / a.QNet.neuronLayers[i].Neurons.Count;
+                    var k = Unity.Mathematics.math.sqrt(2f/num_of_inputs);
+
+                    //Debug.Log($"num_of_inputs = {num_of_inputs}");
+
                     for (int j = 0; j < a.QNet.neuronLayers[i].Weights.Count; j++)
                     {                        
                         if (Random.Range(0.0f, 1.0f) < (1.0f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
                         {
-                            a.QNet.neuronLayers[i].Weights[j] = Random.Range(-1.0f, 1.0f);
-                            a.QTargetNet.neuronLayers[i].Weights[j] = Random.Range(-1.0f, 1.0f);
+                            a.QNet.neuronLayers[i].Weights[j] = Random.Range(-1.0f, 1.0f) * k;
+                            a.QTargetNet.neuronLayers[i].Weights[j] = Random.Range(-1.0f, 1.0f) * k;
                             Debug.Log($"Mutating W[{i}][{j}]({a.name})!");
                         }                            
                     }

@@ -42,7 +42,7 @@ public class AgentDDQN : ShipController
     private float Fuel_old;
     private int Ammo_old;
 
-    public bool presiel100Epizod = false;
+    public bool presiel10Epizod = false;
 
     public bool testMode = false;
 
@@ -69,11 +69,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
-        QNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64, 128
+        QNet.neuronLayers[1].CreateNeurons(256); // 24, 32, 48, 64, 128, 256
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
-        QTargetNet.neuronLayers[1].CreateNeurons(64);   // 24, 32, 48, 64, 128
+        QTargetNet.neuronLayers[1].CreateNeurons(256);   // 24, 32, 48, 64, 128, 256
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -149,7 +149,7 @@ public class AgentDDQN : ShipController
                     DestroyShip();
                     this.hasNewPlanet = false;
 
-                    if (num_of_episodes > 0 && num_of_episodes % 100 == 0) this.presiel100Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
+                    if (num_of_episodes > 0 && num_of_episodes % 10 == 0) this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
                     if (num_of_episodes > 100000) 
                     { 
                         #if UNITY_EDITOR
@@ -197,7 +197,10 @@ public class AgentDDQN : ShipController
                     replayBufferItem.Reward += ((float)(this.Ammo - this.Ammo_old) / (float)ShipController.maxAmmo) * 0.10f;
                 }
 
-                this.fitness += replayBufferItem.Reward;
+                // Kym nepresiel 10 epizod scitavaj odmeny do celkoveho skore
+                if (this.presiel10Epizod == false)
+                    this.fitness += replayBufferItem.Reward;
+
                 this.levelBox.text = ((int)this.fitness).ToString();
 
                 // Uloz udalost do bufferu
