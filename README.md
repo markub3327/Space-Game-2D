@@ -17,8 +17,8 @@ It has been written in Visual Studio Community 2019 for Mac and designed in Unit
 
 <p align="center">
   <img src="ship-game-2d.gif" alt="GameScreen">
-  <p>Screenshot from the game</p>
 </p>
+<p align="center">Screenshot from the game</p>
 
 
 ## Installation & Run
