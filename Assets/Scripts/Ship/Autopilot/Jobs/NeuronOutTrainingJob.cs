@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
 [BurstCompile]
@@ -31,8 +32,16 @@ public struct NeuronOutTrainingJob : IJobParallelFor
     {
         var neuron = this.Neurons[index];
 
-        // Vypocitaj chybu siete podla vystupu
-        neuron.sigma = (Feedback[index] - neuron.output) * NeuronFn.derivELU(neuron.output);                
+        // Vypocitaj chybu siete podla vystupu metodou Huber loss function
+        var diff = Feedback[index] - neuron.output;
+
+        if (math.abs(diff) > 1.0f)
+            // MAE (Mean absolute error)
+            neuron.sigma = math.sign(diff) * NeuronFn.derivELU(neuron.output);
+        else
+            // MSE (Mean squared error)
+            neuron.sigma = diff * NeuronFn.derivELU(neuron.output);         
+        
         //Debug.Log($"sigma = {neuron.sigma}");
 
         // Adaptuj vahy podla chyby neuronu
