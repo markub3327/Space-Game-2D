@@ -9,9 +9,9 @@ public class AgentDDQN : ShipController
 {
     private const int num_of_frames = 4;
 
-    private const int num_of_states = 34;
+    private const int num_of_states = 178;
 
-    private const int num_of_actions = 18;
+    private const int num_of_actions = 16;
 
     private bool isFirstFrame = true;
 
@@ -69,11 +69,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
-        QNet.neuronLayers[1].CreateNeurons(256); // 24, 32, 48, 64, 128, 256
+        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
-        QTargetNet.neuronLayers[1].CreateNeurons(256);   // 24, 32, 48, 64, 128, 256
+        QTargetNet.neuronLayers[1].CreateNeurons(32);   // 24, 32, 64, 128, 256
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -190,11 +190,12 @@ public class AgentDDQN : ShipController
                 }                
                 else
                 {
+                    // Vazeny priemer
+                    // Vyskusat aj nasobit
                     replayBufferItem.Done = false;
-                    replayBufferItem.Reward = 0f;
-                    replayBufferItem.Reward += ((float)(this.Health - this.Health_old) / (float)ShipController.maxHealth) * 0.10f;
-                    replayBufferItem.Reward += ((float)(this.Fuel - this.Fuel_old) / (float)ShipController.maxFuel) * 0.10f;
-                    replayBufferItem.Reward += ((float)(this.Ammo - this.Ammo_old) / (float)ShipController.maxAmmo) * 0.10f;
+                    replayBufferItem.Reward = ((float)(this.Health - this.Health_old) / (float)ShipController.maxHealth) * 0.40f;
+                    replayBufferItem.Reward += ((float)(this.Fuel - this.Fuel_old) / (float)ShipController.maxFuel) * 0.40f;
+                    replayBufferItem.Reward += ((float)(this.Ammo - this.Ammo_old) / (float)ShipController.maxAmmo) * 0.20f;
                 }
 
                 // Kym nepresiel 10 epizod scitavaj odmeny do celkoveho skore
@@ -214,7 +215,7 @@ public class AgentDDQN : ShipController
                 this.replayBufferItem = new ReplayBufferItem { State = replayBufferItem.Next_state };
 
                 // Exploration/Exploitation parameter changed
-                this.epsilon = math.max(epsilonMin, (epsilon * 0.999998f));  // od 100% nahody po 1%
+                this.epsilon = math.max(epsilonMin, (epsilon * 0.999999f));  // od 100% nahody po 1%
                 
                 this.isFirstFrame = true;                
             }                        
@@ -259,67 +260,67 @@ public class AgentDDQN : ShipController
         // Vykonaj akciu => koordinacia pohybu lode
         switch (action)
         {
-            case 0:         // Nothing action
-                break;
+            //case 0:         // Nothing action
+            //    break;
 
-            case 1:         // Up
+            case 0:         // Up
                 this.MoveShip(Vector2.up);
                 break;
-            case 2:         // Up-Right
+            case 1:         // Up-Right
                 this.MoveShip(new Vector2(1f, 1f));
                 break;
-            case 3:         // Right
+            case 2:         // Right
                 this.MoveShip(Vector2.right);
                 break;
-            case 4:         // Down-Right
+            case 3:         // Down-Right
                 this.MoveShip(new Vector2(1f, -1f));
                 break;
-            case 5:         // Down
+            case 4:         // Down
                 this.MoveShip(Vector2.down);
                 break;
-            case 6:         // Down-Left
+            case 5:         // Down-Left
                 this.MoveShip(new Vector2(-1f, -1f));
                 break;
-            case 7:         // Left
+            case 6:         // Left
                 this.MoveShip(Vector2.left);
                 break;
-            case 8:         // Left-Up
+            case 7:         // Left-Up
                 this.MoveShip(new Vector2(-1f, 1f));
                 break;
 
-            case 9:
-                this.Fire();
-                break;
+            //case 9:
+            //    this.Fire();
+            //    break;
                 
-            case 10:         // Up
+            case 8:         // Up
                 this.MoveShip(Vector2.up);
                 this.Fire();
                 break;
-            case 11:         // Up-Right
+            case 9:         // Up-Right
                 this.MoveShip(new Vector2(1f, 1f));
                 this.Fire();
                 break;
-            case 12:         // Right
+            case 10:         // Right
                 this.MoveShip(Vector2.right);
                 this.Fire();
                 break;
-            case 13:         // Down-Right
+            case 11:         // Down-Right
                 this.MoveShip(new Vector2(1f, -1f));
                 this.Fire();
                 break;
-            case 14:         // Down
+            case 12:         // Down
                 this.MoveShip(Vector2.down);
                 this.Fire();
                 break;
-            case 15:         // Down-Left
+            case 13:         // Down-Left
                 this.MoveShip(new Vector2(-1f, -1f));
                 this.Fire();
                 break;
-            case 16:         // Left
+            case 14:         // Left
                 this.MoveShip(Vector2.left);
                 this.Fire();
                 break;
-            case 17:         // Left-Up
+            case 15:         // Left-Up
                 this.MoveShip(new Vector2(-1f, 1f));
                 this.Fire();
                 break;
@@ -420,7 +421,7 @@ public class AgentDDQN : ShipController
     private float[] GetState()
     {
         var radarResult = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this.transform);
-        float[] state = new float[num_of_states];  // 2 + 32 = 34
+        float[] state = new float[num_of_states];
 
         // Udaje o polohe
         state[0] = this.rigidbody2d.position.x;
@@ -428,22 +429,37 @@ public class AgentDDQN : ShipController
         //Debug.Log($"state[{this.name}] = {state[0]}, {state[1]}");
 
         // Udaje o objektoch v okoli lodi
-        for (int i = 0, j = 2; i < 16; i++, j+=2)
+        for (int i = 0, j = 2; i < 16; i++)
         {
             if (radarResult[i] != null)
             {
                 var code = DecodeTagObject(radarResult[i].Value.transform.gameObject);
-
-                state[j] = (float)code;
-                if (code > 0)
-                    state[j+1] = radarResult[i].Value.distance;
+                if (code != null)
+                {
+                    for (int k = 0; k < 10; k++, j++)
+                    {
+                        state[j] = (float)code[k];
+                        //Debug.Log($"state[{j}]={state[j]}");
+                    }
+                    state[j] = radarResult[i].Value.distance;
+                    //Debug.Log($"state[{j}]={state[j]}");
+                }
                 else
-                    state[j+1] = 0f;
+                {
+                    for (int k = 0; k < 10; k++, j++)
+                    {
+                        state[j] = 0f;
+                    }   
+                    state[j] = 0f;
+                }
             }
             else
             {
+                for (int k = 0; k < 10; k++, j++)
+                {
+                    state[j] = 0f;
+                }
                 state[j] = 0f;
-                state[j+1] = 0f;
             }
             //Debug.Log($"state[{this.name}] = {state[j]}, {state[j+1]}");
         }
@@ -456,44 +472,48 @@ public class AgentDDQN : ShipController
         return this.framesBuffer.ToArray();
     }
 
-    private int DecodeTagObject(GameObject obj)
+    private int[] DecodeTagObject(GameObject obj)
     {
-        int code;
+        int[] code = new int[10];
         
+        // TAG = VSTUP do NN
         switch (obj.tag)
         {
             case "Planet":
                 var planet = obj.GetComponent<PlanetController>();
                 if (this.myPlanets.Contains(planet))                
-                    code = 0x0A;       // moja planeta
+                    // moja planeta
+                    code[9] = 0x01; 
                 else if (planet.OwnerPlanet != null)
-                    code = 0x09;       // planeta uz vlastnena
+                    // planeta uz vlastnena
+                    code[8] = 0x01; 
                 else
-                    code = 0x08;        // planeta bez vlastnika
+                    // planeta bez vlastnika
+                    code[7] = 0x01; 
                 break;
             case "Moon":
-                code = 0x07; 
+                code[6] = 0x01;  
                 break;
             case "Star":
-                code = 0x06; 
+                code[5] = 0x01; 
                 break;
             case "Nebula":
-                code = 0x05; 
+                code[4] = 0x01;
                 break;
             case "Health":
-                code = 0x04; 
+                code[3] = 0x01; 
                 break;
             case "Ammo":
-                code = 0x03; 
+                code[2] = 0x01; 
                 break;
             case "Projectile":
-                code = 0x02; 
+                code[1] = 0x01;  
                 break;
             case "Player":
-                code = 0x01; 
+                code[0] = 0x01; 
                 break;            
             default:
-                code = 0x00;
+                code = null;
                 break;
         }
 

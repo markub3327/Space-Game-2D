@@ -13,7 +13,7 @@ public class AmmoCollectible : MonoBehaviour
         if (controller != null && controller.Ammo < ShipController.maxAmmo)
         {
             // Pridaj zivot hracovi
-            controller.ChangeAmmo(+50);
+            controller.ChangeAmmo(+100);
 
             // Prehraj klip
             controller.PlaySound(collectibleClip);
