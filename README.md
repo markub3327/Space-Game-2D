@@ -11,12 +11,15 @@
 
 **Documentation**
 
-  **Space Game 2D** is an open source multiplatform Unity3D game written in C#.
-It has been written in Visual Studio Community 2019 for Mac and designed in Unity3D game engine. It's about conquering planets in the space. Winner is who own all planets.
+  **Space Game 2D** is an open source multiplatform Unity3D game written in C#. It's about collecting planets by agents (ships). The agent uses Double Deep Q Network for controlling ships. Computer plays with computer and the best ship in-game is selected by the Genetics algorithm.
+  
+It has been written in Visual Studio Community 2019 for Mac and designed in Unity3D game engine.
 
 <p align="center">
-      <img src="ship-game-2d.gif" alt="GameScreen">
+  <img src="ship-game-2d.gif" alt="GameScreen">
 </p>
+<p align="center">Screenshot from the game</p>
+
 
 ## Installation & Run
 
