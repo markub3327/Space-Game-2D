@@ -21,7 +21,14 @@ public class PlanetController : MonoBehaviour
             {
                 this.OwnerPlanet = ship;
                 ship.myPlanets.Add(this);
-                ship.hasNewPlanet = true;
+                //ship.hasNewPlanet = true;
+
+                var strPlanets = string.Empty;
+                foreach (var p in ship.myPlanets)
+                {
+                    strPlanets += p.name + ", ";
+                }
+                Debug.Log($"MyPlanets[{ship.name}]: {strPlanets}");
             }
 
             // Vycisti dialogove okno

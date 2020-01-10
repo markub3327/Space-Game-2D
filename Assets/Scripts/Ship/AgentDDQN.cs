@@ -21,7 +21,7 @@ public class AgentDDQN : ShipController
     private ReplayBuffer replayMemory = new ReplayBuffer();
     private List<float> framesBuffer = new List<float>(num_of_frames * num_of_states);
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 64; // size of minibatch
+    private const int BATCH_SIZE = 32; // size of minibatch
 
     // Epsilon
     private float epsilon = 1.0f;
@@ -37,11 +37,6 @@ public class AgentDDQN : ShipController
     public Text nameBox;
     public Text levelBox;
 
-    // Stavy t-1 (pre ziskanie odmeny za tah v hre)
-    private int Health_old;
-    private float Fuel_old;
-    private int Ammo_old;
-
     public bool presiel10Epizod = false;
 
     public bool testMode = false;
@@ -52,37 +47,29 @@ public class AgentDDQN : ShipController
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
-        QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 2nd hidden
         QNet.CreateLayer(NeuronLayerType.OUTPUT);   // Output
 
         QTargetNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QTargetNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
-        QTargetNet.CreateLayer(NeuronLayerType.HIDDEN);   // 2nd hidden
         QTargetNet.CreateLayer(NeuronLayerType.OUTPUT);   // Output
 
         QNet.SetEdge(QNet.neuronLayers[1], QNet.neuronLayers[0]);
         QNet.SetEdge(QNet.neuronLayers[2], QNet.neuronLayers[1]);
-        QNet.SetEdge(QNet.neuronLayers[3], QNet.neuronLayers[2]);
         QNet.SetBPGEdge(QNet.neuronLayers[0], QNet.neuronLayers[1]);
         QNet.SetBPGEdge(QNet.neuronLayers[1], QNet.neuronLayers[2]);
-        QNet.SetBPGEdge(QNet.neuronLayers[2], QNet.neuronLayers[3]);
 
         QTargetNet.SetEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[0]);
         QTargetNet.SetEdge(QTargetNet.neuronLayers[2], QTargetNet.neuronLayers[1]);
-        QTargetNet.SetEdge(QTargetNet.neuronLayers[3], QTargetNet.neuronLayers[2]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[0], QTargetNet.neuronLayers[1]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
-        QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[2], QTargetNet.neuronLayers[3]);
 
         QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
         QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
-        QNet.neuronLayers[2].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
-        QNet.neuronLayers[3].CreateNeurons(num_of_actions);
+        QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
-        QTargetNet.neuronLayers[1].CreateNeurons(32);   // 24, 32, 48, 64, 128, 256
-        QTargetNet.neuronLayers[2].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
-        QTargetNet.neuronLayers[3].CreateNeurons(num_of_actions);
+        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
         this.levelBox.text = ((int)this.fitness).ToString();
@@ -93,11 +80,6 @@ public class AgentDDQN : ShipController
             this.GetState();
         }
         this.replayBufferItem = new ReplayBufferItem { State = this.framesBuffer.ToArray() };
-
-        // inicializuj pocitadlo pre t-1
-        this.Health_old = this.Health;
-        this.Ammo_old = this.Ammo;
-        this.Fuel_old  = this.Fuel;
 
         // Nacitaj vahy zo subora ak existuje
         var str1 = Application.dataPath + "/DDQN_Weights_QNet.save";
@@ -135,10 +117,10 @@ public class AgentDDQN : ShipController
                 }
             }
             Debug.Log("QTargetNet loaded from file.");
-        }
+        }        
     }
 
-    public override void Update()
+    public void Update()
     {
         // Ak nie je lod znicena = hra hru
         if (!IsDestroyed)
@@ -155,9 +137,10 @@ public class AgentDDQN : ShipController
                 if (this.Health <= 0 || this.Fuel <= 0)
                 {
                     DestroyShip();
-                    this.hasNewPlanet = false;
+                    //this.hasNewPlanet = false;
 
-                    if (num_of_episodes > 0 && num_of_episodes % 10 == 0) this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
+                    if (num_of_episodes > 0 && num_of_episodes % 10 == 0) 
+                        this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
                     if (num_of_episodes > 100000) 
                     { 
                         #if UNITY_EDITOR
@@ -170,17 +153,24 @@ public class AgentDDQN : ShipController
                     
                     replayBufferItem.Done = true;
                     replayBufferItem.Reward = -1.0f;
-                }
-                else if (this.hasNewPlanet == true)
+                }                
+                else
                 {
-                    WinnerShip();                   
-                    this.hasNewPlanet = false;
-                    
+                    // Vazeny priemer
+                    // Vyskusat aj nasobit
                     replayBufferItem.Done = false;
-                    replayBufferItem.Reward = +1.0f;
+                    replayBufferItem.Reward = ((float)this.Health / (float)ShipController.maxHealth) * 0.20f;
+                    replayBufferItem.Reward += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.20f;
+                    replayBufferItem.Reward += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.05f;
+                    replayBufferItem.Reward += ((float)this.myPlanets.Count / 4f) * 0.55f;
 
-                    if (num_of_episodes % 10 == 0)
-                    {
+                    // Vitaz musi ziskat vsetky planety
+                    if (this.myPlanets.Count == 4)
+                        WinnerShip();
+                }
+
+                /*if (num_of_episodes % 10 == 0 && this.myPlanets.Count > 0)
+                {
                         Debug.Log($"health[{this.name}] = {this.Health}");
                         Debug.Log($"fuel[{this.name}] = {this.Fuel}");
                         Debug.Log($"ammo[{this.name}] = {this.Ammo}");
@@ -194,36 +184,24 @@ public class AgentDDQN : ShipController
                             strPlanets += p.name + ", ";
                         }
                         Debug.Log($"MyPlanets: {strPlanets}"); 
-                    }
-                }                
-                else
-                {
-                    // Vazeny priemer
-                    // Vyskusat aj nasobit
-                    replayBufferItem.Done = false;
-                    replayBufferItem.Reward = ((float)(this.Health - this.Health_old) / (float)ShipController.maxHealth) * 0.40f;
-                    replayBufferItem.Reward += ((float)(this.Fuel - this.Fuel_old) / (float)ShipController.maxFuel) * 0.40f;
-                    replayBufferItem.Reward += ((float)(this.Ammo - this.Ammo_old) / (float)ShipController.maxAmmo) * 0.20f;
-                }
+                }*/
 
                 // Kym nepresiel 10 epizod scitavaj odmeny do celkoveho skore
                 if (this.presiel10Epizod == false)
+                {
                     this.fitness += replayBufferItem.Reward;
-
-                this.levelBox.text = ((int)this.fitness).ToString();
-
+                    this.levelBox.text = ((int)this.fitness).ToString();
+                }
+                
                 // Uloz udalost do bufferu
                 replayBufferItem.Next_state = this.GetState();
                 this.replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
 
                 // Uchovaj stav predoslej hry
-                this.Health_old = this.Health;
-                this.Ammo_old = this.Ammo;
-                this.Fuel_old  = this.Fuel;
                 this.replayBufferItem = new ReplayBufferItem { State = replayBufferItem.Next_state };
 
                 // Exploration/Exploitation parameter changed
-                this.epsilon = math.max(epsilonMin, (epsilon * 0.999999f));  // od 100% nahody po 1%
+                this.epsilon = math.max(epsilonMin, (epsilon * 0.9999995f));  // od 100% nahody po 1%
                 
                 this.isFirstFrame = true;                
             }                        
@@ -235,18 +213,8 @@ public class AgentDDQN : ShipController
             {
                 // Vyber vzorku a natrenuj sa
                 this.Training();
-            }
-            
-            //if (respawnTimer <= 0.0f) 
-            //{
+            }            
             RespawnShip();
-
-            // inicializuj pocitadlo pre t-1
-            this.Health_old = this.Health;
-            this.Ammo_old = this.Ammo;
-            this.Fuel_old  = this.Fuel;
-            //}                                    
-            //respawnTimer -= Time.deltaTime;
         }
     }
 
@@ -258,7 +226,7 @@ public class AgentDDQN : ShipController
         if (UnityEngine.Random.Range(0.0f, 1.0f) > epsilon || testMode)
         {
             QNet.Run(state);
-            var q = GetMaxQ(QNet.neuronLayers[3].Neurons, out action);
+            var q = GetMaxQ(QNet.neuronLayers[2].Neurons, out action);
         }
         else    // Skumaj prostredie
         {
@@ -378,8 +346,8 @@ public class AgentDDQN : ShipController
 
                 // Vyber nasledujuce Q 
                 var next_Q = math.min(
-                    GetMaxQ(QNet.neuronLayers[3].Neurons, out int a1),
-                    GetMaxQ(QTargetNet.neuronLayers[3].Neurons, out int a2)
+                    GetMaxQ(QNet.neuronLayers[2].Neurons, out int a1),
+                    GetMaxQ(QTargetNet.neuronLayers[2].Neurons, out int a2)
                 );
 
                 // TD
@@ -400,11 +368,8 @@ public class AgentDDQN : ShipController
             
             if (num_of_episodes % 10 == 0)
             {        
-                var e1 = (targets[sample[i].Action] - QNet.neuronLayers[3].Neurons[sample[i].Action].output);
-                avgErr1 += e1 * e1;
-
-                var e2 = (targets[sample[i].Action] - QTargetNet.neuronLayers[3].Neurons[sample[i].Action].output);
-                avgErr2 += e2 * e2;
+                avgErr1 += math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
+                avgErr2 += math.abs(targets[sample[i].Action] - QTargetNet.neuronLayers[2].Neurons[sample[i].Action].output);
             }
         }
 
@@ -412,11 +377,9 @@ public class AgentDDQN : ShipController
         {        
             // Kvadraticky priemer chyby NN
             avgErr1 /= (float)BATCH_SIZE;
-            avgErr1 = math.sqrt(avgErr1);
             QNet.errorList.Add(avgErr1);
 
             avgErr2 /= (float)BATCH_SIZE;
-            avgErr2 = math.sqrt(avgErr2);
             QTargetNet.errorList.Add(avgErr2);
         
             Debug.Log($"avgErr.QNet[{this.name}] = {avgErr1}");

@@ -71,14 +71,17 @@ public class ShipController : MonoBehaviour
         }
     }
 
+    // Stavy t-1 (pre ziskanie odmeny za tah v hre)
+    //protected int Health_old = maxHealth;
+    //protected float Fuel_old = maxFuel;
+    //protected int Ammo_old = maxAmmo;
+
     // Zoznam planet, ktore vlastni lod
     public List<PlanetController> myPlanets;
-    public bool hasNewPlanet = false;
+    //public bool hasNewPlanet = false;
 
     // Respawn
-    public float timeRespawn = 10.0f;       // 10 sekund do obnovenia lode v bode respawnu
     public bool IsDestroyed { get; private set; } = false;  // stav lode, je lod znicena?
-    protected float respawnTimer;   // casovac pre obnovu lode
 
     // Dynamika herneho objektu
     protected Rigidbody2D rigidbody2d;
@@ -92,9 +95,6 @@ public class ShipController : MonoBehaviour
     // Collider
     private PolygonCollider2D collider2d;
 
-    // Respawn
-    private GameObject respawn;
-
     // Start is called before the first frame update
     public virtual void Start()
     {
@@ -102,31 +102,6 @@ public class ShipController : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
         collider2d = GetComponent<PolygonCollider2D>();
-        respawn = GameObject.FindGameObjectWithTag("Respawn");
-
-        var rot = this.transform.rotation;
-    }
-
-    public virtual void Update()
-    {
-        // Ak je lod znicena
-        if (IsDestroyed)
-        {
-            respawnTimer -= Time.deltaTime;
-            if (respawnTimer < 0.0f)
-            {
-                RespawnShip();
-                animator.SetTrigger("Respawn");
-            }
-        }
-        else
-        {
-            // Ak uz hrac nema zivoty znici sa lod
-            if (this.Health <= 0)
-            {
-                DestroyShip();
-            }
-        }
     }
 
     /// <summary>
@@ -175,7 +150,11 @@ public class ShipController : MonoBehaviour
     {
         IsDestroyed = true;
         collider2d.enabled = false;
-        //respawnTimer = timeRespawn;
+
+        // obnov zivoty, palivo a municiu lode na maximum
+        this.Health = maxHealth;
+        this.Ammo = maxAmmo;
+        this.Fuel = maxFuel;
 
         // Znicena lod straca vlastnictvo u planety
         foreach (var p in this.myPlanets)
@@ -192,18 +171,13 @@ public class ShipController : MonoBehaviour
     {
         IsDestroyed = true;
         collider2d.enabled = false;
-        //respawnTimer = 1f;
+
         animator.SetBool("Respawn", false);
         animator.SetBool("Winner", true);
     }
 
     protected void RespawnShip()
     {
-        // obnov zivoty, palivo a municiu lode na maximum
-        Health = maxHealth;
-        Ammo = maxAmmo;
-        Fuel = maxFuel;
-
         rigidbody2d.position = Respawn.getPoint();        
         rigidbody2d.rotation = 0f;
         IsDestroyed = false;
@@ -222,7 +196,7 @@ public class ShipController : MonoBehaviour
     {
         if (!IsDestroyed)
         {
-            Ammo = Mathf.Clamp(Ammo + amount, 0, maxAmmo);
+            this.Ammo = Mathf.Clamp(Ammo + amount, 0, maxAmmo);
         }
     }
 
@@ -234,7 +208,7 @@ public class ShipController : MonoBehaviour
     {
         if (!IsDestroyed)
         {
-            Fuel = Mathf.Clamp(Fuel + amount, 0f, maxFuel);
+            this.Fuel = Mathf.Clamp(Fuel + amount, 0f, maxFuel);
         }
     }
 
@@ -246,7 +220,7 @@ public class ShipController : MonoBehaviour
     {
         if (!IsDestroyed)
         {
-            Health = Mathf.Clamp(Health + amount, 0, maxHealth);
+            this.Health = Mathf.Clamp(Health + amount, 0, maxHealth);
         }
     }
 

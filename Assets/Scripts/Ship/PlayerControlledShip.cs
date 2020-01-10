@@ -10,7 +10,7 @@ public class PlayerControlledShip : ShipController
     }
 
     // Update is called once per frame
-    public override void Update()
+    public void Update()
     {
         // Nacitaj zmenu polohy z klavesnice alebo joysticku
         float axisH = Input.GetAxis("Horizontal");
@@ -23,7 +23,5 @@ public class PlayerControlledShip : ShipController
             // Pohni s lodou podla vstupu od uzivatela
             MoveShip(move);
         }
-
-        base.Update();
     }
 }

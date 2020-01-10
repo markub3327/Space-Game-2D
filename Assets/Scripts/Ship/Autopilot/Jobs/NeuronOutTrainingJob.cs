@@ -35,12 +35,12 @@ public struct NeuronOutTrainingJob : IJobParallelFor
         // Vypocitaj chybu siete podla vystupu metodou Huber loss function
         var diff = Feedback[index] - neuron.output;
 
-        if (math.abs(diff) > 1.0f)
+        //if (math.abs(diff) > 1.0f)
             // MAE (Mean absolute error)
-            neuron.sigma = math.sign(diff) * NeuronFn.derivELU(neuron.output);
-        else
-            // MSE (Mean squared error)
-            neuron.sigma = diff * NeuronFn.derivELU(neuron.output);         
+        //    neuron.sigma = math.sign(diff) * NeuronFn.derivELU(neuron.output);
+        //else
+        // MSE (Mean squared error)
+        neuron.sigma = diff * NeuronFn.derivELU(neuron.output);         
         
         //Debug.Log($"sigma = {neuron.sigma}");
 
