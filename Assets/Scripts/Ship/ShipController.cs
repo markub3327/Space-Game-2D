@@ -53,7 +53,7 @@ public class ShipController : MonoBehaviour
 
     // Player's fuel
     public UIBarControl fuelBar;
-    public const int maxFuel = 10;                // maximalny pocet paliva v nadrzi hraca
+    public const int maxFuel = 5;                // maximalny pocet paliva v nadrzi hraca
     private float _fuel = maxFuel;
     public float Fuel {
         get

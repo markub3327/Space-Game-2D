@@ -64,11 +64,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
-        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
-        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -159,10 +159,10 @@ public class AgentDDQN : ShipController
                     // Vazeny priemer
                     // Vyskusat aj nasobit
                     replayBufferItem.Done = false;
-                    replayBufferItem.Reward = ((float)this.Health / (float)ShipController.maxHealth) * 0.20f;
-                    replayBufferItem.Reward += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.20f;
+                    replayBufferItem.Reward = ((float)this.Health / (float)ShipController.maxHealth) * 0.10f;
+                    replayBufferItem.Reward += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.10f;
                     replayBufferItem.Reward += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.05f;
-                    replayBufferItem.Reward += ((float)this.myPlanets.Count / 4f) * 0.55f;
+                    replayBufferItem.Reward += ((float)this.myPlanets.Count / 4f) * 0.75f;
 
                     // Vitaz musi ziskat vsetky planety
                     if (this.myPlanets.Count == 4)
@@ -326,7 +326,7 @@ public class AgentDDQN : ShipController
         return qValues[action].output;
     }
 
-    private void Training(float gamma=0.990f)   
+    private void Training(float gamma=0.90f)   
     {        
         var sample = replayMemory.Sample(BATCH_SIZE);
         float avgErr1 = 0;
@@ -334,7 +334,7 @@ public class AgentDDQN : ShipController
         
         for (int i = 0; i < BATCH_SIZE; i++)
         {
-            float[] targets = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            float[] targets = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
             // Non-terminal state     
             if (sample[i].Done == false)
