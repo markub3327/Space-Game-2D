@@ -78,7 +78,7 @@ public class ShipController : MonoBehaviour
 
     // Zoznam planet, ktore vlastni lod
     public List<PlanetController> myPlanets;
-    //public bool hasNewPlanet = false;
+    public bool hasNewPlanet = false;
 
     // Respawn
     public bool IsDestroyed { get; private set; } = false;  // stav lode, je lod znicena?
@@ -162,6 +162,7 @@ public class ShipController : MonoBehaviour
             p.OwnerPlanet = null;
         }
         this.myPlanets.Clear();
+        this.hasNewPlanet = false;
         
         animator.SetBool("Respawn", false);
         animator.SetBool("Destroyed", true);

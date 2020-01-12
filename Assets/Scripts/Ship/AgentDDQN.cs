@@ -7,7 +7,7 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    private const int num_of_frames = 1;//4;
+    //private const int num_of_frames = 1;//4;
 
     private const int num_of_states = 1776;
 
@@ -19,7 +19,7 @@ public class AgentDDQN : ShipController
     public NeuralNetwork QTargetNet = new NeuralNetwork();
 
     private ReplayBuffer replayMemory = new ReplayBuffer();
-    private List<float> framesBuffer = new List<float>(num_of_frames * num_of_states);
+    //private List<float> framesBuffer = new List<float>(num_of_frames * num_of_states);
     private ReplayBufferItem replayBufferItem = null;
     private const int BATCH_SIZE = 32; // size of minibatch
 
@@ -63,11 +63,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[0], QTargetNet.neuronLayers[1]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
-        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 24);
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
         QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 24);
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
         QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
@@ -75,11 +75,7 @@ public class AgentDDQN : ShipController
         this.levelBox.text = ((int)this.fitness).ToString();
 
         // Nacitaj stav, t=0
-        for (int i = 0; i < num_of_frames; i++)
-        {
-            this.GetState();
-        }
-        this.replayBufferItem = new ReplayBufferItem { State = this.framesBuffer.ToArray() };
+        this.replayBufferItem = new ReplayBufferItem { State = this.GetState() };
 
         // Nacitaj vahy zo subora ak existuje
         var str1 = Application.dataPath + "/DDQN_Weights_QNet.save";
@@ -156,37 +152,34 @@ public class AgentDDQN : ShipController
                     
                     replayBufferItem.Done = true;
                     replayBufferItem.Reward = -1.0f;
-                }                
+                } 
+                else if (this.hasNewPlanet == true)
+                {
+                    this.hasNewPlanet = false;
+
+                    Debug.Log($"fitness[{this.name}] = {this.fitness}");
+                    Debug.Log($"epsilon[{this.name}] = {epsilon}");
+                    Debug.Log($"episode[{this.name}] = {num_of_episodes}");
+                    var strPlanets = string.Empty;
+                    this.myPlanets.ForEach(x => strPlanets += x.name + "\t");
+                    Debug.Log($"MyPlanets[{this.name}]: {strPlanets}");
+
+                    // Vitaz musi ziskat vsetky planety
+                    if (this.myPlanets.Count == 4)
+                        WinnerShip();
+
+                    replayBufferItem.Done = false;
+                    replayBufferItem.Reward = +1.0f;
+                }               
                 else
                 {
                     // Vazeny priemer
                     // Vyskusat aj nasobit
                     replayBufferItem.Done = false;
-                    replayBufferItem.Reward = ((float)this.Health / (float)ShipController.maxHealth) * 0.10f;
-                    replayBufferItem.Reward += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.10f;
-                    replayBufferItem.Reward += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.05f;
-                    replayBufferItem.Reward += ((float)this.myPlanets.Count / 4f) * 0.75f;
-
-                    // Vitaz musi ziskat vsetky planety
-                    if (this.myPlanets.Count == 4)
-                        WinnerShip();
+                    replayBufferItem.Reward = ((float)this.Health / (float)ShipController.maxHealth) * 0.40f;
+                    replayBufferItem.Reward += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.40f;
+                    replayBufferItem.Reward += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.20f;
                 }
-
-                /*if (num_of_episodes % 10 == 0 && this.myPlanets.Count > 0)
-                {
-                        Debug.Log($"health[{this.name}] = {this.Health}");
-                        Debug.Log($"fuel[{this.name}] = {this.Fuel}");
-                        Debug.Log($"ammo[{this.name}] = {this.Ammo}");
-                        Debug.Log($"reward[{this.name}] = {replayBufferItem.Reward}");
-                        Debug.Log($"done[{this.name}] = {this.replayBufferItem.Done}");
-                        Debug.Log($"fitness[{this.name}] = {this.fitness}");
-
-`                       foreach (var p in this.myPlanets)
-                        {
-                            strPlanets += p.name + ", ";
-                        }
-                        Debug.Log($"MyPlanets: {strPlanets}"); 
-                }*/
 
                 // Kym nepresiel 10 epizod scitavaj odmeny do celkoveho skore
                 if (this.presiel10Epizod == false)
@@ -385,13 +378,7 @@ public class AgentDDQN : ShipController
             QTargetNet.errorList.Add(avgErr2);
         
             Debug.Log($"avgErr.QNet[{this.name}] = {avgErr1}");
-            Debug.Log($"avgErr.QTargetNet[{this.name}] = {avgErr2}");
-            Debug.Log($"fitness = {this.fitness}");
-            Debug.Log($"epsilon[{this.name}] = {epsilon}");
-            Debug.Log($"episode[{this.name}] = {num_of_episodes}");
-            var strPlanets = string.Empty;
-            this.myPlanets.ForEach(x => strPlanets = x.name + "\t");
-            Debug.Log($"MyPlanets[{this.name}]: {strPlanets}");
+            Debug.Log($"avgErr.QTargetNet[{this.name}] = {avgErr2}");            
         }
     }
 
@@ -475,11 +462,12 @@ public class AgentDDQN : ShipController
         }
 
         // LIFO
-        if (this.framesBuffer.Count >= (num_of_frames * num_of_states))
-            this.framesBuffer.RemoveRange(0, num_of_states);
-        this.framesBuffer.AddRange(state);
+        //if (this.framesBuffer.Count >= (num_of_frames * num_of_states))
+        //    this.framesBuffer.RemoveRange(0, num_of_states);
+        //this.framesBuffer.AddRange(state);
 
-        return this.framesBuffer.ToArray();   
+        //return this.framesBuffer.ToArray();   
+        return state;
     }
 }
 
