@@ -81,7 +81,7 @@ public class ShipController : MonoBehaviour
     public bool hasNewPlanet = false;
 
     // Respawn
-    public bool IsDestroyed { get; private set; } = false;  // stav lode, je lod znicena?
+    public bool IsDestroyed { get; protected set; } = false;  // stav lode, je lod znicena?
 
     // Dynamika herneho objektu
     protected Rigidbody2D rigidbody2d;
@@ -162,7 +162,6 @@ public class ShipController : MonoBehaviour
             p.OwnerPlanet = null;
         }
         this.myPlanets.Clear();
-        this.hasNewPlanet = false;
         
         animator.SetBool("Respawn", false);
         animator.SetBool("Destroyed", true);

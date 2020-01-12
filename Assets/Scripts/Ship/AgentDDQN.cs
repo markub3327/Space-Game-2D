@@ -7,8 +7,6 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    //private const int num_of_frames = 1;//4;
-
     private const int num_of_states = 1776;
 
     private const int num_of_actions = 16;
@@ -19,7 +17,6 @@ public class AgentDDQN : ShipController
     public NeuralNetwork QTargetNet = new NeuralNetwork();
 
     private ReplayBuffer replayMemory = new ReplayBuffer();
-    //private List<float> framesBuffer = new List<float>(num_of_frames * num_of_states);
     private ReplayBufferItem replayBufferItem = null;
     private const int BATCH_SIZE = 32; // size of minibatch
 
@@ -28,7 +25,6 @@ public class AgentDDQN : ShipController
     private float epsilonMin = 0.01f;
 
     public float fitness = 0;
-
     public int num_of_episodes = 0;
 
     public TurretController[] turretControllers;
@@ -38,8 +34,8 @@ public class AgentDDQN : ShipController
     public Text levelBox;
 
     public bool presiel10Epizod = false;
-
     public bool testMode = false;
+
 
     public override void Start()
     {
@@ -64,11 +60,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         QNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
-        QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
-        QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -118,9 +114,6 @@ public class AgentDDQN : ShipController
 
     public void Update()
     {
-        //var col = this.gameObject.GetComponent<PolygonCollider2D>();        
-        //Debug.Log($"Size[{this.name}] = {col.bounds.size.x}x{col.bounds.size.y}, stride = {((col.bounds.size.x+col.bounds.size.x)/2f)/2f}");
-
         // Ak nie je lod znicena = hra hru
         if (!IsDestroyed)
         {
@@ -136,7 +129,7 @@ public class AgentDDQN : ShipController
                 if (this.Health <= 0 || this.Fuel <= 0)
                 {
                     DestroyShip();
-                    //this.hasNewPlanet = false;
+                    this.hasNewPlanet = false;
 
                     if (num_of_episodes > 0 && num_of_episodes % 10 == 0) 
                         this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie
@@ -155,6 +148,7 @@ public class AgentDDQN : ShipController
                 } 
                 else if (this.hasNewPlanet == true)
                 {
+                    this.IsDestroyed = true;
                     this.hasNewPlanet = false;
 
                     Debug.Log($"fitness[{this.name}] = {this.fitness}");
@@ -176,9 +170,9 @@ public class AgentDDQN : ShipController
                     // Vazeny priemer
                     // Vyskusat aj nasobit
                     replayBufferItem.Done = false;
-                    replayBufferItem.Reward = ((float)this.Health / (float)ShipController.maxHealth) * 0.40f;
-                    replayBufferItem.Reward += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.40f;
-                    replayBufferItem.Reward += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.20f;
+                    replayBufferItem.Reward = ((float)this.Health / (float)ShipController.maxHealth) * 0.10f;
+                    replayBufferItem.Reward += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.10f;
+                    replayBufferItem.Reward += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.05f;
                 }
 
                 // Kym nepresiel 10 epizod scitavaj odmeny do celkoveho skore
