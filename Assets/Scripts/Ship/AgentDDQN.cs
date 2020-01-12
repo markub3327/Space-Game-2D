@@ -59,12 +59,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[0], QTargetNet.neuronLayers[1]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
-        QNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 16);
+        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
-        QTargetNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 16);
+        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -155,7 +155,7 @@ public class AgentDDQN : ShipController
                     Debug.Log($"epsilon[{this.name}] = {epsilon}");
                     Debug.Log($"episode[{this.name}] = {num_of_episodes}");
                     var strPlanets = string.Empty;
-                    this.myPlanets.ForEach(x => strPlanets += x.name + "\t");
+                    this.myPlanets.ForEach(x => strPlanets += x.name + ", ");
                     Debug.Log($"MyPlanets[{this.name}]: {strPlanets}");
 
                     // Vitaz musi ziskat vsetky planety
@@ -315,7 +315,7 @@ public class AgentDDQN : ShipController
         return qValues[action].output;
     }
 
-    private void Training(float gamma=0.99f)   
+    private void Training(float gamma=0.90f)   
     {        
         var sample = replayMemory.Sample(BATCH_SIZE);
         float avgErr1 = 0;
