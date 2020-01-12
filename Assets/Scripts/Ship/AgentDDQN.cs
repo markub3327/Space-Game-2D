@@ -7,7 +7,7 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    private const int num_of_states = 1776;
+    private const int num_of_states = 1777;
 
     private const int num_of_actions = 16;
 
@@ -381,6 +381,10 @@ public class AgentDDQN : ShipController
         var radarResult = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this.transform);
         float[] state = new float[num_of_states];       // array of zeros
         int idx = 0;
+
+        // Rotacia agenta
+        state[idx] = this.rigidbody2d.rotation;
+        idx++;
 
         // 1600
         for (float y = -20.0f; y < 20.0f; y+=1.0f)
