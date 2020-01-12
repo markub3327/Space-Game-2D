@@ -7,9 +7,9 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    private const int num_of_frames = 4;
+    private const int num_of_frames = 1;//4;
 
-    private const int num_of_states = 178;
+    private const int num_of_states = 1776;
 
     private const int num_of_actions = 16;
 
@@ -25,7 +25,7 @@ public class AgentDDQN : ShipController
 
     // Epsilon
     private float epsilon = 1.0f;
-    private float epsilonMin = 0.10f;
+    private float epsilonMin = 0.01f;
 
     public float fitness = 0;
 
@@ -63,11 +63,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[0], QTargetNet.neuronLayers[1]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
-        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
+        QNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 24);
         QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 1);
+        QTargetNet.neuronLayers[0].CreateNeurons((num_of_frames * num_of_states), 24);
         QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
@@ -122,6 +122,9 @@ public class AgentDDQN : ShipController
 
     public void Update()
     {
+        //var col = this.gameObject.GetComponent<PolygonCollider2D>();        
+        //Debug.Log($"Size[{this.name}] = {col.bounds.size.x}x{col.bounds.size.y}, stride = {((col.bounds.size.x+col.bounds.size.x)/2f)/2f}");
+
         // Ak nie je lod znicena = hra hru
         if (!IsDestroyed)
         {
@@ -178,8 +181,7 @@ public class AgentDDQN : ShipController
                         Debug.Log($"done[{this.name}] = {this.replayBufferItem.Done}");
                         Debug.Log($"fitness[{this.name}] = {this.fitness}");
 
-                        var strPlanets = string.Empty;
-                        foreach (var p in this.myPlanets)
+`                       foreach (var p in this.myPlanets)
                         {
                             strPlanets += p.name + ", ";
                         }
@@ -201,7 +203,7 @@ public class AgentDDQN : ShipController
                 this.replayBufferItem = new ReplayBufferItem { State = replayBufferItem.Next_state };
 
                 // Exploration/Exploitation parameter changed
-                this.epsilon = math.max(epsilonMin, (epsilon * 0.9999995f));  // od 100% nahody po 1%
+                this.epsilon = math.max(epsilonMin, (epsilon * 0.999999f));  // od 100% nahody po 1%
                 
                 this.isFirstFrame = true;                
             }                        
@@ -326,7 +328,7 @@ public class AgentDDQN : ShipController
         return qValues[action].output;
     }
 
-    private void Training(float gamma=0.90f)   
+    private void Training(float gamma=0.99f)   
     {        
         var sample = replayMemory.Sample(BATCH_SIZE);
         float avgErr1 = 0;
@@ -384,55 +386,92 @@ public class AgentDDQN : ShipController
         
             Debug.Log($"avgErr.QNet[{this.name}] = {avgErr1}");
             Debug.Log($"avgErr.QTargetNet[{this.name}] = {avgErr2}");
+            Debug.Log($"fitness = {this.fitness}");
             Debug.Log($"epsilon[{this.name}] = {epsilon}");
             Debug.Log($"episode[{this.name}] = {num_of_episodes}");
+            var strPlanets = string.Empty;
+            this.myPlanets.ForEach(x => strPlanets = x.name + "\t");
+            Debug.Log($"MyPlanets[{this.name}]: {strPlanets}");
         }
     }
 
     private float[] GetState()
     {
         var radarResult = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this.transform);
-        float[] state = new float[num_of_states];
+        float[] state = new float[num_of_states];       // array of zeros
+        int idx = 0;
 
-        // Udaje o polohe
-        state[0] = this.rigidbody2d.position.x;
-        state[1] = this.rigidbody2d.position.y;
-        //Debug.Log($"state[{this.name}] = {state[0]}, {state[1]}");
-
-        // Udaje o objektoch v okoli lodi
-        for (int i = 0, j = 2; i < 16; i++)
+        // 1600
+        for (float y = -20.0f; y < 20.0f; y+=1.0f)
         {
+            for (float x = -20.0f; x < 20.0f; x+=1.0f, idx+=1)
+            {
+                if (this.rigidbody2d.position.x >= x && this.rigidbody2d.position.x <= (x+1.0f))
+                {
+                    if (this.rigidbody2d.position.y >= y && this.rigidbody2d.position.y <= (y+1.0f))
+                    {
+                        state[idx] = 0x01;
+                        //Debug.Log($"ship[{this.name}][{idx}] = 1");                        
+                    }
+                }
+            }
+        }
+
+        // 176
+        // Udaje o objektoch v okoli lodi
+        for (int i = 0; i < 16; i++)
+        {
+            // ak luc narazil na objekt hry
             if (radarResult[i] != null)
             {
-                var code = DecodeTagObject(radarResult[i].Value.transform.gameObject);
-                if (code != null)
+                // TAG = VSTUP do NN
+                var obj = radarResult[i].Value.transform;
+                switch (obj.tag)
                 {
-                    for (int k = 0; k < 10; k++, j++)
-                    {
-                        state[j] = (float)code[k];
-                        //Debug.Log($"state[{j}]={state[j]}");
-                    }
-                    state[j] = radarResult[i].Value.distance;
-                    //Debug.Log($"state[{j}]={state[j]}");
+                    case "Planet":
+                        var planet = obj.GetComponent<PlanetController>();
+                        if (this.myPlanets.Contains(planet))                
+                            // moja planeta
+                            state[idx + 9] = 0x01; 
+                        else if (planet.OwnerPlanet != null)
+                            // planeta uz vlastnena
+                            state[idx + 8] = 0x01; 
+                        else
+                            // planeta bez vlastnika
+                            state[idx + 7] = 0x01; 
+                        state[idx + 10] = radarResult[i].Value.distance;
+                        break;
+                    case "Moon":
+                        state[idx + 6] = 0x01;
+                        state[idx + 10] = radarResult[i].Value.distance;  
+                        break;
+                    case "Star":
+                        state[idx + 5] = 0x01; 
+                        state[idx + 10] = radarResult[i].Value.distance;  
+                        break;
+                     case "Nebula":
+                        state[idx + 4] = 0x01;
+                        state[idx + 10] = radarResult[i].Value.distance;  
+                        break;
+                    case "Health":
+                        state[idx + 3] = 0x01; 
+                        state[idx + 10] = radarResult[i].Value.distance;  
+                        break;
+                    case "Ammo":
+                        state[idx + 2] = 0x01; 
+                        state[idx + 10] = radarResult[i].Value.distance;  
+                        break;
+                    case "Projectile":
+                        state[idx + 1] = 0x01;  
+                        state[idx + 10] = radarResult[i].Value.distance;  
+                        break;
+                    case "Player":
+                        state[idx] = 0x01; 
+                        state[idx + 10] = radarResult[i].Value.distance;  
+                        break;           
                 }
-                else
-                {
-                    for (int k = 0; k < 10; k++, j++)
-                    {
-                        state[j] = 0f;
-                    }   
-                    state[j] = 0f;
-                }
+                idx += 11;
             }
-            else
-            {
-                for (int k = 0; k < 10; k++, j++)
-                {
-                    state[j] = 0f;
-                }
-                state[j] = 0f;
-            }
-            //Debug.Log($"state[{this.name}] = {state[j]}, {state[j+1]}");
         }
 
         // LIFO
@@ -440,56 +479,8 @@ public class AgentDDQN : ShipController
             this.framesBuffer.RemoveRange(0, num_of_states);
         this.framesBuffer.AddRange(state);
 
-        return this.framesBuffer.ToArray();
+        return this.framesBuffer.ToArray();   
     }
-
-    private int[] DecodeTagObject(GameObject obj)
-    {
-        int[] code = new int[10];
-        
-        // TAG = VSTUP do NN
-        switch (obj.tag)
-        {
-            case "Planet":
-                var planet = obj.GetComponent<PlanetController>();
-                if (this.myPlanets.Contains(planet))                
-                    // moja planeta
-                    code[9] = 0x01; 
-                else if (planet.OwnerPlanet != null)
-                    // planeta uz vlastnena
-                    code[8] = 0x01; 
-                else
-                    // planeta bez vlastnika
-                    code[7] = 0x01; 
-                break;
-            case "Moon":
-                code[6] = 0x01;  
-                break;
-            case "Star":
-                code[5] = 0x01; 
-                break;
-            case "Nebula":
-                code[4] = 0x01;
-                break;
-            case "Health":
-                code[3] = 0x01; 
-                break;
-            case "Ammo":
-                code[2] = 0x01; 
-                break;
-            case "Projectile":
-                code[1] = 0x01;  
-                break;
-            case "Player":
-                code[0] = 0x01; 
-                break;            
-            default:
-                code = null;
-                break;
-        }
-
-        return code;
-    }    
 }
 
 public class ReplayBuffer

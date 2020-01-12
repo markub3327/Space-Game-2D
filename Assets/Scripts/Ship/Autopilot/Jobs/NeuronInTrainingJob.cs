@@ -45,11 +45,11 @@ public struct NeuronInTrainingJob : IJobParallelFor
         neuron.sigma = sum * NeuronFn.derivELU(neuron.output);
         
         // Adaptuj vahy podla chyby neuronu
-        //for (int n = 0; n < neuron.num_of_inputs; n++)
-        //{
-        deltaWeights[neuron.IndexW + 0] = neuron.learning_rate * neuron.sigma * Input[index] + (neuron.momentum * deltaWeights[neuron.IndexW + 0]);
-        Weights[neuron.IndexW + 0] += deltaWeights[neuron.IndexW + 0];
-        //}
+        for (int n = 0; n < neuron.num_of_inputs; n++)
+        {
+            deltaWeights[neuron.IndexW + n] = neuron.learning_rate * neuron.sigma * Input[n] + (neuron.momentum * deltaWeights[neuron.IndexW + n]);
+            Weights[neuron.IndexW + n] += deltaWeights[neuron.IndexW + n];
+        }
 
         // Bias
         deltaWeights[neuron.IndexW + neuron.num_of_inputs] = neuron.learning_rate * neuron.sigma + (neuron.momentum * deltaWeights[neuron.IndexW + neuron.num_of_inputs]);
