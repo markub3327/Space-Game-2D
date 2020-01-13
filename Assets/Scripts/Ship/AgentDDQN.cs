@@ -315,7 +315,7 @@ public class AgentDDQN : ShipController
         return qValues[action].output;
     }
 
-    private void Training(float gamma=0.90f)   
+    private void Training(float gamma=0.99f)   
     {        
         var sample = replayMemory.Sample(BATCH_SIZE);
         float avgErr1 = 0;
@@ -382,11 +382,14 @@ public class AgentDDQN : ShipController
         float[] state = new float[num_of_states];       // array of zeros
         int idx = 0;
 
-        // Rotacia agenta
-        state[idx] = this.rigidbody2d.rotation;
-        idx++;
+        // Rotacia agenta        
+        state[idx] = this.rigidbody2d.rotation / 180.0f;
+        //state[idx + 1] = this.rigidbody2d.rotation;
+        //state[idx + 2] = this.rigidbody2d.rotation;
+        //Debug.Log($"state[{this.name}][{idx}] = {state[idx]}");                        
+        idx+=1;
 
-        // 1600
+        // Poloha agenta ako 2D digitalna mapa
         for (float y = -20.0f; y < 20.0f; y+=1.0f)
         {
             for (float x = -20.0f; x < 20.0f; x+=1.0f, idx+=1)
@@ -396,7 +399,7 @@ public class AgentDDQN : ShipController
                     if (this.rigidbody2d.position.y >= y && this.rigidbody2d.position.y <= (y+1.0f))
                     {
                         state[idx] = 0x01;
-                        //Debug.Log($"ship[{this.name}][{idx}] = 1");                        
+                        //Debug.Log($"state[{this.name}][{idx}] = 1, x={x}, y={y}");                        
                     }
                 }
             }
@@ -404,7 +407,7 @@ public class AgentDDQN : ShipController
 
         // 176
         // Udaje o objektoch v okoli lodi
-        for (int i = 0; i < 16; i++)
+        for (int i = 0; i < 16; i++, idx+=11)
         {
             // ak luc narazil na objekt hry
             if (radarResult[i] != null)
@@ -455,10 +458,10 @@ public class AgentDDQN : ShipController
                         state[idx + 10] = radarResult[i].Value.distance;  
                         break;           
                 }
-                idx += 11;
-            }
+            }            
         }
 
+        //Debug.Log($"idx = {idx}");
         // LIFO
         //if (this.framesBuffer.Count >= (num_of_frames * num_of_states))
         //    this.framesBuffer.RemoveRange(0, num_of_states);
