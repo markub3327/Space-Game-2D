@@ -382,13 +382,16 @@ public class AgentDDQN : ShipController
         float[] state = new float[num_of_states];       // array of zeros
         int idx = 0;
 
-        // Rotacia agenta        
-        state[idx] = this.rigidbody2d.rotation / 180.0f;
-        //state[idx + 1] = this.rigidbody2d.rotation;
-        //state[idx + 2] = this.rigidbody2d.rotation;
+        // Rotacia agenta (na vstup siete v normalizovanom tvare <0,1>)        
+        state[idx] = this.rigidbody2d.rotation;
+        if (state[idx] < 0f)
+        {
+            state[idx] += 360.0f;
+        }
+        state[idx] /= 360.0f;
         //Debug.Log($"state[{this.name}][{idx}] = {state[idx]}");                        
         idx+=1;
-
+        
         // Poloha agenta ako 2D digitalna mapa
         for (float y = -20.0f; y < 20.0f; y+=1.0f)
         {
