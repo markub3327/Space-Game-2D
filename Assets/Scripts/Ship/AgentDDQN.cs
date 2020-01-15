@@ -7,7 +7,7 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    private const int num_of_states = 1777;
+    private const int num_of_states = 1776;
 
     private const int num_of_actions = 16;
 
@@ -59,12 +59,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[0], QTargetNet.neuronLayers[1]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 16);
-        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(1, num_of_states);
+        QNet.neuronLayers[1].CreateNeurons(16); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 16);
-        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(1, num_of_states);
+        QTargetNet.neuronLayers[1].CreateNeurons(16); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -383,14 +383,14 @@ public class AgentDDQN : ShipController
         int idx = 0;
 
         // Rotacia agenta (na vstup siete v normalizovanom tvare <0,1>)        
-        state[idx] = this.rigidbody2d.rotation;
-        if (state[idx] < 0f)
-        {
-            state[idx] += 360.0f;
-        }
-        state[idx] /= 360.0f;
+        //state[idx] = this.rigidbody2d.rotation;
+        //if (state[idx] < 0f)
+        //{
+        //    state[idx] += 360.0f;
+        //}
+        //state[idx] /= 360.0f;
         //Debug.Log($"state[{this.name}][{idx}] = {state[idx]}");                        
-        idx+=1;
+        //idx+=1;
         
         // Poloha agenta ako 2D digitalna mapa
         for (float y = -20.0f; y < 20.0f; y+=1.0f)
