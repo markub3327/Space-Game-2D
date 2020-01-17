@@ -1,4 +1,4 @@
-## Space Game 2D
+# Space Game 2D
 
 [![Release](https://img.shields.io/github/release/markub3327/Space-Game-2D)](https://github.com/markub3327/Space-Game-2D/releases)
 ![Tag](https://img.shields.io/github/v/tag/markub3327/Space-Game-2D)
