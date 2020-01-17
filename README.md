@@ -9,7 +9,7 @@
 ![Languages](https://img.shields.io/github/languages/count/markub3327/Space-Game-2D)
 ![Size](https://img.shields.io/github/repo-size/markub3327/Space-Game-2D)
 
-**Documentation**
+## Documentation
 
   **Space Game 2D** is an open source multiplatform Unity3D game written in C#. It's about collecting planets by agents (ships). The agent uses Double Deep Q Network for controlling ships. Computer plays with computer and the best ship in-game is selected by the Genetics algorithm.
   
