@@ -190,7 +190,7 @@ public class AgentDDQN : ShipController
                 this.replayBufferItem = new ReplayBufferItem { State = replayBufferItem.Next_state };
 
                 // Exploration/Exploitation parameter changed
-                this.epsilon = math.max(epsilonMin, (epsilon * 0.999999f));  // od 100% nahody po 1%
+                this.epsilon = math.max(epsilonMin, (epsilon * 0.9999999f));  // od 100% nahody po 1%
                 
                 this.isFirstFrame = true;                
             }                        
@@ -315,7 +315,7 @@ public class AgentDDQN : ShipController
         return qValues[action].output;
     }
 
-    private void Training(float gamma=0.99f)   
+    private void Training(float gamma=0.90f)   
     {        
         var sample = replayMemory.Sample(BATCH_SIZE);
         float avgErr1 = 0;
