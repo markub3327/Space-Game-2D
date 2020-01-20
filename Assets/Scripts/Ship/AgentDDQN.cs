@@ -60,11 +60,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         QNet.neuronLayers[0].CreateNeurons(1, num_of_states);
-        QNet.neuronLayers[1].CreateNeurons(16); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons(1, num_of_states);
-        QTargetNet.neuronLayers[1].CreateNeurons(16); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -315,7 +315,7 @@ public class AgentDDQN : ShipController
         return qValues[action].output;
     }
 
-    private void Training(float gamma=0.90f)   
+    private void Training(float gamma=0.90f, float tau=0.01f)   
     {        
         var sample = replayMemory.Sample(BATCH_SIZE);
         float avgErr1 = 0;
@@ -348,12 +348,19 @@ public class AgentDDQN : ShipController
                 // TD
                 targets[sample[i].Action] = sample[i].Reward;
             }
-            
-            QNet.Run(sample[i].State);
-            QTargetNet.Run(sample[i].State);
 
+            // Training Q network            
+            QNet.Run(sample[i].State);
             QNet.Training(sample[i].State, targets);
-            QTargetNet.Training(sample[i].State, targets);
+
+            // Soft update Q Target network
+            for (int j = 0; j < this.QNet.neuronLayers.Count; j++)
+            {
+                for (int k = 0; k < this.QNet.neuronLayers[i].Weights.Count; k++)
+                {
+                    this.QTargetNet.neuronLayers[j].Weights[k] = tau*this.QNet.neuronLayers[j].Weights[k] + (1.0f-tau)*this.QTargetNet.neuronLayers[j].Weights[k];                    
+                }
+            }
             
             if (num_of_episodes % 10 == 0)
             {        

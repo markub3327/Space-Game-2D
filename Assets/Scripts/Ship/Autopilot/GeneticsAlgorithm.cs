@@ -97,7 +97,7 @@ public class GeneticsAlgorithm : MonoBehaviour
                         if (Random.Range(0.0f, 1.0f) < (1.0f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
                         {
                             a.QNet.neuronLayers[i].Weights[j] = Random.Range(-1.0f, 1.0f) * k;
-                            a.QTargetNet.neuronLayers[i].Weights[j] = Random.Range(-1.0f, 1.0f) * k;
+                            //a.QTargetNet.neuronLayers[i].Weights[j] = Random.Range(-1.0f, 1.0f) * k;
                             Debug.Log($"Mutating W[{i}][{j}]({a.name})!");
                         }                            
                     }
