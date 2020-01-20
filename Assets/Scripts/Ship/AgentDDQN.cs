@@ -404,9 +404,9 @@ public class AgentDDQN : ShipController
         {
             for (float x = -20.0f; x < 20.0f; x+=1.0f, idx+=1)
             {
-                if (this.rigidbody2d.position.x >= x && this.rigidbody2d.position.x <= (x+1.0f))
+                if (this.rigidbody2d.position.x >= x && this.rigidbody2d.position.x < (x+1.0f))
                 {
-                    if (this.rigidbody2d.position.y >= y && this.rigidbody2d.position.y <= (y+1.0f))
+                    if (this.rigidbody2d.position.y >= y && this.rigidbody2d.position.y < (y+1.0f))
                     {
                         state[idx] = 0x01;
                         //Debug.Log($"state[{this.name}][{idx}] = 1, x={x}, y={y}");                        
