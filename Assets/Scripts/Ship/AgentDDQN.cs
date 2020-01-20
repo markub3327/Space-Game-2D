@@ -356,7 +356,7 @@ public class AgentDDQN : ShipController
             // Soft update Q Target network
             for (int j = 0; j < this.QNet.neuronLayers.Count; j++)
             {
-                for (int k = 0; k < this.QNet.neuronLayers[i].Weights.Count; k++)
+                for (int k = 0; k < this.QNet.neuronLayers[j].Weights.Count; k++)
                 {
                     this.QTargetNet.neuronLayers[j].Weights[k] = tau*this.QNet.neuronLayers[j].Weights[k] + (1.0f-tau)*this.QTargetNet.neuronLayers[j].Weights[k];                    
                 }
