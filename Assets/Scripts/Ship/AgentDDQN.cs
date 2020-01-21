@@ -190,7 +190,7 @@ public class AgentDDQN : ShipController
                 this.replayBufferItem = new ReplayBufferItem { State = replayBufferItem.Next_state };
 
                 // Exploration/Exploitation parameter changed
-                this.epsilon = math.max(epsilonMin, (epsilon * 0.9999999f));  // od 100% nahody po 1%
+                this.epsilon = math.max(epsilonMin, (epsilon * 0.999999f));  // od 100% nahody po 1%
                 
                 this.isFirstFrame = true;                
             }                        
@@ -488,7 +488,7 @@ public class ReplayBuffer
 
     public List<ReplayBufferItem> items;
 
-    private const int max_count = 10000;
+    private const int max_count = 100000;
 
     public ReplayBuffer()
     {
