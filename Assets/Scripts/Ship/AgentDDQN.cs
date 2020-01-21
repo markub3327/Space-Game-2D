@@ -170,9 +170,9 @@ public class AgentDDQN : ShipController
                     // Vazeny priemer
                     // Vyskusat aj nasobit
                     replayBufferItem.Done = false;
-                    replayBufferItem.Reward = ((float)this.Health / (float)ShipController.maxHealth) * 0.10f;
-                    replayBufferItem.Reward += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.10f;
-                    replayBufferItem.Reward += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.05f;
+                    replayBufferItem.Reward = ((float)this.Health / (float)ShipController.maxHealth) * 0.08f;
+                    replayBufferItem.Reward += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.04f;
+                    replayBufferItem.Reward += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.01f;
                 }
 
                 // Kym nepresiel 10 epizod scitavaj odmeny do celkoveho skore
@@ -192,7 +192,7 @@ public class AgentDDQN : ShipController
                 // Exploration/Exploitation parameter changed
                 this.epsilon = math.max(epsilonMin, (epsilon * 0.999999f));  // od 100% nahody po 1%
                 
-                this.isFirstFrame = true;                
+                this.isFirstFrame = true;
             }                        
         }
         else    // Ak je lod znicena = cas na preucenie siete (nove vedomosti)
@@ -315,7 +315,7 @@ public class AgentDDQN : ShipController
         return qValues[action].output;
     }
 
-    private void Training(float gamma=0.90f, float tau=0.01f)   
+    private void Training(float gamma=0.80f, float tau=0.01f)   
     {        
         var sample = replayMemory.Sample(BATCH_SIZE);
         float avgErr1 = 0;
