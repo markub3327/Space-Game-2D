@@ -60,11 +60,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         QNet.neuronLayers[0].CreateNeurons(1, num_of_states);
-        QNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons(1, num_of_states);
-        QTargetNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         this.nameBox.text = this.name;
@@ -150,9 +150,9 @@ public class AgentDDQN : ShipController
                 {
                     this.hasNewPlanet = false;
 
-                    Debug.Log($"fitness[{this.name}] = {this.fitness}");
-                    Debug.Log($"epsilon[{this.name}] = {epsilon}");
-                    Debug.Log($"episode[{this.name}] = {num_of_episodes}");
+                    //Debug.Log($"fitness[{this.name}] = {this.fitness}");
+                    //Debug.Log($"epsilon[{this.name}] = {epsilon}");
+                    //Debug.Log($"episode[{this.name}] = {num_of_episodes}");
                     var strPlanets = string.Empty;
                     this.myPlanets.ForEach(x => strPlanets += x.name + ", ");
                     Debug.Log($"MyPlanets[{this.name}]: {strPlanets}");
@@ -353,7 +353,7 @@ public class AgentDDQN : ShipController
                     }
                 }
             
-                if (num_of_episodes % 10 == 0)
+                if (num_of_episodes % 100 == 0)
                 {        
                     avgErr1 += math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
                 }

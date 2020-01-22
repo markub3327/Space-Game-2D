@@ -33,7 +33,7 @@ public class GeneticsAlgorithm : MonoBehaviour
 
             for (int i = 0; i < agents.Count; i++)
             {
-                Debug.Log($"order = {i+1}., name = {agents[i].name}, fitness = {agents[i].fitness}");
+                //Debug.Log($"order = {i+1}., name = {agents[i].name}, fitness = {agents[i].fitness}");
                 agents[i].presiel10Epizod = false;
 
                 // Vynuluj meranie skore agentom
@@ -98,7 +98,7 @@ public class GeneticsAlgorithm : MonoBehaviour
                         {
                             a.QNet.neuronLayers[i].Weights[j] = Random.Range(-1.0f, 1.0f) * k;
                             //a.QTargetNet.neuronLayers[i].Weights[j] = Random.Range(-1.0f, 1.0f) * k;
-                            Debug.Log($"Mutating W[{i}][{j}]({a.name})!");
+                            //Debug.Log($"Mutating W[{i}][{j}]({a.name})!");
                         }                            
                     }
                 }
