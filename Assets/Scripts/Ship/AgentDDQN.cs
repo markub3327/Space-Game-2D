@@ -359,7 +359,7 @@ public class AgentDDQN : ShipController
                 }
             }
 
-            if (num_of_episodes % 10 == 0)
+            if (num_of_episodes % 100 == 0)
             {        
                 // Kvadraticky priemer chyby NN
                 avgErr1 /= (float)BATCH_SIZE;
@@ -457,7 +457,7 @@ public class ReplayBuffer
 
     public List<ReplayBufferItem> items;
 
-    private const int max_count = 1000000;
+    private const int max_count = 10000;
 
     public ReplayBuffer()
     {
