@@ -4,7 +4,7 @@ namespace Sensors
 {
     public static class Radar
     {
-        public const float max_distance = 2f;
+        public const float max_distance = 3f;
 
         // Radar okolo lode
         public static RaycastHit2D?[] Scan(Vector2 origin, Vector2 lookDirection, Transform parent)

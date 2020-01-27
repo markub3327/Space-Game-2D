@@ -71,15 +71,10 @@ public class ShipController : MonoBehaviour
         }
     }
 
-    // Stavy t-1 (pre ziskanie odmeny za tah v hre)
-    //protected int Health_old = maxHealth;
-    //protected float Fuel_old = maxFuel;
-    //protected int Ammo_old = maxAmmo;
-
     // Zoznam planet, ktore vlastni lod
     public List<PlanetController> myPlanets;
     public bool hasNewPlanet = false;
-
+    
     // Respawn
     public bool IsDestroyed { get; protected set; } = false;  // stav lode, je lod znicena?
 
@@ -110,7 +105,7 @@ public class ShipController : MonoBehaviour
     /// <param name="move">Normalizovany vektor udavajuci smer a velkost pohybu</param>
     protected void MoveShip(Vector2 move)
     {
-        if (!IsDestroyed && this.Fuel > 0f)
+        if (this.Fuel > 0f)
         {
             // Vypocitaj zmenu rychlosti rotacie a pozicie hraca
             var position = rigidbody2d.position;
