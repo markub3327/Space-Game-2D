@@ -121,9 +121,9 @@ public class AgentsComparer : IComparer<AgentDDQN>
     public int Compare(AgentDDQN x, AgentDDQN y)
     {
         if (x.fitness < y.fitness)
-            return -1;
-        else if (x.fitness > y.fitness)
             return +1;
+        else if (x.fitness > y.fitness)
+            return -1;
         else
             return 0;
     }
