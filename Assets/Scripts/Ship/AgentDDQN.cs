@@ -70,11 +70,11 @@ public class AgentDDQN : ShipController
 
         //var num_of_inputs = num_of_states * num_of_frames;
         QNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
-        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
-        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
         
         // Init Player info panel
@@ -162,6 +162,12 @@ public class AgentDDQN : ShipController
                     replayBufferItem.Done = false;
                     replayBufferItem.Reward = GetReward();
                     this.levelBox.text = this.score.ToString("0.000");
+                }
+                
+                // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
+                if (!this.presiel10Epizod)
+                {
+                    this.fitness += replayBufferItem.Reward;
                 }
 
                 // Uloz udalost do bufferu
@@ -366,12 +372,8 @@ public class AgentDDQN : ShipController
                 
             if (this.presiel10Epizod)
             {
-                QNet.errorList.Add(fitness);
+                QNet.errorList.Add(avgErr);
                 Debug.Log($"avgErr.QNet[{this.name}] = {avgErr}");
-            }
-            else
-            {
-                this.fitness += avgErr;
             }
         }
     }
