@@ -34,8 +34,8 @@ public class NeuralLayer
                 sigma = 0f,
                 IndexW = this.Weights.Count,
                 num_of_inputs = num_of_inputs,
-                momentum = 0.900f,
-                learning_rate = 0.010f
+                momentum = 0.9f,
+                learning_rate = 0.001f
             });
             for (int n = 0; n <= num_of_inputs; n++)
             {
@@ -58,8 +58,8 @@ public class NeuralLayer
                 sigma = 0f,
                 IndexW = this.Weights.Count,
                 num_of_inputs = num_of_inputs,
-                momentum = 0.900f,
-                learning_rate = 0.010f
+                momentum = 0.9f,
+                learning_rate = 0.001f
             });
             for (int n = 0; n <= num_of_inputs; n++)
             {

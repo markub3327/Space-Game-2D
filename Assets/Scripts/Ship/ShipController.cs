@@ -33,7 +33,7 @@ public class ShipController : MonoBehaviour
 
     // Player's ammo
     public UIBarControl ammoBar;
-    public const int maxAmmo = 200;               // maximalny pocet nabojov hraca
+    public const int maxAmmo = 100;               // maximalny pocet nabojov hraca
     private int _ammo = maxAmmo;
     public int Ammo {
         get
@@ -53,7 +53,7 @@ public class ShipController : MonoBehaviour
 
     // Player's fuel
     public UIBarControl fuelBar;
-    public const int maxFuel = 10;                // maximalny pocet paliva v nadrzi hraca
+    public const int maxFuel = 5;                // maximalny pocet paliva v nadrzi hraca
     private float _fuel = maxFuel;
     public float Fuel {
         get
@@ -73,7 +73,6 @@ public class ShipController : MonoBehaviour
 
     // Zoznam planet, ktore vlastni lod
     public List<PlanetController> myPlanets;
-    public bool hasNewPlanet = false;
     
     // Respawn
     public bool IsDestroyed { get; protected set; } = false;  // stav lode, je lod znicena?

@@ -21,7 +21,6 @@ public class PlanetController : MonoBehaviour
             {
                 this.OwnerPlanet = ship;
                 ship.myPlanets.Add(this);
-                ship.hasNewPlanet = true;
             }
 
             // Vycisti dialogove okno

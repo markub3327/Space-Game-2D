@@ -2007,11 +2007,6 @@ PrefabInstance:
       objectReference: {fileID: 519420031}
     - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
-      propertyPath: testMode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
       propertyPath: myGA
       value: 
       objectReference: {fileID: 898395953}
@@ -13644,11 +13639,6 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 206128129584833057, guid: dea3018b8a27844a4a9701a79c63ab1c,
         type: 3}
-      propertyPath: testMode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 206128129584833057, guid: dea3018b8a27844a4a9701a79c63ab1c,
-        type: 3}
       propertyPath: myGA
       value: 
       objectReference: {fileID: 898395953}
@@ -14052,11 +14042,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 898395952}
     m_Modifications:
-    - target: {fileID: 206128129584833057, guid: dea3018b8a27844a4a9701a79c63ab1c,
-        type: 3}
-      propertyPath: testMode
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 206128129584833057, guid: dea3018b8a27844a4a9701a79c63ab1c,
         type: 3}
       propertyPath: myGA
@@ -14582,11 +14567,6 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 519420031}
-    - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: testMode
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: myGA

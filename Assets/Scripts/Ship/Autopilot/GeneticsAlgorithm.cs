@@ -34,10 +34,8 @@ public class GeneticsAlgorithm : MonoBehaviour
             for (int i = 0; i < agents.Count; i++)
             {
                 Debug.Log($"order = {i+1}., name = {agents[i].name}, fitness = {agents[i].fitness}");
-                agents[i].presiel10Epizod = false;
-
-                // Vynuluj meranie skore agentom
                 agents[i].fitness = 0.0f;
+                agents[i].presiel10Epizod = false;
             }
         }
     }
@@ -123,9 +121,9 @@ public class AgentsComparer : IComparer<AgentDDQN>
     public int Compare(AgentDDQN x, AgentDDQN y)
     {
         if (x.fitness < y.fitness)
-            return 1;
-        else if (x.fitness > y.fitness)
             return -1;
+        else if (x.fitness > y.fitness)
+            return +1;
         else
             return 0;
     }
