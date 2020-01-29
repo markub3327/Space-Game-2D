@@ -48,7 +48,7 @@ public class AgentDDQN : ShipController
     {
         base.Start();
 
-        epsilon_decay = (epsilon - epsilonMin) / 10000f;
+        epsilon_decay = (epsilon - epsilonMin) / 5000f;
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
@@ -70,11 +70,11 @@ public class AgentDDQN : ShipController
 
         //var num_of_inputs = num_of_states * num_of_frames;
         QNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
-        QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
-        QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
         
         // Init Player info panel
@@ -309,7 +309,7 @@ public class AgentDDQN : ShipController
         return qValues[action].output;
     }
 
-    private void Training(float gamma=0.99f, float tau=0.01f)
+    private void Training(float gamma=0.90f, float tau=0.01f)
     {        
         // Ak je v zasobniku dost vzorov k uceniu
         if (this.replayMemory.Count >= BATCH_SIZE && !testMode)
@@ -448,10 +448,10 @@ public class AgentDDQN : ShipController
         float reward;
 
         // Vypocitaj skore hraca
-        this.score = ((float)this.Health / (float)ShipController.maxHealth) * 0.25f;
-        this.score += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.25f;
+        this.score = ((float)this.Health / (float)ShipController.maxHealth) * 0.20f;
+        this.score += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.20f;
         this.score += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.10f;
-        this.score += ((float)this.myPlanets.Count / 4f) * 0.40f;
+        this.score += ((float)this.myPlanets.Count / 4f) * 0.50f;
 
         reward = score - this.score_old;
         this.score_old = this.score;
