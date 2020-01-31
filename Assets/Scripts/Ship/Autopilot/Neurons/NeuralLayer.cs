@@ -35,7 +35,7 @@ public class NeuralLayer
                 IndexW = this.Weights.Count,
                 num_of_inputs = num_of_inputs,
                 momentum = 0.9f,
-                learning_rate = 0.001f
+                learning_rate = 0.005f
             });
             for (int n = 0; n <= num_of_inputs; n++)
             {
@@ -59,7 +59,7 @@ public class NeuralLayer
                 IndexW = this.Weights.Count,
                 num_of_inputs = num_of_inputs,
                 momentum = 0.9f,
-                learning_rate = 0.001f
+                learning_rate = 0.005f
             });
             for (int n = 0; n <= num_of_inputs; n++)
             {

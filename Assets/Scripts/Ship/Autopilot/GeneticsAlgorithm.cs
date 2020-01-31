@@ -18,7 +18,7 @@ public class GeneticsAlgorithm : MonoBehaviour
 
     public void Update()
     {        
-        if (agents.Where(p => p.presiel10Epizod == true).Count() == agents.Count)
+        if (agents.Where(p => p.presiel50Epizod == false).Count() == 0)
         {
             // Replace agents with agents list ordered by his fitness
             this.agents.Sort(new AgentsComparer());
@@ -35,7 +35,7 @@ public class GeneticsAlgorithm : MonoBehaviour
             {
                 Debug.Log($"order = {i+1}., name = {agents[i].name}, fitness = {agents[i].fitness}");
                 agents[i].fitness = 0.0f;
-                agents[i].presiel10Epizod = false;
+                agents[i].presiel50Epizod = false;
             }
         }
     }

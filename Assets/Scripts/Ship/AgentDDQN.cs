@@ -7,7 +7,7 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    private const int num_of_states = 176;
+    private const int num_of_states = 192;
 
     private const int num_of_actions = 16;
 
@@ -18,7 +18,7 @@ public class AgentDDQN : ShipController
 
     private ReplayBuffer replayMemory = new ReplayBuffer();
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 32; // size of minibatch
+    private const int BATCH_SIZE = 48; // size of minibatch
 
     // Frame buffer
     //private const int num_of_frames = 4;
@@ -38,7 +38,7 @@ public class AgentDDQN : ShipController
     public Text nameBox;
     public Text levelBox;
 
-    public bool presiel10Epizod = false;
+    public bool presiel50Epizod = false;
     public bool testMode = false;
 
     private float score = 0;
@@ -165,7 +165,7 @@ public class AgentDDQN : ShipController
                 }
                 
                 // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
-                if (!this.presiel10Epizod)
+                if (!this.presiel50Epizod)
                 {
                     this.fitness += replayBufferItem.Reward;
                 }
@@ -182,11 +182,11 @@ public class AgentDDQN : ShipController
         }
         else    // Ak je lod znicena = cas na preucenie siete (nove vedomosti)
         {            
-            if (this.presiel10Epizod == false)
+            if (this.presiel50Epizod == false)
             {
-                if (num_of_episodes > 0 && (num_of_episodes % 10 == 0))
+                if (num_of_episodes > 0 && (num_of_episodes % 50 == 0))
                 {
-                    this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
+                    this.presiel50Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
       
                     Debug.Log($"epsilon[{this.name}] = {epsilon}");
                     Debug.Log($"episode[{this.name}] = {num_of_episodes}");
@@ -364,14 +364,14 @@ public class AgentDDQN : ShipController
                     }
                 }
             
-                //if (this.presiel10Epizod)
-                avgErr += math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
+                if (presiel50Epizod)
+                    avgErr += math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
             }
-            // Kvadraticky priemer chyby NN
-            avgErr /= (float)BATCH_SIZE;
-                
-            if (this.presiel10Epizod)
+                 
+            if (presiel50Epizod)
             {
+                // Kvadraticky priemer chyby NN
+                avgErr /= (float)BATCH_SIZE;
                 QNet.errorList.Add(avgErr);
                 Debug.Log($"avgErr.QNet[{this.name}] = {avgErr}");
             }
@@ -386,7 +386,7 @@ public class AgentDDQN : ShipController
         
         // 192 = 12x16
         // Udaje o objektoch v okoli lodi
-        for (int i = 0; i < 16; i++, idx+=11)
+        for (int i = 0; i < 16; i++, idx+=12)
         {
             // ak luc narazil na objekt hry
             if (radarResult[i] != null)
@@ -398,31 +398,37 @@ public class AgentDDQN : ShipController
                         var planet = radarResult[i].Value.transform.GetComponent<PlanetController>();                        
                         if (this.myPlanets.Contains(planet))                
                             // moja planeta
-                            state[idx + 10] = GetDistance(radarResult[i].Value.distance); 
+                            state[idx + 11] = GetDistance(radarResult[i].Value.distance); 
                         else if (planet.OwnerPlanet != null)
                             // planeta uz vlastnena
-                            state[idx + 9] = GetDistance(radarResult[i].Value.distance); 
+                            state[idx + 10] = GetDistance(radarResult[i].Value.distance); 
                         else
                             // planeta bez vlastnika
-                            state[idx + 8] = GetDistance(radarResult[i].Value.distance); 
+                            state[idx + 9] = GetDistance(radarResult[i].Value.distance); 
                         break;
                     case "Moon":
-                        state[idx + 7] = GetDistance(radarResult[i].Value.distance);
+                        state[idx + 8] = GetDistance(radarResult[i].Value.distance);
                         break;
                     case "Star":
-                        state[idx + 6] = GetDistance(radarResult[i].Value.distance); 
+                        state[idx + 7] = GetDistance(radarResult[i].Value.distance); 
                         break;
                      case "Nebula":
-                        state[idx + 5] = GetDistance(radarResult[i].Value.distance);
+                        state[idx + 6] = GetDistance(radarResult[i].Value.distance);
                         break;
                     case "Health":
-                        state[idx + 4] = GetDistance(radarResult[i].Value.distance); 
+                        state[idx + 5] = GetDistance(radarResult[i].Value.distance); 
                         break;
                     case "Ammo":
-                        state[idx + 3] = GetDistance(radarResult[i].Value.distance); 
+                        state[idx + 4] = GetDistance(radarResult[i].Value.distance); 
                         break;
                     case "Projectile":
-                        state[idx + 2] = GetDistance(radarResult[i].Value.distance);  
+                        var projectile = radarResult[i].Value.transform.GetComponent<Projectile>();
+                        if (projectile.firingShip == this)
+                            // projektil patri mne (neutoci)
+                            state[idx + 3] = GetDistance(radarResult[i].Value.distance);
+                        else
+                            // projektil patri inej lodi (utoci)
+                            state[idx + 2] = GetDistance(radarResult[i].Value.distance);  
                         break;
                     case "Player":
                         state[idx + 1] = GetDistance(radarResult[i].Value.distance); 
@@ -450,10 +456,10 @@ public class AgentDDQN : ShipController
         float reward;
 
         // Vypocitaj skore hraca
-        this.score = ((float)this.Health / (float)ShipController.maxHealth) * 0.20f;
-        this.score += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.20f;
-        this.score += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.10f;
-        this.score += ((float)this.myPlanets.Count / 4f) * 0.50f;
+        this.score = ((float)this.Health / (float)ShipController.maxHealth) * 0.10f;
+        this.score += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.10f;
+        this.score += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.05f;
+        this.score += ((float)this.myPlanets.Count / 4f) * 0.75f;
 
         reward = score - this.score_old;
         this.score_old = this.score;
@@ -464,7 +470,7 @@ public class AgentDDQN : ShipController
 
 public class ReplayBuffer
 {
-    private const int max_count = 100000;
+    private const int max_count = 50000;
 
     private Unity.Mathematics.Random randGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
 
