@@ -42,13 +42,13 @@ public class AgentDDQN : ShipController
     public bool testMode = false;
 
     private float score = 0;
-    private float score_old = 0;
+    private float score_old;
 
     public override void Start()
     {
         base.Start();
 
-        epsilon_decay = (epsilon - epsilonMin) / 5000f;
+        epsilon_decay = (epsilon - epsilonMin) / 10000f;
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
@@ -70,11 +70,11 @@ public class AgentDDQN : ShipController
 
         //var num_of_inputs = num_of_states * num_of_frames;
         QNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
-        QNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
-        QTargetNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
         
         // Init Player info panel
@@ -121,6 +121,7 @@ public class AgentDDQN : ShipController
 
         // Nacitaj stav, t=0
         this.replayBufferItem = new ReplayBufferItem { State = this.GetState() };
+        this.score_old = GetScore();
     }
 
     public void Update()
@@ -151,6 +152,7 @@ public class AgentDDQN : ShipController
 
                     // Destrukcia lode
                     DestroyShip();
+                    this.score_old = GetScore();
 
                     // Terminalny stav - koniec epizody
                     replayBufferItem.Done = true;
@@ -455,16 +457,24 @@ public class AgentDDQN : ShipController
     {
         float reward;
 
-        // Vypocitaj skore hraca
-        this.score = ((float)this.Health / (float)ShipController.maxHealth) * 0.10f;
-        this.score += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.10f;
-        this.score += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.05f;
-        this.score += ((float)this.myPlanets.Count / 4f) * 0.75f;
-
+        this.score = GetScore();
         reward = score - this.score_old;
         this.score_old = this.score;
 
         return reward;
+    }
+
+    private float GetScore()
+    {
+        float avg;
+
+        // Vypocitaj skore hraca
+        avg = ((float)this.Health / (float)ShipController.maxHealth) * 0.10f;
+        avg += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.10f;
+        avg += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.05f;
+        avg += ((float)this.myPlanets.Count / 4f) * 0.75f;
+
+        return avg;
     }
 }
 
