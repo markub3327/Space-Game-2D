@@ -382,13 +382,12 @@ public class AgentDDQN : ShipController
 
     private float[] GetState()
     {
-        var radarResult = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this.transform);
         float[] state = new float[num_of_states];       // array of zeros
-        int idx = 0;
+        var radarResult = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this.transform);
         
         // 736 = 23x32
         // Udaje o objektoch v okoli lodi
-        for (int i = 0; i < 32; i++, idx+=24)
+        for (int i = 0, idx = 0; i < 32; i++, idx+=24)
         {
             // ak luc narazil na objekt hry
             if (radarResult[i] != null)
@@ -500,7 +499,7 @@ public class AgentDDQN : ShipController
                         Debug.Log($"obj.tag = {radarResult[i].Value.transform.tag}, dist = {radarResult[i].Value.distance}");
                         break;
                 }
-            }            
+            }
         }
 
         return state;
@@ -528,10 +527,10 @@ public class AgentDDQN : ShipController
         float avg;
 
         // Vypocitaj skore hraca
-        avg = ((float)this.Health / (float)ShipController.maxHealth) * 0.15f;
-        avg += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.15f;
-        avg += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.10f;
-        avg += ((float)this.myPlanets.Count / 4f) * 0.60f;
+        avg  = (float)this.Health          * 0.15f;
+        avg += (float)this.Fuel            * 0.15f;
+        avg += (float)this.Ammo            * 0.10f;
+        avg += (float)this.myPlanets.Count * 0.60f;
 
         return avg;
     }
