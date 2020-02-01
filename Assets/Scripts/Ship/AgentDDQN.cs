@@ -7,7 +7,7 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    private const int num_of_states = 384;
+    private const int num_of_states = 672;
 
     private const int num_of_actions = 16;
 
@@ -69,12 +69,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
-        QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
+        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
-        QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
+        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
         
         // Init Player info panel
@@ -388,7 +388,7 @@ public class AgentDDQN : ShipController
         
         // 384 = 12x32
         // Udaje o objektoch v okoli lodi
-        for (int i = 0; i < 32; i++, idx+=12)
+        for (int i = 0; i < 32; i++, idx+=21)
         {
             // ak luc narazil na objekt hry
             if (radarResult[i] != null)
@@ -398,15 +398,56 @@ public class AgentDDQN : ShipController
                 {
                     case "Planet":
                         var planet = radarResult[i].Value.transform.GetComponent<PlanetController>();                        
-                        if (this.myPlanets.Contains(planet))                
-                            // moja planeta
-                            state[idx + 11] = GetDistance(radarResult[i].Value.distance); 
-                        else if (planet.OwnerPlanet != null)
-                            // planeta uz vlastnena
-                            state[idx + 10] = GetDistance(radarResult[i].Value.distance); 
-                        else
-                            // planeta bez vlastnika
-                            state[idx + 9] = GetDistance(radarResult[i].Value.distance); 
+                        switch (planet.name)
+                        {
+                            case "Saturn":
+                                if (this.myPlanets.Contains(planet))     
+                                    // moja planeta
+                                    state[idx + 20] = GetDistance(radarResult[i].Value.distance); 
+                                else if (planet.OwnerPlanet != null)
+                                    // planeta uz vlastnena
+                                    state[idx + 19] = GetDistance(radarResult[i].Value.distance); 
+                                else
+                                    // planeta bez vlastnika
+                                    state[idx + 18] = GetDistance(radarResult[i].Value.distance); 
+                                break;
+                            case "Earth":
+                                if (this.myPlanets.Contains(planet))     
+                                    // moja planeta
+                                    state[idx + 17] = GetDistance(radarResult[i].Value.distance); 
+                                else if (planet.OwnerPlanet != null)
+                                    // planeta uz vlastnena
+                                    state[idx + 16] = GetDistance(radarResult[i].Value.distance); 
+                                else
+                                    // planeta bez vlastnika
+                                    state[idx + 15] = GetDistance(radarResult[i].Value.distance); 
+                                break;
+                            case "Mars":
+                                if (this.myPlanets.Contains(planet))     
+                                    // moja planeta
+                                    state[idx + 14] = GetDistance(radarResult[i].Value.distance); 
+                                else if (planet.OwnerPlanet != null)
+                                    // planeta uz vlastnena
+                                    state[idx + 13] = GetDistance(radarResult[i].Value.distance); 
+                                else
+                                    // planeta bez vlastnika
+                                    state[idx + 12] = GetDistance(radarResult[i].Value.distance); 
+                                break;
+                            case "Jupiter":
+                                if (this.myPlanets.Contains(planet))     
+                                    // moja planeta
+                                    state[idx + 11] = GetDistance(radarResult[i].Value.distance); 
+                                else if (planet.OwnerPlanet != null)
+                                    // planeta uz vlastnena
+                                    state[idx + 10] = GetDistance(radarResult[i].Value.distance); 
+                                else
+                                    // planeta bez vlastnika
+                                    state[idx + 9] = GetDistance(radarResult[i].Value.distance); 
+                                break;
+                            default:
+                                Debug.Log($"obj.tag = {planet.name}, dist = {radarResult[i].Value.distance}");
+                                break;
+                        }
                         break;
                     case "Moon":
                         state[idx + 8] = GetDistance(radarResult[i].Value.distance);
