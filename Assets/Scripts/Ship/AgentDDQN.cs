@@ -7,7 +7,7 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    private const int num_of_states = 672;
+    private const int num_of_states = 736;
 
     private const int num_of_actions = 16;
 
@@ -386,9 +386,9 @@ public class AgentDDQN : ShipController
         float[] state = new float[num_of_states];       // array of zeros
         int idx = 0;
         
-        // 384 = 12x32
+        // 736 = 23x32
         // Udaje o objektoch v okoli lodi
-        for (int i = 0; i < 32; i++, idx+=21)
+        for (int i = 0; i < 32; i++, idx+=23)
         {
             // ak luc narazil na objekt hry
             if (radarResult[i] != null)
@@ -403,46 +403,46 @@ public class AgentDDQN : ShipController
                             case "Saturn":
                                 if (this.myPlanets.Contains(planet))     
                                     // moja planeta
-                                    state[idx + 20] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 22] = GetDistance(radarResult[i].Value.distance); 
                                 else if (planet.OwnerPlanet != null)
                                     // planeta uz vlastnena
-                                    state[idx + 19] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 21] = GetDistance(radarResult[i].Value.distance); 
                                 else
                                     // planeta bez vlastnika
-                                    state[idx + 18] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 20] = GetDistance(radarResult[i].Value.distance); 
                                 break;
                             case "Earth":
                                 if (this.myPlanets.Contains(planet))     
                                     // moja planeta
-                                    state[idx + 17] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 19] = GetDistance(radarResult[i].Value.distance); 
                                 else if (planet.OwnerPlanet != null)
                                     // planeta uz vlastnena
-                                    state[idx + 16] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 18] = GetDistance(radarResult[i].Value.distance); 
                                 else
                                     // planeta bez vlastnika
-                                    state[idx + 15] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 17] = GetDistance(radarResult[i].Value.distance); 
                                 break;
                             case "Mars":
                                 if (this.myPlanets.Contains(planet))     
                                     // moja planeta
-                                    state[idx + 14] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 16] = GetDistance(radarResult[i].Value.distance); 
                                 else if (planet.OwnerPlanet != null)
                                     // planeta uz vlastnena
-                                    state[idx + 13] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 15] = GetDistance(radarResult[i].Value.distance); 
                                 else
                                     // planeta bez vlastnika
-                                    state[idx + 12] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 14] = GetDistance(radarResult[i].Value.distance); 
                                 break;
                             case "Jupiter":
                                 if (this.myPlanets.Contains(planet))     
                                     // moja planeta
-                                    state[idx + 11] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 13] = GetDistance(radarResult[i].Value.distance); 
                                 else if (planet.OwnerPlanet != null)
                                     // planeta uz vlastnena
-                                    state[idx + 10] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 12] = GetDistance(radarResult[i].Value.distance); 
                                 else
                                     // planeta bez vlastnika
-                                    state[idx + 9] = GetDistance(radarResult[i].Value.distance); 
+                                    state[idx + 11] = GetDistance(radarResult[i].Value.distance); 
                                 break;
                             default:
                                 Debug.Log($"obj.tag = {planet.name}, dist = {radarResult[i].Value.distance}");
@@ -450,13 +450,27 @@ public class AgentDDQN : ShipController
                         }
                         break;
                     case "Moon":
-                        state[idx + 8] = GetDistance(radarResult[i].Value.distance);
+                        state[idx + 10] = GetDistance(radarResult[i].Value.distance);
                         break;
                     case "Star":
-                        state[idx + 7] = GetDistance(radarResult[i].Value.distance); 
+                        state[idx + 9] = GetDistance(radarResult[i].Value.distance); 
                         break;
                      case "Nebula":
-                        state[idx + 6] = GetDistance(radarResult[i].Value.distance);
+                        switch (radarResult[i].Value.transform.name)
+                        {
+                            case "Nebula-Red":
+                                state[idx + 8] = GetDistance(radarResult[i].Value.distance); 
+                                break;
+                            case "Nebula-Blue":
+                                state[idx + 7] = GetDistance(radarResult[i].Value.distance); 
+                                break;
+                            case "Nebula-Silver":
+                                state[idx + 6] = GetDistance(radarResult[i].Value.distance); 
+                                break;
+                            default:
+                                Debug.Log($"obj.tag = {radarResult[i].Value.transform.name}, dist = {radarResult[i].Value.distance}");
+                                break;
+                        }                        
                         break;
                     case "Health":
                         state[idx + 5] = GetDistance(radarResult[i].Value.distance); 

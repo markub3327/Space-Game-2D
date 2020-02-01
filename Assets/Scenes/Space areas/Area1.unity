@@ -3413,7 +3413,7 @@ PrefabInstance:
     - target: {fileID: 8674290839193575467, guid: ce342863ea7f84c2891b3b3a33915acc,
         type: 3}
       propertyPath: m_Name
-      value: Nebula 3
+      value: Nebula-Silver
       objectReference: {fileID: 0}
     - target: {fileID: 8674290839193575467, guid: ce342863ea7f84c2891b3b3a33915acc,
         type: 3}
@@ -13080,7 +13080,7 @@ PrefabInstance:
     - target: {fileID: 8674290839193575467, guid: ce342863ea7f84c2891b3b3a33915acc,
         type: 3}
       propertyPath: m_Name
-      value: Nebula 2
+      value: Nebula-Blue
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ce342863ea7f84c2891b3b3a33915acc, type: 3}
@@ -14961,7 +14961,7 @@ PrefabInstance:
     - target: {fileID: 8674290839193575467, guid: ce342863ea7f84c2891b3b3a33915acc,
         type: 3}
       propertyPath: m_Name
-      value: Nebula 1
+      value: Nebula-Red
       objectReference: {fileID: 0}
     - target: {fileID: 8674290839193575467, guid: ce342863ea7f84c2891b3b3a33915acc,
         type: 3}
