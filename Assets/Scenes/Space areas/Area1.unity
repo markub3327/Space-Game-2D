@@ -1740,7 +1740,7 @@ PrefabInstance:
     - target: {fileID: 8016924804414281261, guid: 9d8809ffb93ea4a15a35c7c26fe8a990,
         type: 3}
       propertyPath: m_Name
-      value: Moon
+      value: Fobos
       objectReference: {fileID: 0}
     - target: {fileID: 8016924804414281261, guid: 9d8809ffb93ea4a15a35c7c26fe8a990,
         type: 3}
