@@ -25,19 +25,24 @@ public class MoonController : MonoBehaviour
     {
         // Spin the object around the world origin at 20 degrees/second.
 		transform.RotateAround(planetTransform.position, Vector3.forward, rotationSpeed * Time.deltaTime);
-
-        // Vyrovnaj text aby bol citatelny
-        dialogBox.transform.rotation = Quaternion.Euler(0f, 0f, -Mathf.Atan2(transform.position.y, transform.position.x) * Mathf.Rad2Deg - 40f);
     }
 
-    public void ShowDialog()
+    // Kolizia
+    private void OnTriggerEnter2D(Collider2D collider)
     {
-        dialogBox.gameObject.SetActive(true);
+        if (collider.gameObject.tag == "Player")
+        {
+            dialogBox.gameObject.SetActive(true);
+        }
     }
 
-    public void CloseDialog()
+    // Na konci kolizie
+    void OnTriggerExit2D(Collider2D collider)
     {
-        // Deaktivuj dialogove okno
-        dialogBox.gameObject.SetActive(false);
+        if (collider.gameObject.tag == "Player")
+        {
+            // Deaktivuj dialogove okno
+            dialogBox.gameObject.SetActive(false);
+        }
     }
 }

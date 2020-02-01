@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1776190722379617474}
   - component: {fileID: 60312288092528544}
   - component: {fileID: 1575137445023622045}
-  - component: {fileID: 2999362981660393990}
+  - component: {fileID: 7012184471259581375}
   m_Layer: 12
   m_Name: Asteroid
   m_TagString: Asteroid
@@ -125,15 +125,15 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 1
   m_Mass: 2.3776412
-  m_LinearDrag: 0
-  m_AngularDrag: 0
+  m_LinearDrag: 0.8
+  m_AngularDrag: 0.8
   m_GravityScale: 1
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &2999362981660393990
+--- !u!114 &7012184471259581375
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -145,7 +145,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74bbab07b00e24933a8948077103fbc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  damageClip: {fileID: 8300000, guid: ae904c7305df7344d86b2092c0cb3a26, type: 3}
   rotationSpeed: 10
   starTransform: {fileID: 0}
-  explosionAnim: {fileID: 2236869965556612302, guid: 2dc0497fbd6fc44d6b3acba230f14927,
-    type: 3}

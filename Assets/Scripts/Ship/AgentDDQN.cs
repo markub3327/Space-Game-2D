@@ -7,7 +7,7 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    private const int num_of_states = 736;
+    private const int num_of_states = 768;
 
     private const int num_of_actions = 16;
 
@@ -69,12 +69,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
-        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
+        QNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
-        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
+        QTargetNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
         
         // Init Player info panel
@@ -317,7 +317,7 @@ public class AgentDDQN : ShipController
         return qValues[action].output;
     }
 
-    private void Training(float gamma=0.90f, float tau=0.01f)
+    private void Training(float gamma=0.90f, float tau=0.001f)
     {        
         // Ak je v zasobniku dost vzorov k uceniu
         if (this.replayMemory.Count >= BATCH_SIZE && !testMode)
@@ -388,7 +388,7 @@ public class AgentDDQN : ShipController
         
         // 736 = 23x32
         // Udaje o objektoch v okoli lodi
-        for (int i = 0; i < 32; i++, idx+=23)
+        for (int i = 0; i < 32; i++, idx+=24)
         {
             // ak luc narazil na objekt hry
             if (radarResult[i] != null)
@@ -396,7 +396,10 @@ public class AgentDDQN : ShipController
                 // TAG = VSTUP do NN
                 switch (radarResult[i].Value.transform.tag)
                 {
-                    case "Planet":
+                    case "Asteroid":
+                        state[idx + 23] = GetDistance(radarResult[i].Value.distance);
+                        break;
+                    case "Planet": // staticke orientacne body
                         var planet = radarResult[i].Value.transform.GetComponent<PlanetController>();                        
                         switch (planet.name)
                         {
@@ -455,7 +458,7 @@ public class AgentDDQN : ShipController
                     case "Star":
                         state[idx + 9] = GetDistance(radarResult[i].Value.distance); 
                         break;
-                     case "Nebula":
+                     case "Nebula": // staticke orientacne body
                         switch (radarResult[i].Value.transform.name)
                         {
                             case "Nebula-Red":
@@ -525,10 +528,10 @@ public class AgentDDQN : ShipController
         float avg;
 
         // Vypocitaj skore hraca
-        avg = ((float)this.Health / (float)ShipController.maxHealth) * 0.10f;
-        avg += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.10f;
-        avg += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.05f;
-        avg += ((float)this.myPlanets.Count / 4f) * 0.75f;
+        avg = ((float)this.Health / (float)ShipController.maxHealth) * 0.15f;
+        avg += ((float)this.Fuel / (float)ShipController.maxFuel) * 0.15f;
+        avg += ((float)this.Ammo / (float)ShipController.maxAmmo) * 0.10f;
+        avg += ((float)this.myPlanets.Count / 4f) * 0.60f;
 
         return avg;
     }

@@ -23,9 +23,6 @@ public class PlanetController : MonoBehaviour
                 ship.myPlanets.Add(this);
             }
 
-            // Vycisti dialogove okno
-            dialogBox.Clear();
-
             // Vypis do dialogoveho okna
             dialogBox.WriteLine($"Planet: {this.name}");
             dialogBox.WriteLine($"Owner: {(this.OwnerPlanet != null ? this.OwnerPlanet.name : string.Empty)}");
@@ -41,12 +38,6 @@ public class PlanetController : MonoBehaviour
             // Vycisti a deaktivuj dialogove okno
             dialogBox.Clear();
             dialogBox.gameObject.SetActive(false);
-
-            // Zatvor dialogBox na vsetkych mesiacoch planety
-            foreach (var moon in Moons)
-            {
-                moon.CloseDialog();
-            }
         }
     }
 }

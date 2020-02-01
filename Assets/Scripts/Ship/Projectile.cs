@@ -33,30 +33,18 @@ public class Projectile : MonoBehaviour
     }
 
     // Pri kolizii s objektom
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D collider)
     {
-        if (other.gameObject != firingShip.gameObject)
+        if (collider.gameObject != firingShip.gameObject)
         {
             //Debug.Log($"Projectile {this.name} collide with {other.gameObject.name}");
 
-            switch (other.gameObject.layer)
+            if (collider.gameObject.tag == "Player")
             {
-                case 10:    // Ship
-                    {
-                        var controller = other.gameObject.GetComponent<ShipController>();
-                        if (controller != null)
-                            // Znizi zivoty hracovi
-                            controller.ChangeHealth(-1);
-                        break;
-                    }
-                case 12:    // Asteroid
-                    {
-                        var controller = other.gameObject.GetComponent<AsteroidController>();
-                        if (controller != null)
-                            // Znici asteroid
-                            controller.Destroy();
-                        break;
-                    }
+                var controller = collider.gameObject.GetComponent<ShipController>();
+                if (controller != null)
+                    // Znizi zivoty hracovi
+                    controller.ChangeHealth(-1);
             }
 
             // Prehra zvuk zasahu projektilu
