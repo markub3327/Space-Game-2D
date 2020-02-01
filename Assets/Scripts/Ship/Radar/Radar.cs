@@ -4,16 +4,16 @@ namespace Sensors
 {
     public static class Radar
     {
-        public const float max_distance = 3f;
+        public const float max_distance = 5f;
 
         // Radar okolo lode
         public static RaycastHit2D?[] Scan(Vector2 origin, Vector2 lookDirection, Transform parent)
         {
             float angle = 0f;
-            var hits = new RaycastHit2D?[16];
+            var hits = new RaycastHit2D?[32];
 
             // Vysli luce pod uhlami po 22.5 stupnoch (16 skenov)
-            for (int idx = 0; angle < 360; angle += 22.5f, idx++)
+            for (int idx = 0; angle < 360; angle += 11.25f, idx++)
             {
                 hits[idx] = null;
 

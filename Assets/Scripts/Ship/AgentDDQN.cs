@@ -7,7 +7,7 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    private const int num_of_states = 192;
+    private const int num_of_states = 384;
 
     private const int num_of_actions = 16;
 
@@ -69,12 +69,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
-        QNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
+        QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
-        QTargetNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
+        QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
         
         // Init Player info panel
@@ -386,9 +386,9 @@ public class AgentDDQN : ShipController
         float[] state = new float[num_of_states];       // array of zeros
         int idx = 0;
         
-        // 192 = 12x16
+        // 384 = 12x32
         // Udaje o objektoch v okoli lodi
-        for (int i = 0; i < 16; i++, idx+=12)
+        for (int i = 0; i < 32; i++, idx+=12)
         {
             // ak luc narazil na objekt hry
             if (radarResult[i] != null)
@@ -450,7 +450,8 @@ public class AgentDDQN : ShipController
 
     private float GetDistance(float d)
     {
-        return Sensors.Radar.max_distance - d;
+        // Normalizovany vstup
+        return (Sensors.Radar.max_distance - d) / Sensors.Radar.max_distance;
     }
 
     private float GetReward()
