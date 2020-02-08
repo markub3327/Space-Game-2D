@@ -4,7 +4,7 @@ using UnityEngine;
 public class HealthsGenerator : MonoBehaviour
 {
     // Maximalny pocet srdiecok v hre
-    public static int MaxHealthObjects { get; set; } = 3;
+    public static int MaxHealthObjects { get; set; } = 5;
 
     // Zoznam volnych pozicii pre srdiecka
     public List<Vector2> freePoints = new List<Vector2>(MaxHealthObjects);
@@ -23,10 +23,10 @@ public class HealthsGenerator : MonoBehaviour
     }
 
     // Update is called once per frame
-    private void FixedUpdate()
+    private void Update()
     {
         // Pocet srdiecok v hre (musia chybat 2 zivoty)
-        if (freePoints.Count >= 3)
+        if (freePoints.Count > 0)
         {
             Timer -= Time.deltaTime;
             if (Timer < 0f)

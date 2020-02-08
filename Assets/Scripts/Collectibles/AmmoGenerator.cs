@@ -13,7 +13,7 @@ public class AmmoGenerator : MonoBehaviour
     public GameObject AmmoPrefab;
 
     // Casovac pridavania municie
-    private const float maxTime = 5f;
+    private const float maxTime = 10f;
     private float Timer = maxTime;
 
     // Start is called before the first frame update
@@ -23,10 +23,10 @@ public class AmmoGenerator : MonoBehaviour
     }
 
     // Update is called once per frame
-    private void FixedUpdate()
+    private void Update()
     {
         // Pocet srdiecok v hre (musia chybat 2 zivoty)
-        if (freePoints.Count >= 3)
+        if (freePoints.Count > 0)
         {
             Timer -= Time.deltaTime;
             if (Timer < 0f)

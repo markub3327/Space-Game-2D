@@ -336,7 +336,6 @@ MonoBehaviour:
   ammoBar: {fileID: 4008730070538748781}
   fuelBar: {fileID: 1337906483231677797}
   myPlanets: []
-  hasNewPlanet: 0
   fitness: 0
   num_of_episodes: 0
   turretControllers:
@@ -350,7 +349,6 @@ MonoBehaviour:
   levelBox: {fileID: 8138040364113821962}
   presiel10Epizod: 0
   testMode: 0
-  myGA: {fileID: 0}
 --- !u!1 &9101201141709214759
 GameObject:
   m_ObjectHideFlags: 0

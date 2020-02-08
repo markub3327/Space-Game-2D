@@ -9,7 +9,7 @@ public class AgentDDQN : ShipController
 {
     private const int num_of_states = 800;
 
-    private const int num_of_actions = 16;
+    private const int num_of_actions = 18;
 
     private bool isFirstFrame = true;
 
@@ -64,12 +64,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
-        QNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
+        QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
-        QTargetNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
+        QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
         // Init Player info panel
@@ -181,7 +181,7 @@ public class AgentDDQN : ShipController
         {            
             if (this.presiel10Epizod == false)
             {
-                if (num_of_episodes > 0 && (num_of_episodes % 10 == 0))
+                if (num_of_episodes > 0 && (num_of_episodes % 30 == 0))
                 {
                     this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
       
@@ -222,65 +222,85 @@ public class AgentDDQN : ShipController
         {
             action = UnityEngine.Random.Range(0, num_of_actions);
         }
-        
-        // Vykonaj akciu => koordinacia pohybu lode
+
         switch (action)
         {
-            case 0:         // Up
+            // case 0x00 - is stop (do nothing)
+            // Up
+            case 0x01:
                 this.MoveShip(Vector2.up);
                 break;
-            case 1:         // Up-Right
-                this.MoveShip(new Vector2(1f, 1f));
+            // Up-Right
+            case 0x02:
+                this.MoveShip(Vector2.up + Vector2.right);
                 break;
-            case 2:         // Right
+            // Right
+            case 0x03:
                 this.MoveShip(Vector2.right);
                 break;
-            case 3:         // Down-Right
-                this.MoveShip(new Vector2(1f, -1f));
+            // Down-Right
+            case 0x04:
+                this.MoveShip(Vector2.down + Vector2.right);
                 break;
-            case 4:         // Down
+            // Down
+            case 0x05:
                 this.MoveShip(Vector2.down);
                 break;
-            case 5:         // Down-Left
-                this.MoveShip(new Vector2(-1f, -1f));
+            // Down-Left
+            case 0x06:
+                this.MoveShip(Vector2.down + Vector2.left);
                 break;
-            case 6:         // Left
+            // Left
+            case 0x07:
                 this.MoveShip(Vector2.left);
                 break;
-            case 7:         // Left-Up
-                this.MoveShip(new Vector2(-1f, 1f));
-                break;            
-            case 8:         // Up
+            // Up-Left
+            case 0x08:
+                this.MoveShip(Vector2.up + Vector2.left);
+                break;
+            // is only firing
+            case 0x09:
+                this.Fire();
+                break;
+            // Up
+            case 0x10:
+                this.Fire();
                 this.MoveShip(Vector2.up);
-                this.Fire();
                 break;
-            case 9:         // Up-Right
-                this.MoveShip(new Vector2(1f, 1f));
+            // Up-Right
+            case 0x11:
                 this.Fire();
+                this.MoveShip(Vector2.up + Vector2.right);
                 break;
-            case 10:         // Right
+            // Right
+            case 0x12:
+                this.Fire();
                 this.MoveShip(Vector2.right);
-                this.Fire();
                 break;
-            case 11:         // Down-Right
-                this.MoveShip(new Vector2(1f, -1f));
+            // Down-Right
+            case 0x13:
                 this.Fire();
+                this.MoveShip(Vector2.down + Vector2.right);
                 break;
-            case 12:         // Down
+            // Down
+            case 0x14:
+                this.Fire();
                 this.MoveShip(Vector2.down);
-                this.Fire();
                 break;
-            case 13:         // Down-Left
-                this.MoveShip(new Vector2(-1f, -1f));
+            // Down-Left
+            case 0x15:
                 this.Fire();
+                this.MoveShip(Vector2.down + Vector2.left);
                 break;
-            case 14:         // Left
+            // Left
+            case 0x16:
+                this.Fire();
                 this.MoveShip(Vector2.left);
-                this.Fire();
                 break;
-            case 15:         // Left-Up
-                this.MoveShip(new Vector2(-1f, 1f));
+            // Up-Left
+            case 0x17:
                 this.Fire();
+                this.MoveShip(Vector2.up + Vector2.left);
                 break;
         }
 
@@ -324,7 +344,7 @@ public class AgentDDQN : ShipController
 
             for (int i = 0; i < sample.Count; i++)
             {
-                float[] targets = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                float[] targets = new float[num_of_actions];
 
                 // Non-terminal state     
                 if (sample[i].Done == false)
