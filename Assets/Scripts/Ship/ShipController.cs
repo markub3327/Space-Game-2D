@@ -89,6 +89,8 @@ public class ShipController : MonoBehaviour
     // Collider
     private PolygonCollider2D collider2d;
 
+    private Vector2 respawnPoint;
+
     // Start is called before the first frame update
     public virtual void Start()
     {
@@ -96,6 +98,8 @@ public class ShipController : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
         collider2d = GetComponent<PolygonCollider2D>();
+
+        respawnPoint = this.transform.position;
     }
 
     /// <summary>
@@ -172,7 +176,7 @@ public class ShipController : MonoBehaviour
 
     protected void RespawnShip()
     {
-        rigidbody2d.position = Respawn.getPoint();        
+        rigidbody2d.position = respawnPoint;  //Respawn.getPoint();        
         rigidbody2d.rotation = 0f;
         IsDestroyed = false;
         collider2d.enabled = true;

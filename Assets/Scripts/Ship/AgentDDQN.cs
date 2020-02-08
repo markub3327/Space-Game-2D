@@ -16,17 +16,12 @@ public class AgentDDQN : ShipController
     public NeuralNetwork QNet = new NeuralNetwork();
     public NeuralNetwork QTargetNet = new NeuralNetwork();
 
-    private ReplayBuffer replayMemory = new ReplayBuffer();
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 64; // size of minibatch
-
-    // Frame buffer
-    //private const int num_of_frames = 4;
-    //private List<float> frameBuffer = new List<float>(num_of_frames * num_of_states);
+    private const int BATCH_SIZE = 48; // size of minibatch
 
     // Epsilon
     private float epsilon = 1.0f;
-    private const float epsilonMin = 0.01f;
+    private const float epsilonMin = 0.05f;
     private float epsilon_decay;
 
     public float fitness = 0;
@@ -48,7 +43,7 @@ public class AgentDDQN : ShipController
     {
         base.Start();
 
-        epsilon_decay = (epsilon - epsilonMin) / 5000f;
+        epsilon_decay = (epsilon - epsilonMin) / 1000000f;
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
@@ -69,12 +64,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
-        QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
+        QNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
-        QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
+        QTargetNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
         // Init Player info panel
@@ -173,7 +168,7 @@ public class AgentDDQN : ShipController
                 }
 
                 // Uloz udalost do bufferu
-                this.replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
+                ReplayBuffer.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
 
                 // Uchovaj stav predoslej hry
                 this.replayBufferItem = new ReplayBufferItem { State = replayBufferItem.Next_state };
@@ -194,13 +189,9 @@ public class AgentDDQN : ShipController
                     Debug.Log($"episode[{this.name}] = {num_of_episodes}");
                 }
 
-                // Exploration/Exploitation parameter changed
-                if (this.epsilon > epsilonMin)
-                    this.epsilon -= this.epsilon_decay;  // od 100% nahody po 1%
-
                 num_of_episodes++;
             }
-            if (num_of_episodes > 20000) 
+            if (num_of_episodes > 5000) 
             { 
                 #if UNITY_EDITOR
                     UnityEditor.EditorApplication.isPlaying = false;
@@ -293,6 +284,10 @@ public class AgentDDQN : ShipController
                 break;
         }
 
+        // Exploration/Exploitation parameter changed
+        if (this.epsilon > epsilonMin)
+            this.epsilon -= this.epsilon_decay;  // od 100% nahody po 1%
+
         return action;
     }
 
@@ -317,15 +312,17 @@ public class AgentDDQN : ShipController
         return qValues[action].output;
     }
 
-    private void Training(float gamma=0.99f, float tau=0.01f)
+    private void Training(float gamma=0.90f, float tau=0.01f)
     {        
         // Ak je v zasobniku dost vzorov k uceniu
-        if (this.replayMemory.Count >= BATCH_SIZE && !testMode)
+        if (ReplayBuffer.Count >= BATCH_SIZE && !testMode)
         {
-            var sample = replayMemory.Sample(BATCH_SIZE);
+            var sample = ReplayBuffer.Sample(BATCH_SIZE);
             float avgErr = 0;
-        
-            for (int i = 0; i < BATCH_SIZE; i++)
+
+            //Debug.Log($"sample.Count = {sample.Count}, memory.Count = {this.replayMemory.Count}");
+
+            for (int i = 0; i < sample.Count; i++)
             {
                 float[] targets = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -373,7 +370,7 @@ public class AgentDDQN : ShipController
             if (presiel10Epizod)
             {
                 // Kvadraticky priemer chyby NN
-                avgErr /= (float)BATCH_SIZE;
+                avgErr /= (float)sample.Count;
                 QNet.errorList.Add(avgErr);
                 Debug.Log($"avgErr.QNet[{this.name}] = {avgErr}");
             }
@@ -547,47 +544,45 @@ public class AgentDDQN : ShipController
     }
 }
 
-public class ReplayBuffer
+public static class ReplayBuffer
 {
-    private const int max_count = 50000;
+    private const int max_count = 1000000;
 
-    private Unity.Mathematics.Random randGen = new Unity.Mathematics.Random((uint)System.DateTime.Now.Ticks);
+    public static LinkedList<ReplayBufferItem> items = new LinkedList<ReplayBufferItem>();
 
-    public List<ReplayBufferItem> items;
-
-    public ReplayBuffer()
-    {
-        this.items = new List<ReplayBufferItem>(max_count); // Ako ma standardny smart TV :D
-    }
-
-    public void Add(ReplayBufferItem item)
+    public static void Add(ReplayBufferItem item)
     {
         // LIFO
-        if (this.Count >= max_count)    
-            this.items.RemoveAt(0);
-        this.items.Add(item);        
+        if (items.Count >= max_count)    
+            items.RemoveFirst();
+        items.AddLast(item);        
     }
 
-    public ReplayBufferItem[] Sample(int batch_size)
+    public static List<ReplayBufferItem> Sample(int batch_size)
     {
-        List<ReplayBufferItem> buff = new List<ReplayBufferItem>(batch_size);
+        var buff = new List<ReplayBufferItem>(batch_size);
+        //var i = 0;
 
-        for (int i = 0; i < batch_size; i++)
+        foreach (var element in items)
         {
-            var idx = randGen.NextInt(0,this.Count);
-            buff.Add(this[idx]);           
+            if (buff.Count < batch_size)
+            {
+                if (UnityEngine.Random.Range(0.0f, 1.0f) < ((float)batch_size/(float)items.Count))
+                {
+                    buff.Add(element);              
+                    //Debug.Log($"selected element i = {i}/{items.Count}");
+                }
+            }
+            else
+                break;  // end of selecting items
+
+            //i++;
         }
 
-        return buff.ToArray();
-    }
+        return buff;
+    }    
 
-    public ReplayBufferItem this[int index]
-    {
-        get { return items[index]; }
-        set { items[index] = value; }
-    }
-    
-    public int Count { get { return items.Count; } }
+    public static int Count { get { return items.Count; } }
 }
 
 public class ReplayBufferItem

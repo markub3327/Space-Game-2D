@@ -32,11 +32,11 @@ public class GeneticsAlgorithm : MonoBehaviour
             // Mutacia
             this.Mutation();
 
+            // Soft update Q Target network
             foreach (var a in agents)
     		{
                 if (a != bestAgent)
 			    {
-                    // Soft update Q Target network
                     for (int j = 0; j < a.QNet.neuronLayers.Count; j++)
                     {
                         for (int k = 0; k < a.QNet.neuronLayers[j].Weights.Count; k++)
@@ -124,7 +124,7 @@ public class GeneticsAlgorithm : MonoBehaviour
 
                     for (int j = 0; j < a.QNet.neuronLayers[i].Weights.Count; j++)
                     {                        
-                        if (Random.Range(0.0f, 1.0f) < (0.01f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
+                        if (Random.Range(0.0f, 1.0f) < (0.05f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
                         {
                             var newW = Random.Range(-1.0f, 1.0f) * k;
                             a.QNet.neuronLayers[i].Weights[j] = newW;//0.0002f*newW + (1.0f-0.0002f)*a.QNet.neuronLayers[i].Weights[j];
