@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 308646146709840008}
   - component: {fileID: 1535776764880457998}
   - component: {fileID: 4083348612445641118}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Shoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 562172196990736657}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.06, y: 0.3, z: 0}
+  m_LocalPosition: {x: -0.06, y: 0.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5642378035005915217}
@@ -4766,8 +4766,8 @@ GameObject:
   m_Component:
   - component: {fileID: 5642378035005915217}
   - component: {fileID: 7040528982928546089}
-  - component: {fileID: 3923725894147193817}
-  m_Layer: 0
+  - component: {fileID: 4528097718256909391}
+  m_Layer: 2
   m_Name: Turret Large 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4837,7 +4837,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &3923725894147193817
+--- !u!114 &4528097718256909391
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4846,11 +4846,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 7268453001880701775}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48fa3980500e9462f89a91c35306a539, type: 3}
+  m_Script: {fileID: 11500000, guid: d7a76563d4c934585b3715ce51ca62ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  shootEffect: {fileID: 1535776764880457998}
   projectilePrefab: {fileID: 2917896089770542357, guid: ebd63f22f45124a63be1208ba149776b,
     type: 3}
-  throwClip: {fileID: 8300000, guid: b2edfd40873655249ba0e01a5cf705be, type: 3}
   shot_speed: 75
-  shootEffect: {fileID: 1535776764880457998}

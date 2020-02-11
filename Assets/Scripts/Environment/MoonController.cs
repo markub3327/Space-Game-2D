@@ -21,25 +21,26 @@ public class MoonController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         // Spin the object around the world origin at 20 degrees/second.
-		transform.RotateAround(planetTransform.position, Vector3.forward, rotationSpeed * Time.deltaTime);
+		transform.RotateAround(planetTransform.position, Vector3.forward, rotationSpeed * Time.fixedDeltaTime);
     }
 
     // Kolizia
-    private void OnTriggerEnter2D(Collider2D collider)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collider.gameObject.tag == "Player")
+        if (collision.gameObject.tag == "Player")
         {
+            // Aktivuj dialogove okno
             dialogBox.gameObject.SetActive(true);
         }
     }
 
     // Na konci kolizie
-    void OnTriggerExit2D(Collider2D collider)
+    void OnCollisionExit2D(Collision2D collision)
     {
-        if (collider.gameObject.tag == "Player")
+        if (collision.gameObject.tag == "Player")
         {
             // Deaktivuj dialogove okno
             dialogBox.gameObject.SetActive(false);

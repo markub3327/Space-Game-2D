@@ -32,7 +32,8 @@ public class AmmoGenerator : MonoBehaviour
             if (Timer < 0f)
             {
                 var idx = Random.Range(0, freePoints.Count);
-                Instantiate(AmmoPrefab, freePoints[idx], Quaternion.identity, this.transform);
+                var obj = Instantiate(AmmoPrefab, freePoints[idx], Quaternion.identity, this.transform);
+                obj.name = "Ammo";
 
                 // Vymaz pouzity bod z volnych (obsadeny)
                 freePoints.Remove(freePoints[idx]);

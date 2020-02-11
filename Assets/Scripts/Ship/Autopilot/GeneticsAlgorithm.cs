@@ -12,11 +12,6 @@ public class GeneticsAlgorithm : MonoBehaviour
 
     private float tau=0.01f;
 
-    public void Start()
-    {
-
-    }
-
     public void Update()
     {        
         if (agents.Where(p => p.presiel10Epizod == false).Count() == 0)
@@ -24,7 +19,7 @@ public class GeneticsAlgorithm : MonoBehaviour
             // Replace agents with agents list ordered by his fitness
             this.agents.Sort(new AgentsComparer());
             this.bestAgent = agents[0];
-            Debug.Log($"The best agent is {bestAgent.name}, fitness = {bestAgent.fitness}");
+            //Debug.Log($"The best agent is {bestAgent.name}, fitness = {bestAgent.fitness}");
 
             // Krizenie
             this.Crossover();
@@ -124,7 +119,7 @@ public class GeneticsAlgorithm : MonoBehaviour
 
                     for (int j = 0; j < a.QNet.neuronLayers[i].Weights.Count; j++)
                     {                        
-                        if (Random.Range(0.0f, 1.0f) < (0.04f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
+                        if (Random.Range(0.0f, 1.0f) < (0.01f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
                         {
                             var newW = Random.Range(-1.0f, 1.0f) * k;
                             a.QNet.neuronLayers[i].Weights[j] = newW;//0.0002f*newW + (1.0f-0.0002f)*a.QNet.neuronLayers[i].Weights[j];
@@ -140,7 +135,7 @@ public class GeneticsAlgorithm : MonoBehaviour
                             var n = a.QNet.neuronLayers[i].Neurons[j];
                             n.learning_rate = newLR;
                             a.QNet.neuronLayers[i].Neurons[j] = n;
-                            Debug.Log($"Mutating LR[{i}][{j}]({a.name})={newLR}!");
+                            //Debug.Log($"Mutating LR[{i}][{j}]({a.name})={newLR}!");
                         }
                     }
                 }
@@ -164,12 +159,7 @@ public class AgentsComparer : IComparer<AgentDDQN>
 {
     public int Compare(AgentDDQN x, AgentDDQN y)
     {
-        if (x.fitness < y.fitness)
-            return +1;
-        else if (x.fitness > y.fitness)
-            return -1;
-        else
-            return 0;
+        return x.fitness.CompareTo(y.fitness);
     }
 }
 

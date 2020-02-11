@@ -32,8 +32,9 @@ public class HealthsGenerator : MonoBehaviour
             if (Timer < 0f)
             {
                 var idx = Random.Range(0, freePoints.Count);
-                Instantiate(HealthPrefab, freePoints[idx], Quaternion.identity, this.transform);
-
+                var obj = Instantiate(HealthPrefab, freePoints[idx], Quaternion.identity, this.transform);
+                obj.name = "Health";
+                
                 // Vymaz pouzity bod z volnych (obsadeny)
                 freePoints.Remove(freePoints[idx]);
 

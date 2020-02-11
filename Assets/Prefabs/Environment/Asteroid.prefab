@@ -145,6 +145,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74bbab07b00e24933a8948077103fbc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damageClip: {fileID: 8300000, guid: ae904c7305df7344d86b2092c0cb3a26, type: 3}
   rotationSpeed: 5
   starTransform: {fileID: 0}
+  explosionAnim: {fileID: 2236869965556612302, guid: a46f1b74d539148bc8e80adc59f89978,
+    type: 3}

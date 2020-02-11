@@ -129,7 +129,7 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -142,6 +142,12 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8016924804414281234}
     m_Modifications:
+    - target: {fileID: 165230331211605733, guid: d8ca1256b7d644f6bb9fbb6e6759907f,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee,
+        type: 2}
     - target: {fileID: 1138711386221092552, guid: d8ca1256b7d644f6bb9fbb6e6759907f,
         type: 3}
       propertyPath: m_Name

@@ -7,7 +7,7 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    private const int num_of_states = 800;
+    private const int num_of_states = Sensors.Radar.num_of_rays * Sensors.Radar.num_of_objs;
 
     private const int num_of_actions = 18;
 
@@ -16,12 +16,13 @@ public class AgentDDQN : ShipController
     public NeuralNetwork QNet = new NeuralNetwork();
     public NeuralNetwork QTargetNet = new NeuralNetwork();
 
+    private ReplayBuffer replayMemory = new ReplayBuffer();
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 48; // size of minibatch
+    private const int BATCH_SIZE = 32; // size of minibatch
 
     // Epsilon
     private float epsilon = 1.0f;
-    private const float epsilonMin = 0.05f;
+    private const float epsilonMin = 0.01f;
     private float epsilon_decay;
 
     public float fitness = 0;
@@ -35,9 +36,6 @@ public class AgentDDQN : ShipController
 
     public bool presiel10Epizod = false;
     public bool testMode = false;
-
-    private float score = 0;
-    private float score_old;
 
     public override void Start()
     {
@@ -64,11 +62,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
         QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
         QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
@@ -115,8 +113,7 @@ public class AgentDDQN : ShipController
         }        
 
         // Nacitaj stav, t=0
-        this.replayBufferItem = new ReplayBufferItem { State = this.GetState() };
-        this.score_old = GetScore();
+        this.replayBufferItem = new ReplayBufferItem { State = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this) };
     }
 
     public void Update()
@@ -133,7 +130,7 @@ public class AgentDDQN : ShipController
             else    // Ide o druhy obraz? => ziskaj reakciu za akciu a uloz ju
             {
                 // Nacitaj stav hry
-                replayBufferItem.Next_state = this.GetState();
+                replayBufferItem.Next_state = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this);
 
                 // Ak uz hrac nema zivoty ani palivo znici sa lod
                 if (this.Health <= 0 || this.Fuel <= 0)
@@ -144,31 +141,28 @@ public class AgentDDQN : ShipController
                         this.myPlanets.ForEach(x => strPlanets += x.name + ", ");
                         Debug.Log($"MyPlanets[{this.name}]: {strPlanets}");
                     }
+                    if (this.Hits > 0)
+                        Debug.Log($"Hits[{this.name}]: {this.Hits}");
 
                     // Destrukcia lode
                     DestroyShip();
-                    this.score_old = GetScore();
 
                     // Terminalny stav - koniec epizody
                     replayBufferItem.Done = true;
-                    replayBufferItem.Reward = 0.0f;   // smrtou straca vsetky ziskane body
+                    replayBufferItem.Reward = -1.0f;
                 }
                 else    // pokracuje v hre
                 {
+                    var score = this.Score;
                     // Neterminalny stav - pokracuje v hre
-                    replayBufferItem.Done = false;
-                    replayBufferItem.Reward = GetReward();
-                    this.levelBox.text = this.score.ToString("0.000");
+                    replayBufferItem.Done = false;                    
+                    replayBufferItem.Reward = score - this.scoreOld;
+                    this.scoreOld = score;       // odmena za krok v hre je prirastok v skore po akcii hraca
+                    this.levelBox.text = score.ToString("0.000");
                 }
                 
-                // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
-                if (!this.presiel10Epizod)
-                {
-                    this.fitness += replayBufferItem.Reward;
-                }
-
                 // Uloz udalost do bufferu
-                ReplayBuffer.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
+                replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
 
                 // Uchovaj stav predoslej hry
                 this.replayBufferItem = new ReplayBufferItem { State = replayBufferItem.Next_state };
@@ -181,13 +175,16 @@ public class AgentDDQN : ShipController
         {            
             if (this.presiel10Epizod == false)
             {
-                if (num_of_episodes > 0 && (num_of_episodes % 30 == 0))
+                if (num_of_episodes > 0 && (num_of_episodes % 10 == 0))
                 {
                     this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
       
                     Debug.Log($"epsilon[{this.name}] = {epsilon}");
                     Debug.Log($"episode[{this.name}] = {num_of_episodes}");
                 }
+    
+                // Pretrenuj hraca derivaciami
+                this.Training();
 
                 num_of_episodes++;
             }
@@ -199,145 +196,87 @@ public class AgentDDQN : ShipController
                     Application.Quit();
                 #endif
             }
-
-            // Pretrenuj hraca derivaciami
-            this.Training();
             
             // Respawn
             RespawnShip();
         }
     }
 
-    private int Act(float[] state, float epsilon=0.20f)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        int action;
+        // Podla oznacenia herneho objektu vykonaj akciu kolizie
+        switch (collision.gameObject.tag)
+        {
+            case "Ammo":
+                if (this.Ammo < ShipController.maxAmmo)
+                {
+                    // Pridaj municiu hracovi
+                    this.ChangeAmmo(+100);
+                    // Prehraj klip
+                    this.PlaySound(collectibleClip);
+                }
+                Destroy(collision.gameObject);
+                break;
+            case "Nebula":
+                if (this.Fuel < ShipController.maxFuel)
+                {
+                    // Pridaj palivo hracovi
+                    this.ChangeFuel(+1);
+                    // Prehraj klip
+                    this.PlaySound(collectibleClip);
+                }
+                break;
+            case "Health":
+                if (this.Health < ShipController.maxHealth)
+                {
+                    // Pridaj zivot hracovi
+                    this.ChangeHealth(+1);
+                    // Prehraj klip
+                    this.PlaySound(collectibleClip);
+                }
+                Destroy(collision.gameObject);
+                break;
+            case "Asteroid":
+                // Uberie sa hracovi zivot
+                this.ChangeHealth(-1);      
+                // Prahra clip poskodenia lode
+                this.PlaySound(damageClip);
+                break;
+            case "Planet":
+                {
+                    var planet = collision.gameObject.GetComponent<PlanetController>();
+                    if (planet.OwnerPlanet == null)
+                    {
+                        planet.OwnerPlanet = this.gameObject;
+                        this.myPlanets.Add(planet);
 
-        // Vyuzivaj naucenu vedomost
-        if (UnityEngine.Random.Range(0.0f, 1.0f) > epsilon || testMode)
-        {
-            QNet.Run(state);
-            GetMaxQ(QNet.neuronLayers[2].Neurons, out action);
-        }
-        else    // Skumaj prostredie
-        {
-            action = UnityEngine.Random.Range(0, num_of_actions);
-        }
-
-        switch (action)
-        {
-            // case 0x00 - is stop (do nothing)
-            // Up
-            case 0x01:
-                this.MoveShip(Vector2.up);
+                        planet.dialogBox.Clear();
+                        planet.dialogBox.WriteLine($"Planet: {planet.name}");
+                        planet.dialogBox.WriteLine($"Owner: {this.name}");
+                    }
+                }
                 break;
-            // Up-Right
-            case 0x02:
-                this.MoveShip(Vector2.up + Vector2.right);
+            case "Star":
+                // Prahra clip poskodenia lode
+                this.PlaySound(damageClip);
+                // Uberie sa hracovi zivot
+                this.ChangeHealth(-1);
                 break;
-            // Right
-            case 0x03:
-                this.MoveShip(Vector2.right);
-                break;
-            // Down-Right
-            case 0x04:
-                this.MoveShip(Vector2.down + Vector2.right);
-                break;
-            // Down
-            case 0x05:
-                this.MoveShip(Vector2.down);
-                break;
-            // Down-Left
-            case 0x06:
-                this.MoveShip(Vector2.down + Vector2.left);
-                break;
-            // Left
-            case 0x07:
-                this.MoveShip(Vector2.left);
-                break;
-            // Up-Left
-            case 0x08:
-                this.MoveShip(Vector2.up + Vector2.left);
-                break;
-            // is only firing
-            case 0x09:
-                this.Fire();
-                break;
-            // Up
-            case 0x10:
-                this.Fire();
-                this.MoveShip(Vector2.up);
-                break;
-            // Up-Right
-            case 0x11:
-                this.Fire();
-                this.MoveShip(Vector2.up + Vector2.right);
-                break;
-            // Right
-            case 0x12:
-                this.Fire();
-                this.MoveShip(Vector2.right);
-                break;
-            // Down-Right
-            case 0x13:
-                this.Fire();
-                this.MoveShip(Vector2.down + Vector2.right);
-                break;
-            // Down
-            case 0x14:
-                this.Fire();
-                this.MoveShip(Vector2.down);
-                break;
-            // Down-Left
-            case 0x15:
-                this.Fire();
-                this.MoveShip(Vector2.down + Vector2.left);
-                break;
-            // Left
-            case 0x16:
-                this.Fire();
-                this.MoveShip(Vector2.left);
-                break;
-            // Up-Left
-            case 0x17:
-                this.Fire();
-                this.MoveShip(Vector2.up + Vector2.left);
+            case "Player":
+                // Prahra clip poskodenia lode
+                this.PlaySound(damageClip);
+                // Uberie sa hracovi zivot
+                this.ChangeHealth(-1);
                 break;
         }
-
-        // Exploration/Exploitation parameter changed
-        if (this.epsilon > epsilonMin)
-            this.epsilon -= this.epsilon_decay;  // od 100% nahody po 1%
-
-        return action;
-    }
-
-    private void Fire()
-    {
-        foreach (var turret in turretControllers)
-        {
-            if (turret != null)                    
-            turret.Fire();
-        }
-    }
-
-    private float GetMaxQ(List<Neuron> qValues, out int action)
-    {
-        action = 0;
-
-        for (int i = 1; i < qValues.Count; i++)
-        {
-            if (qValues[action].output < qValues[i].output)
-                action = i;
-        }
-        return qValues[action].output;
     }
 
     private void Training(float gamma=0.90f, float tau=0.01f)
     {        
         // Ak je v zasobniku dost vzorov k uceniu
-        if (ReplayBuffer.Count >= BATCH_SIZE && !testMode)
+        if (replayMemory.Count >= BATCH_SIZE && !testMode)
         {
-            var sample = ReplayBuffer.Sample(BATCH_SIZE);
+            var sample = replayMemory.Sample(BATCH_SIZE);
             float avgErr = 0;
 
             //Debug.Log($"sample.Count = {sample.Count}, memory.Count = {this.replayMemory.Count}");
@@ -382,195 +321,171 @@ public class AgentDDQN : ShipController
                         this.QTargetNet.neuronLayers[j].Weights[k] = tau*this.QNet.neuronLayers[j].Weights[k] + (1.0f-tau)*this.QTargetNet.neuronLayers[j].Weights[k];                    
                     }
                 }
-            
-                if (presiel10Epizod)
-                    avgErr += math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
+
+                avgErr += math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
             }
-                 
+            // Priemer chyby NN
+            avgErr /= (float)sample.Count;
+
             if (presiel10Epizod)
             {
-                // Kvadraticky priemer chyby NN
-                avgErr /= (float)sample.Count;
                 QNet.errorList.Add(avgErr);
                 Debug.Log($"avgErr.QNet[{this.name}] = {avgErr}");
             }
+            // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
+            else
+            {
+                this.fitness += avgErr;
+            }
+
         }
     }
 
-    private float[] GetState()
+    private int Act(float[] state, float epsilon=0.20f)
     {
-        float[] state = new float[num_of_states];       // array of zeros
-        var radarResult = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this.transform);
-        
-        // 736 = 23x32
-        // Udaje o objektoch v okoli lodi
-        for (int i = 0, idx = 0; i < 32; i++, idx+=25)
+        int action;
+
+        // Vyuzivaj naucenu vedomost
+        if (UnityEngine.Random.Range(0.0f, 1.0f) > epsilon || testMode)
         {
-            // ak luc narazil na objekt hry
-            if (radarResult[i] != null)
+            QNet.Run(state);
+            GetMaxQ(QNet.neuronLayers[2].Neurons, out action);
+        }
+        else    // Skumaj prostredie
+        {
+            action = UnityEngine.Random.Range(0, num_of_actions);
+        }
+
+        switch (action)
+        {
+            // case 0x00 - is stop (do nothing)
+            // Up
+            case 0x01:
+                this.MoveShip(Vector2.up);
+                break;
+            // Up-Right
+            case 0x02:
+                this.MoveShip(ExtendedVector2.up_right);
+                break;
+            // Right
+            case 0x03:
+                this.MoveShip(Vector2.right);
+                break;
+            // Down-Right
+            case 0x04:
+                this.MoveShip(ExtendedVector2.down_right);
+                break;
+            // Down
+            case 0x05:
+                this.MoveShip(Vector2.down);
+                break;
+            // Down-Left
+            case 0x06:
+                this.MoveShip(ExtendedVector2.down_left);
+                break;
+            // Left
+            case 0x07:
+                this.MoveShip(Vector2.left);
+                break;
+            // Up-Left
+            case 0x08:
+                this.MoveShip(ExtendedVector2.up_left);
+                break;
+            // is only firing
+            case 0x09:
+                this.Fire();
+                break;
+            // Up
+            case 0x10:
+                this.Fire();
+                this.MoveShip(Vector2.up);
+                break;
+            // Up-Right
+            case 0x11:
+                this.Fire();
+                this.MoveShip(ExtendedVector2.up_right);
+                break;
+            // Right
+            case 0x12:
+                this.Fire();
+                this.MoveShip(Vector2.right);
+                break;
+            // Down-Right
+            case 0x13:
+                this.Fire();
+                this.MoveShip(ExtendedVector2.down_right);
+                break;
+            // Down
+            case 0x14:
+                this.Fire();
+                this.MoveShip(Vector2.down);
+                break;
+            // Down-Left
+            case 0x15:
+                this.Fire();
+                this.MoveShip(ExtendedVector2.down_left);
+                break;
+            // Left
+            case 0x16:
+                this.Fire();
+                this.MoveShip(Vector2.left);
+                break;
+            // Up-Left
+            case 0x17:
+                this.Fire();
+                this.MoveShip(ExtendedVector2.up_left);
+                break;
+        }
+
+        // Exploration/Exploitation parameter changed
+        if (this.epsilon > epsilonMin)
+            this.epsilon -= this.epsilon_decay;  // od 100% nahody po 1%
+
+        return action;
+    }
+
+    private void Fire()
+    {
+        if (this.Ammo > 0)
+        {       
+            // Prehra zvuk vystrelu
+            this.PlaySound(throwClip);
+                     
+            foreach (var turret in this.turretControllers)
             {
-                // TAG = VSTUP do NN
-                switch (radarResult[i].Value.transform.tag)
-                {
-                    case "Asteroid":
-                        state[idx + 24] = GetDistance(radarResult[i].Value.distance);
-                        break;
-                    case "Planet": // staticke orientacne body
-                        var planet = radarResult[i].Value.transform.GetComponent<PlanetController>();                        
-                        switch (planet.name)
-                        {
-                            case "Saturn":
-                                if (this.myPlanets.Contains(planet))     
-                                    // moja planeta
-                                    state[idx + 23] = GetDistance(radarResult[i].Value.distance); 
-                                else if (planet.OwnerPlanet != null)
-                                    // planeta uz vlastnena
-                                    state[idx + 22] = GetDistance(radarResult[i].Value.distance); 
-                                else
-                                    // planeta bez vlastnika
-                                    state[idx + 21] = GetDistance(radarResult[i].Value.distance); 
-                                break;
-                            case "Earth":
-                                if (this.myPlanets.Contains(planet))     
-                                    // moja planeta
-                                    state[idx + 20] = GetDistance(radarResult[i].Value.distance); 
-                                else if (planet.OwnerPlanet != null)
-                                    // planeta uz vlastnena
-                                    state[idx + 19] = GetDistance(radarResult[i].Value.distance); 
-                                else
-                                    // planeta bez vlastnika
-                                    state[idx + 18] = GetDistance(radarResult[i].Value.distance); 
-                                break;
-                            case "Mars":
-                                if (this.myPlanets.Contains(planet))     
-                                    // moja planeta
-                                    state[idx + 17] = GetDistance(radarResult[i].Value.distance); 
-                                else if (planet.OwnerPlanet != null)
-                                    // planeta uz vlastnena
-                                    state[idx + 16] = GetDistance(radarResult[i].Value.distance); 
-                                else
-                                    // planeta bez vlastnika
-                                    state[idx + 15] = GetDistance(radarResult[i].Value.distance); 
-                                break;
-                            case "Jupiter":
-                                if (this.myPlanets.Contains(planet))     
-                                    // moja planeta
-                                    state[idx + 14] = GetDistance(radarResult[i].Value.distance); 
-                                else if (planet.OwnerPlanet != null)
-                                    // planeta uz vlastnena
-                                    state[idx + 13] = GetDistance(radarResult[i].Value.distance); 
-                                else
-                                    // planeta bez vlastnika
-                                    state[idx + 12] = GetDistance(radarResult[i].Value.distance); 
-                                break;
-                            default:
-                                Debug.Log($"obj.tag = {planet.name}, dist = {radarResult[i].Value.distance}");
-                                break;
-                        }
-                        break;
-                    case "Moon":
-                        switch (radarResult[i].Value.transform.name)
-                        {
-                            case "Fobos":
-                                state[idx + 11] = GetDistance(radarResult[i].Value.distance); 
-                                break;
-                            case "Moon":
-                                state[idx + 10] = GetDistance(radarResult[i].Value.distance); 
-                                break;
-                            default:
-                                Debug.Log($"obj.tag = {radarResult[i].Value.transform.name}, dist = {radarResult[i].Value.distance}");
-                                break;
-                        }                        
-                        break;
-                    case "Star":
-                        state[idx + 9] = GetDistance(radarResult[i].Value.distance); 
-                        break;
-                     case "Nebula": // staticke orientacne body
-                        switch (radarResult[i].Value.transform.name)
-                        {
-                            case "Nebula-Red":
-                                state[idx + 8] = GetDistance(radarResult[i].Value.distance); 
-                                break;
-                            case "Nebula-Blue":
-                                state[idx + 7] = GetDistance(radarResult[i].Value.distance); 
-                                break;
-                            case "Nebula-Silver":
-                                state[idx + 6] = GetDistance(radarResult[i].Value.distance); 
-                                break;
-                            default:
-                                Debug.Log($"obj.tag = {radarResult[i].Value.transform.name}, dist = {radarResult[i].Value.distance}");
-                                break;
-                        }                        
-                        break;
-                    case "Health":
-                        state[idx + 5] = GetDistance(radarResult[i].Value.distance); 
-                        break;
-                    case "Ammo":
-                        state[idx + 4] = GetDistance(radarResult[i].Value.distance); 
-                        break;
-                    case "Projectile":
-                        var projectile = radarResult[i].Value.transform.GetComponent<Projectile>();
-                        if (projectile.firingShip == this)
-                            // projektil patri mne (neutoci)
-                            state[idx + 3] = GetDistance(radarResult[i].Value.distance);
-                        else
-                            // projektil patri inej lodi (utoci)
-                            state[idx + 2] = GetDistance(radarResult[i].Value.distance);  
-                        break;
-                    case "Player":
-                        state[idx + 1] = GetDistance(radarResult[i].Value.distance); 
-                        break;    
-                    case "Space":
-                        state[idx] = GetDistance(radarResult[i].Value.distance); 
-                        break;    
-                    default:
-                        Debug.Log($"obj.tag = {radarResult[i].Value.transform.tag}, dist = {radarResult[i].Value.distance}");
-                        break;
-                }
+                // Vystrel
+                turret.Fire();
+                // Uber z municie hraca jeden naboj
+                this.ChangeAmmo(-1);
+                // Ak uz hrac nema municiu nemoze pokracovat v strelbe
+                if (this.Ammo <= 0)
+                    break;
             }
         }
-
-        return state;
     }
 
-    private float GetDistance(float d)
+    private float GetMaxQ(List<Neuron> qValues, out int action)
     {
-        // Normalizovany vstup
-        return (Sensors.Radar.max_distance - d) / Sensors.Radar.max_distance;
-    }
+        action = 0;
 
-    private float GetReward()
-    {
-        float reward;
-
-        this.score = GetScore();
-        reward = score - this.score_old;
-        this.score_old = this.score;
-
-        return reward;
-    }
-
-    private float GetScore()
-    {
-        float avg;
-
-        // Vypocitaj skore hraca
-        avg  = (float)this.Health          * 0.20f;
-        avg += (float)this.Fuel            * 0.20f;
-        avg += (float)this.Ammo            * 0.01f;
-        avg += (float)this.myPlanets.Count * 1.00f;
-
-        return avg;
+        for (int i = 1; i < qValues.Count; i++)
+        {
+            if (qValues[action].output < qValues[i].output)
+                action = i;
+        }
+        return qValues[action].output;
     }
 }
 
-public static class ReplayBuffer
+public class ReplayBuffer
 {
-    private const int max_count = 1000000;
+    private const int max_count = 100000;
 
-    public static LinkedList<ReplayBufferItem> items = new LinkedList<ReplayBufferItem>();
+    public LinkedList<ReplayBufferItem> items = new LinkedList<ReplayBufferItem>();
 
-    public static void Add(ReplayBufferItem item)
+    public System.Random rand = new System.Random();
+
+    public void Add(ReplayBufferItem item)
     {
         // LIFO
         if (items.Count >= max_count)    
@@ -578,7 +493,7 @@ public static class ReplayBuffer
         items.AddLast(item);        
     }
 
-    public static List<ReplayBufferItem> Sample(int batch_size)
+    public List<ReplayBufferItem> Sample(int batch_size)
     {
         var buff = new List<ReplayBufferItem>(batch_size);
         //var i = 0;
@@ -587,7 +502,7 @@ public static class ReplayBuffer
         {
             if (buff.Count < batch_size)
             {
-                if (UnityEngine.Random.Range(0.0f, 1.0f) < ((float)batch_size/(float)items.Count))
+                if ((float)rand.NextDouble() < ((float)batch_size/(float)items.Count))
                 {
                     buff.Add(element);              
                     //Debug.Log($"selected element i = {i}/{items.Count}");
@@ -602,7 +517,7 @@ public static class ReplayBuffer
         return buff;
     }    
 
-    public static int Count { get { return items.Count; } }
+    public int Count { get { return items.Count; } }
 }
 
 public class ReplayBufferItem

@@ -4,27 +4,18 @@ public class Projectile : MonoBehaviour
 {
     public ShipController firingShip;
 
-    public AudioClip hitClip;
-
     public ParticleSystem hitEffect;
 
-    Rigidbody2D rigidbody2d;
+    public Rigidbody2D rigidbody2d;
 
-
-    // Start is called before the first frame update
-    void Awake()
-    {
-        rigidbody2d = GetComponent<Rigidbody2D>();
-    }
+    private float timer = 1.0f;
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
-        // Po prejdeni maximalnej velkosti vektora pohybu strely objekt zanikne
-        if (transform.position.magnitude > 20.0f)
-        {
+        timer -= Time.deltaTime;
+        if (timer <= 0f)
             Destroy(gameObject);
-        }
     }
 
     public void Launch(Vector2 force)
@@ -33,26 +24,24 @@ public class Projectile : MonoBehaviour
     }
 
     // Pri kolizii s objektom
-    void OnTriggerEnter2D(Collider2D collider)
+    private void OnTriggerEnter2D(Collider2D collider)
     {
         if (collider.gameObject != firingShip.gameObject)
         {
-            //Debug.Log($"Projectile {this.name} collide with {other.gameObject.name}");
-
+            //Debug.Log($"collider{this.firingShip.name}.name = {collider.gameObject.name}");
             if (collider.gameObject.tag == "Player")
             {
-                var controller = collider.gameObject.GetComponent<ShipController>();
-                if (controller != null)
-                    // Znizi zivoty hracovi
-                    controller.ChangeHealth(-1);
+                var player = collider.gameObject.GetComponent<ShipController>();
+                // Prehra zvuk zasahu projektilu
+                player.PlaySound(player.hitClip);
+                // Znizi zivoty hracovi
+                player.ChangeHealth(-0.10f);
+                // Pripise si zasah lode
+                this.firingShip.Hits += 1;                
             }
-
-            // Prehra zvuk zasahu projektilu
-            firingShip.PlaySound(hitClip);
 
             // Efekt vybuchu
             hitEffect.Play();
-
             // Znici strelu pri zrazke s objektom
             Destroy(this.gameObject, 0.1f);
         }

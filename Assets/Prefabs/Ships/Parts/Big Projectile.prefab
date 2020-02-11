@@ -4795,7 +4795,7 @@ Transform:
   m_GameObject: {fileID: 2917896089770542357}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 6.234, y: -2.882, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 4, y: 1.5, z: 1}
   m_Children:
   - {fileID: 8046008616908239013}
   m_Father: {fileID: 0}
@@ -4837,7 +4837,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: -1
   m_Sprite: {fileID: 21300000, guid: 127fde18d4a264228a3c7f5724e5c392, type: 3}
   m_Color: {r: 1, g: 0.8669203, b: 0.85490197, a: 1}
   m_FlipX: 0
@@ -4895,7 +4895,7 @@ Rigidbody2D:
   m_Interpolate: 1
   m_SleepingMode: 0
   m_CollisionDetection: 1
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &5695354770921218497
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4909,8 +4909,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firingShip: {fileID: 0}
-  hitClip: {fileID: 8300000, guid: 709a835b61b848644946696fdd5e5a4d, type: 3}
   hitEffect: {fileID: 2619513584035020282}
+  rigidbody2d: {fileID: 2917896089770542353}
 --- !u!96 &7110215193959390542
 TrailRenderer:
   serializedVersion: 2

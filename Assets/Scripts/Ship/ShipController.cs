@@ -7,15 +7,15 @@ public class ShipController : MonoBehaviour
     // Engine systems
     public ParticleSystem[] Motors;             // animacia plamenov motora
     public AudioClip engineClip;                // zvukovy klip motorov
-    public float maxSpeed = 5.0f;               // max rychlost lode
+    public float maxSpeed = 10.0f;               // max rychlost lode
     public float maxTorque = 100.0f;            // max rychlost rotacie lode
     public Vector2 LookDirection { get; private set; }  = Vector2.up; // Smer predu lode
 
     // Player's health
     public UIBarControl healthBar;
     public const int maxHealth = 5;              // maximalny pocet zivotov hraca
-    private int _health = maxHealth;
-    public int Health {
+    private float _health = maxHealth;
+    public float Health {
         get
         {
             return _health;
@@ -34,8 +34,8 @@ public class ShipController : MonoBehaviour
     // Player's ammo
     public UIBarControl ammoBar;
     public const int maxAmmo = 100;               // maximalny pocet nabojov hraca
-    private int _ammo = maxAmmo;
-    public int Ammo {
+    private float _ammo = maxAmmo;
+    public float Ammo {
         get
         {
             return _ammo;
@@ -74,6 +74,9 @@ public class ShipController : MonoBehaviour
     // Zoznam planet, ktore vlastni lod
     public List<PlanetController> myPlanets;
     
+    // Pocet zasahov ostatnych lodi
+    public int Hits = 0;
+
     // Respawn
     public bool IsDestroyed { get; protected set; } = false;  // stav lode, je lod znicena?
 
@@ -83,6 +86,12 @@ public class ShipController : MonoBehaviour
     // Reproduktor lode
     private AudioSource audioSource;
 
+    // Zvukove klipy
+    public AudioClip collectibleClip;
+    public AudioClip damageClip;
+    public AudioClip hitClip;
+    public AudioClip throwClip;
+    
     // Animacie lode
     protected Animator animator;
 
@@ -90,6 +99,25 @@ public class ShipController : MonoBehaviour
     private PolygonCollider2D collider2d;
 
     private Vector2 respawnPoint;
+
+    // Skore v hre
+    public float scoreOld;
+    public float Score 
+    {
+        get {
+            float avg;
+
+            // Vypocitaj skore hraca
+            avg  = (float)this.Health          * 0.40f;
+            avg += (float)this.Fuel            * 0.20f;
+            avg += (float)this.Ammo            * 0.01f;
+            avg += (float)this.myPlanets.Count * 1.00f;
+            avg += (float)this.Hits            * 0.01f;
+
+            return (avg / 1.62f);
+        }
+    }
+
 
     // Start is called before the first frame update
     public virtual void Start()
@@ -100,6 +128,9 @@ public class ShipController : MonoBehaviour
         collider2d = GetComponent<PolygonCollider2D>();
 
         respawnPoint = this.transform.position;
+
+        // inicializuj skore lode
+        this.scoreOld = this.Score;
     }
 
     /// <summary>
@@ -140,7 +171,9 @@ public class ShipController : MonoBehaviour
                 }
             }
 
-            ChangeFuel(-Time.deltaTime);    // plaivo sa znizi o 1 za 1 sekundu
+            var decay = -Time.deltaTime;
+            ChangeFuel(decay);    // plaivo sa znizi o 1 za 1 sekundu
+            //Debug.Log($"decay={decay}"); 
         }        
     }
 
@@ -153,14 +186,17 @@ public class ShipController : MonoBehaviour
         this.Health = maxHealth;
         this.Ammo = maxAmmo;
         this.Fuel = maxFuel;
-
         // Znicena lod straca vlastnictvo u planety
         foreach (var p in this.myPlanets)
         {
             p.OwnerPlanet = null;
         }
         this.myPlanets.Clear();
-        
+        this.Hits = 0;
+
+        // inicializuj skore lode
+        this.scoreOld = this.Score;
+
         animator.SetBool("Respawn", false);
         animator.SetBool("Destroyed", true);
     }
@@ -176,8 +212,7 @@ public class ShipController : MonoBehaviour
 
     protected void RespawnShip()
     {
-        rigidbody2d.position = respawnPoint;  //Respawn.getPoint();        
-        rigidbody2d.rotation = 0f;
+        rigidbody2d.position = respawnPoint;  //Respawn.getPoint();
         IsDestroyed = false;
         collider2d.enabled = true;
 
@@ -190,7 +225,7 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav municie hraca
     /// </summary>
     /// <param name="amount">Mnozstvo municie, ktore sa pripocita k sucasnemu stavu municie</param>
-    public void ChangeAmmo(int amount)
+    public void ChangeAmmo(float amount)
     {
         if (!IsDestroyed)
         {
@@ -214,7 +249,7 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav zivota hraca
     /// </summary>
     /// <param name="amount">Mnozstvo zivota, ktore sa pripocita k sucasnemu stavu zivota</param>
-    public void ChangeHealth(int amount)
+    public void ChangeHealth(float amount)
     {
         if (!IsDestroyed)
         {
