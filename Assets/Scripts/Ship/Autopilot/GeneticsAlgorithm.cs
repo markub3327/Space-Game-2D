@@ -12,6 +12,8 @@ public class GeneticsAlgorithm : MonoBehaviour
 
     private float tau=0.01f;
 
+    private List<float> fitnessList = new List<float>();
+
     public void Update()
     {        
         if (agents.Where(p => p.presiel10Epizod == false).Count() == 0)
@@ -42,33 +44,36 @@ public class GeneticsAlgorithm : MonoBehaviour
                 }
             }
 
+            this.fitnessList.Add(bestAgent.fitness);
             for (int i = 0; i < agents.Count; i++)
             {
-                Debug.Log($"order = {i+1}., name = {agents[i].name}, fitness = {agents[i].fitness}");
+                Debug.Log($"order = {i+1}., name = {agents[i].name}, fitness = {agents[i].fitness}");   
                 agents[i].fitness = 0.0f;
-                agents[i].presiel10Epizod = false;
+                agents[i].presiel10Epizod = false;                
+            }
+            for (int j = 0; j < bestAgent.wMean.Length; j++)
+            {
+                Debug.Log($"wMean[{j}]={bestAgent.wMean[j]}");
             }
         }
     }
 
     private void Crossover()
 	{
+        int slicing_point;
+
         foreach (var a in agents)
 		{
             if (a != bestAgent)
 			{
 				// Pick 2 parents
-                AgentDDQN parrentA, parrentB;
-                do {
-    				parrentA = agents[Random.Range(0, agents.Count)];
-	    			parrentB = agents[Random.Range(0, agents.Count)];
-                } while (parrentA == parrentB);
-				//RouletteWheelMechanism(&_parrentA, &_parrentB);
+                AgentDDQN parrentA=null, parrentB=null;
+				RouletteWheelMechanism(ref parrentA, ref parrentB);
 
                 for (int i = 0; i < a.QNet.neuronLayers.Count; i++)
                 {
                     // Random slicing point
-    	    		var slicing_point = (Random.Range(1, a.QNet.neuronLayers[i].Weights.Count-1));
+    	    		slicing_point = (Random.Range(1, a.QNet.neuronLayers[i].Weights.Count-1));
 
                     // first part of the child's chromosome contains the parrentA genes    
                     for (int j = 0; j < slicing_point; j++)
@@ -81,28 +86,23 @@ public class GeneticsAlgorithm : MonoBehaviour
 		    		{
     					a.QNet.neuronLayers[i].Weights[j] = parrentB.QNet.neuronLayers[i].Weights[j];
 				    }
-
-                    // Random slicing point
-    	    		slicing_point = (Random.Range(1, a.QNet.neuronLayers[i].Neurons.Count-1));
-
-                    // first part of the child's chromosome contains the parrentA genes    
-                    for (int j = 0; j < slicing_point; j++)
-                    {                        
-                        var n = a.QNet.neuronLayers[i].Neurons[j];
-    					n.learning_rate = parrentA.QNet.neuronLayers[i].Neurons[j].learning_rate;
-                        a.QNet.neuronLayers[i].Neurons[j] = n;
-	    			}
-
-    				// second part of the child's chromosome contains the parrentB genes
-	    			for (int j = slicing_point; j < a.QNet.neuronLayers[i].Neurons.Count; j++)
-		    		{
-                        var n = a.QNet.neuronLayers[i].Neurons[j];
-    					n.learning_rate = parrentB.QNet.neuronLayers[i].Neurons[j].learning_rate;
-                        a.QNet.neuronLayers[i].Neurons[j] = n;
-				    }
                 }
+
+                // Random slicing point
+    	    	slicing_point = (Random.Range(1, a.wMean.Length-1));
+
+                // first part of the child's chromosome contains the parrentA genes    
+                for (int j = 0; j < slicing_point; j++)
+                {                        
+                    a.wMean[j] = parrentA.wMean[j];
+                }
+    			// second part of the child's chromosome contains the parrentB genes
+	    		for (int j = slicing_point; j < a.wMean.Length; j++)
+		    	{
+                    a.wMean[j] = parrentB.wMean[j];
+				}
 			}
-		}
+		}        
 	}
 
     private void Mutation()
@@ -126,22 +126,87 @@ public class GeneticsAlgorithm : MonoBehaviour
                             Debug.Log($"Mutating W[{i}][{j}]({a.name})={newW}!");
                         }                        
                     }
-
-                    for (int j = 0; j < a.QNet.neuronLayers[i].Neurons.Count; j++)
-                    {                        
-                        if (Random.Range(0.0f, 1.0f) < (1f/(float)a.QNet.neuronLayers[i].Neurons.Count))                        
-                        {
-                            var newLR = Random.Range(0.0f, 0.1f);
-                            var n = a.QNet.neuronLayers[i].Neurons[j];
-                            n.learning_rate = newLR;
-                            a.QNet.neuronLayers[i].Neurons[j] = n;
-                            //Debug.Log($"Mutating LR[{i}][{j}]({a.name})={newLR}!");
-                        }
-                    }
                 }
+
+                for (int j = 0; j < a.wMean.Length; j++)
+                {                        
+                    if (Random.Range(0.0f, 1.0f) < (0.1f/(float)a.wMean.Length))                        
+                    {
+                        float newW;
+                        do {
+                            newW = Random.Range(0.0f, 1.0f);
+                        } while (newW == 0f);
+                        a.wMean[j] = newW;
+                        //Debug.Log($"Mutating LR[{i}][{j}]({a.name})={newLR}!");
+                    }
+                }                
             }
         }
     }
+
+    void RouletteWheelMechanism(ref AgentDDQN idxA, ref AgentDDQN idxB)
+	{
+		float[] probability = new float[agents.Count];
+		float sum = 0.0f;
+
+		// Softmax function
+		/*********************************************************/
+		for (int i = 0; i < agents.Count; i++)
+		{
+			sum += Unity.Mathematics.math.exp(agents[i].fitness);
+		}
+		for (int i = 0; i < agents.Count; i++)
+		{
+			probability[i] = Unity.Mathematics.math.exp(agents[i].fitness) / sum;
+			//Debug.Log($"probability = {probability[i]}");
+			//std::cout << "fitness = " << this->populations[i]->getFitness() << std::endl;
+		}
+		//std::cout << std::endl;
+		/*********************************************************/
+
+		// Pseudorandom selection
+		/*********************************************************/
+        do {
+		float a = UnityEngine.Random.Range(0f, 1f);
+		float b = UnityEngine.Random.Range(0f, 1f);
+		float min = 0, max = 0;
+
+        for (int i = 0; i < agents.Count; i++)
+		{
+            min = max;
+			max += probability[i];
+
+			// if is a value in range
+			if (min <= a && a < max)
+			{
+				//std::cout << "a = " << a << std::endl;
+				//std::cout << "interval = <" << min << "; " << max << ")" << std::endl;
+				//std::cout << "index_of_selectedA = " << i << std::endl;
+				//std::cout << "probability_of_selectedA = " << probability[i] << std::endl;
+				//std::cout << "fitness_of_selectedA = " << this->populations[i]->getFitness() << std::endl;
+				//break;
+
+				idxA = agents[i];
+                //Debug.Log($"idxA={i}");
+			}
+
+			// if is b value in range
+			if (min <= b && b < max)
+			{
+				//std::cout << "b = " << b << std::endl;
+				//std::cout << "interval = <" << min << "; " << max << ")" << std::endl;
+				//std::cout << "index_of_selectedB = " << i << std::endl;
+				//std::cout << "probability_of_selectedB = " << probability[i] << std::endl;
+				//std::cout << "fitness_of_selectedB = " << this->populations[i]->getFitness() << std::endl;
+				//break;
+
+				idxB = agents[i];
+                //Debug.Log($"idxB={i}");
+			}
+		}
+        } while (idxA == idxB);
+		//std::cout << std::endl;
+	}
 
     public void OnApplicationQuit()
     {
@@ -149,7 +214,16 @@ public class GeneticsAlgorithm : MonoBehaviour
         if (this.bestAgent != null)
         {
             File.WriteAllText(Application.dataPath + "/DDQN_Weights_QNet.save", bestAgent.QNet.ToString());
-            File.WriteAllText(Application.dataPath + "/DDQN_Weights_QTargetNet.save", bestAgent.QTargetNet.ToString());                        
+            File.WriteAllText(Application.dataPath + "/DDQN_Weights_QTargetNet.save", bestAgent.QTargetNet.ToString());    
+
+            using (var outf = new StreamWriter("DDQN_bestAgent_fitness.log"))
+            {
+                foreach (var x in fitnessList)
+                {
+                    outf.WriteLine($"fitness = {x}");
+                }
+            }
+
             Debug.Log("DDQN saved!");
         }
     }
@@ -159,15 +233,6 @@ public class AgentsComparer : IComparer<AgentDDQN>
 {
     public int Compare(AgentDDQN x, AgentDDQN y)
     {
-        return x.fitness.CompareTo(y.fitness);
+        return x.fitness.CompareTo(y.fitness) * (-1);
     }
-}
-
-[System.Serializable]
-public class JSON_NET
-{
-    public List<float> Weights;
-    //public List<float> Learning_rates;
-    public List<float> error;
-    //public List<float> Momentums;
 }

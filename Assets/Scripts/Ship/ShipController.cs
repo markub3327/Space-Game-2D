@@ -101,6 +101,7 @@ public class ShipController : MonoBehaviour
     private Vector2 respawnPoint;
 
     // Skore v hre
+    public float[] wMean = new float[] { 0.05f, 0.05f, 0.01f, 1.00f, 0.01f }; 
     public float scoreOld;
     public float Score 
     {
@@ -108,13 +109,14 @@ public class ShipController : MonoBehaviour
             float avg;
 
             // Vypocitaj skore hraca
-            avg  = (float)this.Health          * 0.40f;
-            avg += (float)this.Fuel            * 0.20f;
-            avg += (float)this.Ammo            * 0.01f;
-            avg += (float)this.myPlanets.Count * 1.00f;
-            avg += (float)this.Hits            * 0.01f;
+            avg  = (this.Health / (float)ShipController.maxHealth)     *  wMean[0];
+            avg +=     (this.Fuel / (float)ShipController.maxFuel)     *  wMean[1];
+            avg +=     (this.Ammo / (float)ShipController.maxAmmo)     *  wMean[2];
+            avg +=                   ((float)this.myPlanets.Count)     *  wMean[3];
+            avg +=     (this.Hits / (float)ShipController.maxAmmo)     *  wMean[4];
 
-            return (avg / 1.62f);
+            var sum = wMean[0] + wMean[1] + wMean[2] + wMean[3] + wMean[4];
+            return (avg / sum);
         }
     }
 

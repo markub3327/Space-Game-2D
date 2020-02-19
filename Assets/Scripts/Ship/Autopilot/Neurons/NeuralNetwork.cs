@@ -85,3 +85,10 @@ public class NeuralNetwork
         return JsonUtility.ToJson(new JSON_NET { Weights = weights, error = this.errorList }, true);
     } 
 }
+
+[System.Serializable]
+public class JSON_NET
+{
+    public List<float> Weights;
+    public List<float> error;
+}

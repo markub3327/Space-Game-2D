@@ -41,7 +41,7 @@ public class AgentDDQN : ShipController
     {
         base.Start();
 
-        epsilon_decay = (epsilon - epsilonMin) / 1000000f;
+        epsilon_decay = (epsilon - epsilonMin) / 500000f;
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
@@ -62,11 +62,11 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
         QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, num_of_states);
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
         QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
@@ -149,7 +149,7 @@ public class AgentDDQN : ShipController
 
                     // Terminalny stav - koniec epizody
                     replayBufferItem.Done = true;
-                    replayBufferItem.Reward = -1.0f;
+                    replayBufferItem.Reward = 0.0f;
                 }
                 else    // pokracuje v hre
                 {
@@ -160,7 +160,13 @@ public class AgentDDQN : ShipController
                     this.scoreOld = score;       // odmena za krok v hre je prirastok v skore po akcii hraca
                     this.levelBox.text = score.ToString("0.000");
                 }
-                
+
+                // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
+                if (!presiel10Epizod)
+                {
+                    this.fitness += replayBufferItem.Reward;
+                }
+
                 // Uloz udalost do bufferu
                 replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
 
@@ -175,7 +181,7 @@ public class AgentDDQN : ShipController
         {            
             if (this.presiel10Epizod == false)
             {
-                if (num_of_episodes > 0 && (num_of_episodes % 10 == 0))
+                if (num_of_episodes > 0 && (num_of_episodes % 50 == 0))
                 {
                     this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
       
@@ -293,10 +299,10 @@ public class AgentDDQN : ShipController
                     // Ziskaj najvyssie next Q
                     QTargetNet.Run(sample[i].Next_state);
 
-                    // Vyber nasledujuce Q 
+                    // Vyber nasledujuce Q
                     var next_Q = math.min(
-                        GetMaxQ(QNet.neuronLayers[2].Neurons, out int a1),
-                        GetMaxQ(QTargetNet.neuronLayers[2].Neurons, out int a2)
+                        GetMaxQ(QNet.neuronLayers[2].Neurons),
+                        GetMaxQ(QTargetNet.neuronLayers[2].Neurons)
                     );
 
                     // TD
@@ -322,34 +328,29 @@ public class AgentDDQN : ShipController
                     }
                 }
 
-                avgErr += math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
+                if (presiel10Epizod)
+                    avgErr += math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
             }
-            // Priemer chyby NN
-            avgErr /= (float)sample.Count;
-
+        
             if (presiel10Epizod)
             {
+                // Priemer chyby NN
+                avgErr /= (float)sample.Count;
                 QNet.errorList.Add(avgErr);
                 Debug.Log($"avgErr.QNet[{this.name}] = {avgErr}");
-            }
-            // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
-            else
-            {
-                this.fitness += avgErr;
-            }
-
+            }            
         }
     }
 
     private int Act(float[] state, float epsilon=0.20f)
     {
-        int action;
+        int action = 0;
 
         // Vyuzivaj naucenu vedomost
         if (UnityEngine.Random.Range(0.0f, 1.0f) > epsilon || testMode)
         {
             QNet.Run(state);
-            GetMaxQ(QNet.neuronLayers[2].Neurons, out action);
+            GetMaxQ(QNet.neuronLayers[2].Neurons, ref action);
         }
         else    // Skumaj prostredie
         {
@@ -464,9 +465,21 @@ public class AgentDDQN : ShipController
         }
     }
 
-    private float GetMaxQ(List<Neuron> qValues, out int action)
+    private float GetMaxQ(List<Neuron> qValues, ref int action)
     {
         action = 0;
+
+        for (int i = 1; i < qValues.Count; i++)
+        {
+            if (qValues[action].output < qValues[i].output)
+                action = i;
+        }
+        return qValues[action].output;
+    }
+
+    private float GetMaxQ(List<Neuron> qValues)
+    {
+        int action = 0;
 
         for (int i = 1; i < qValues.Count; i++)
         {
@@ -479,7 +492,7 @@ public class AgentDDQN : ShipController
 
 public class ReplayBuffer
 {
-    private const int max_count = 100000;
+    private const int max_count = 500000;
 
     public LinkedList<ReplayBufferItem> items = new LinkedList<ReplayBufferItem>();
 

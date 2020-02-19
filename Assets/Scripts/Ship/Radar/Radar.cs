@@ -4,9 +4,9 @@ namespace Sensors
 {
     public static class Radar
     {
-        public const float max_distance = 10f;
+        public const float max_distance = 2f;
 
-        public const int num_of_rays = 16;
+        public const int num_of_rays = 32;
 
         public const int num_of_objs = 35;
 
@@ -18,7 +18,7 @@ namespace Sensors
             int idx;
 
             // Vysli luce pod uhlami po 11.25 stupnoch (32 skenov)
-            for (idx = 0, angle = 0f; angle < 360; angle += 22.5f, idx+=num_of_objs)
+            for (idx = 0, angle = 0f; angle < 360; angle += 11.25f, idx+=num_of_objs)
             {
                 Debug.DrawRay(origin, lookDirection.Shift(angle), Color.magenta);
                 var ray = Physics2D.RaycastAll(origin, lookDirection.Shift(angle), max_distance);
@@ -39,9 +39,10 @@ namespace Sensors
                     //for (int i = 0; i < num_of_objs; i++)
                     //{
                     //    if (state[idx + i] > 0f)
-                    //        Debug.Log($"Ray({parent.name})(angle={angle}): state[{idx + i}]={state[idx + i]}");
+                    //        Debug.Log($"Ray({parent.name})(angle={angle}): state[{i}]={state[idx + i]}");
                     //}
                 }
+                //Debug.Log($"idx={idx}, angle = {angle}");
             }
 
             return state;
@@ -64,83 +65,83 @@ namespace Sensors
                     TransformPlanetANN(ray, state, idx + 9, parent);
                     break;
                 case "Space":
-                    state[idx + 12] = (1f - ray.fraction);
+                    state[idx + 12] = 1.0f;
                     break;
                 case "Nebula-Red":
                     // Ak lod potrebuje palivo
-                    if (parent.Fuel < (ShipController.maxFuel-1))
-                        state[idx + 13] = (1f - ray.fraction);
-                    else if (parent.Fuel < (ShipController.maxFuel/2f))
-                        state[idx + 14] = (1f - ray.fraction);
+                    if (parent.Fuel > (ShipController.maxFuel-1))
+                        state[idx + 13] = 1.0f;
+                    else if (parent.Fuel > (ShipController.maxFuel/2f))
+                        state[idx + 14] = 1.0f;
                     else
                     {
-                        state[idx + 15] = (1f - ray.fraction);
+                        state[idx + 15] = 1.0f;
                         //Debug.Log("Fuel is full!");                        
                     }
                     break;
                 case "Nebula-Blue":
                     // Ak lod potrebuje palivo
-                    if (parent.Fuel < (ShipController.maxFuel-1))
-                        state[idx + 16] = (1f - ray.fraction);
-                    else if (parent.Fuel < (ShipController.maxFuel/2f))
-                        state[idx + 17] = (1f - ray.fraction);
+                    if (parent.Fuel > (ShipController.maxFuel-1))
+                        state[idx + 16] = 1.0f;
+                    else if (parent.Fuel > (ShipController.maxFuel/2f))
+                        state[idx + 17] = 1.0f;
                     else
                     {
-                        state[idx + 18] = (1f - ray.fraction);
+                        state[idx + 18] = 1.0f;
                         //Debug.Log("Fuel is full!");                        
                     }
                     break;
                 case "Nebula-Silver":
                     // Ak lod potrebuje palivo
-                    if (parent.Fuel < (ShipController.maxFuel-1))
-                        state[idx + 19] = (1f - ray.fraction);
-                    else if (parent.Fuel < (ShipController.maxFuel/2f))
-                        state[idx + 20] = (1f - ray.fraction);
+                    if (parent.Fuel > (ShipController.maxFuel-1))
+                        state[idx + 19] = 1.0f;
+                    else if (parent.Fuel > (ShipController.maxFuel/2f))
+                        state[idx + 20] = 1.0f;
                     else
                     {
-                        state[idx + 21] = (1f - ray.fraction);
+                        state[idx + 21] = 1.0f;
                         //Debug.Log("Fuel is full!");                        
                     }
                     break;
                 case "Asteroid":
-                    state[idx + 22] = (1f - ray.fraction);
+                    state[idx + 22] = 1.0f;
                     break;
                 case "Sun":
-                    state[idx + 23] = (1f - ray.fraction);
+                    state[idx + 23] = 1.0f;
                     break;                
                 case "Ammo":
                     // Ak lod potrebuje palivo
-                    if (parent.Ammo < (ShipController.maxAmmo-10))
-                        state[idx + 24] = (1f - ray.fraction);
-                    else if (parent.Ammo < (ShipController.maxAmmo/2f))
-                        state[idx + 25] = (1f - ray.fraction);
+                    if (parent.Ammo > (ShipController.maxAmmo-10))
+                        state[idx + 24] = 1.0f;
+                    else if (parent.Ammo > (ShipController.maxAmmo/2f))
+                        state[idx + 25] = 1.0f;
                     else
-                        state[idx + 26] = (1f - ray.fraction);
+                        state[idx + 26] = 1.0f;
                     break;                
                 case "Health":
                     // Ak lod potrebuje palivo
-                    if (parent.Health < (ShipController.maxHealth-1))                
-                        state[idx + 27] = (1f - ray.fraction);
-                    else if (parent.Health < (ShipController.maxHealth/2f))                
-                        state[idx + 28] = (1f - ray.fraction);
+                    if (parent.Health > (ShipController.maxHealth-1))                
+                        state[idx + 27] = 1.0f;
+                    else if (parent.Health > (ShipController.maxHealth/2f))                
+                        state[idx + 28] = 1.0f;
                     else
-                        state[idx + 29] = (1f - ray.fraction);
+                        state[idx + 29] = 1.0f;
                     break;                
                 case "Moon":
-                    state[idx + 30] = (1f - ray.fraction);
+                    state[idx + 30] = 1.0f;
                     break;                
                 case "Fobos":
-                    state[idx + 31] = (1f - ray.fraction);
+                    state[idx + 31] = 1.0f;
                     break;       
                 case "Projectile":
                     var projectile = ray.collider.GetComponent<Projectile>();
                     if (projectile.firingShip == parent)
-                        state[idx + 32] = (1f - ray.fraction);
+                        state[idx + 32] = 1.0f;
                     else
-                        state[idx + 33] = (1f - ray.fraction);
+                        state[idx + 33] = 1.0f;
                     break;
                 case "Ship-Destroyer":
-                    state[idx + 34] = (1f - ray.fraction);
+                    state[idx + 34] = 1.0f;
                     break;
                 default:
                     Debug.Log($"ray.name = {ray.collider.name}, ray.fraction = {ray.fraction}");
@@ -153,11 +154,11 @@ namespace Sensors
             var planet = ray.collider.GetComponent<PlanetController>();
             // Ak planeta nema vlastnika oznaci sa ako volna planeta
             if (planet.OwnerPlanet == null)
-                state[idx] = (1f - ray.fraction);
+                state[idx] = 1.0f;
             else if (planet.OwnerPlanet == parent.gameObject)
-                state[idx + 1] = (1f - ray.fraction);
+                state[idx + 1] = 1.0f;
             else
-                state[idx + 2] = (1f - ray.fraction);
+                state[idx + 2] = 1.0f;
         }      
     }
 }
