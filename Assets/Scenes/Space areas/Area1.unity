@@ -2600,6 +2600,11 @@ PrefabInstance:
       propertyPath: myGA
       value: 
       objectReference: {fileID: 898395953}
+    - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
+        type: 3}
+      propertyPath: Nickname
+      value: Alex
+      objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3152,6 +3157,11 @@ PrefabInstance:
       propertyPath: myGA
       value: 
       objectReference: {fileID: 898395953}
+    - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
+        type: 3}
+      propertyPath: Nickname
+      value: Jerry
+      objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -24043,6 +24053,11 @@ PrefabInstance:
       propertyPath: myGA
       value: 
       objectReference: {fileID: 898395953}
+    - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
+        type: 3}
+      propertyPath: Nickname
+      value: Sam
+      objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -25124,6 +25139,11 @@ PrefabInstance:
       propertyPath: myGA
       value: 
       objectReference: {fileID: 898395953}
+    - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
+        type: 3}
+      propertyPath: Nickname
+      value: Ghost
+      objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -25625,6 +25645,11 @@ PrefabInstance:
       propertyPath: myGA
       value: 
       objectReference: {fileID: 898395953}
+    - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
+        type: 3}
+      propertyPath: Nickname
+      value: Tom
+      objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: m_LocalPosition.x

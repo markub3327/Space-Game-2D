@@ -18,15 +18,15 @@ public class AgentDDQN : ShipController
 
     private ReplayBuffer replayMemory = new ReplayBuffer();
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 32; // size of minibatch
+    private const int BATCH_SIZE = 48; // size of minibatch
 
     // Epsilon
     private float epsilon = 1.0f;
     private const float epsilonMin = 0.01f;
     private float epsilon_decay;
 
-    public float fitness = 0;
-    public int num_of_episodes = 0;
+    public float fitness { get; set; } = 0;
+    public int num_of_episodes { get; set; } = 0;
 
     public TurretController[] turretControllers;
 
@@ -34,7 +34,7 @@ public class AgentDDQN : ShipController
     public Text nameBox;
     public Text levelBox;
 
-    public bool presiel10Epizod = false;
+    public bool presiel10Epizod { get; set; } = false;
     public bool testMode = false;
 
     public override void Start()
@@ -71,7 +71,7 @@ public class AgentDDQN : ShipController
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
         // Init Player info panel
-        this.nameBox.text = this.name;
+        this.nameBox.text = this.Nickname;
         this.levelBox.text = ((int)this.fitness).ToString();
 
         // Nacitaj vahy zo subora ak existuje
@@ -181,7 +181,7 @@ public class AgentDDQN : ShipController
         {            
             if (this.presiel10Epizod == false)
             {
-                if (num_of_episodes > 0 && (num_of_episodes % 50 == 0))
+                if (num_of_episodes > 0 && (num_of_episodes % 100 == 0))
                 {
                     this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
       
@@ -492,7 +492,7 @@ public class AgentDDQN : ShipController
 
 public class ReplayBuffer
 {
-    private const int max_count = 500000;
+    private const int max_count = 100000;
 
     public LinkedList<ReplayBufferItem> items = new LinkedList<ReplayBufferItem>();
 

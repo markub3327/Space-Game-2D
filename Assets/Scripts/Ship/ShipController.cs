@@ -72,10 +72,10 @@ public class ShipController : MonoBehaviour
     }
 
     // Zoznam planet, ktore vlastni lod
-    public List<PlanetController> myPlanets;
+    public List<PlanetController> myPlanets { get; set; } = new List<PlanetController>();
     
     // Pocet zasahov ostatnych lodi
-    public int Hits = 0;
+    public int Hits { get; set; } = 0;
 
     // Respawn
     public bool IsDestroyed { get; protected set; } = false;  // stav lode, je lod znicena?
@@ -101,25 +101,25 @@ public class ShipController : MonoBehaviour
     private Vector2 respawnPoint;
 
     // Skore v hre
-    public float[] wMean = new float[] { 0.05f, 0.05f, 0.01f, 1.00f, 0.01f }; 
-    public float scoreOld;
+    public float[] wMean { get; set; } = new float[] { 0.10f, 0.05f, 0.01f, 1.00f, 0.01f }; 
+    public float scoreOld { get; set; }
     public float Score 
     {
         get {
-            float avg;
+            float mean = 0f;
 
             // Vypocitaj skore hraca
-            avg  = (this.Health / (float)ShipController.maxHealth)     *  wMean[0];
-            avg +=     (this.Fuel / (float)ShipController.maxFuel)     *  wMean[1];
-            avg +=     (this.Ammo / (float)ShipController.maxAmmo)     *  wMean[2];
-            avg +=                   ((float)this.myPlanets.Count)     *  wMean[3];
-            avg +=     (this.Hits / (float)ShipController.maxAmmo)     *  wMean[4];
+            mean += (this.Health / (float)ShipController.maxHealth)     *  wMean[0];
+            mean +=     (this.Fuel / (float)ShipController.maxFuel)     *  wMean[1];
+            mean +=     (this.Ammo / (float)ShipController.maxAmmo)     *  wMean[2];
+            mean +=                   ((float)this.myPlanets.Count)     *  wMean[3];
+            mean +=     (this.Hits / (float)ShipController.maxAmmo)     *  wMean[4];
 
-            var sum = wMean[0] + wMean[1] + wMean[2] + wMean[3] + wMean[4];
-            return (avg / sum);
+            return mean;
         }
     }
 
+    public string Nickname;
 
     // Start is called before the first frame update
     public virtual void Start()

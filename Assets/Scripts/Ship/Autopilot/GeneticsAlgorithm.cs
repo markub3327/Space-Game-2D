@@ -28,26 +28,11 @@ public class GeneticsAlgorithm : MonoBehaviour
 
             // Mutacia
             this.Mutation();
-
-            // Soft update Q Target network
-            foreach (var a in agents)
-    		{
-                if (a != bestAgent)
-			    {
-                    for (int j = 0; j < a.QNet.neuronLayers.Count; j++)
-                    {
-                        for (int k = 0; k < a.QNet.neuronLayers[j].Weights.Count; k++)
-                        {
-                            a.QTargetNet.neuronLayers[j].Weights[k] = tau*a.QNet.neuronLayers[j].Weights[k] + (1.0f-tau)*a.QTargetNet.neuronLayers[j].Weights[k];                    
-                        }
-                    }
-                }
-            }
-
+            
             this.fitnessList.Add(bestAgent.fitness);
             for (int i = 0; i < agents.Count; i++)
             {
-                Debug.Log($"order = {i+1}., name = {agents[i].name}, fitness = {agents[i].fitness}");   
+                Debug.Log($"order = {i+1}., name = {agents[i].Nickname}, fitness = {agents[i].fitness}");   
                 agents[i].fitness = 0.0f;
                 agents[i].presiel10Epizod = false;                
             }
@@ -79,12 +64,14 @@ public class GeneticsAlgorithm : MonoBehaviour
                     for (int j = 0; j < slicing_point; j++)
                     {                        
     					a.QNet.neuronLayers[i].Weights[j] = parrentA.QNet.neuronLayers[i].Weights[j];
+    					a.QTargetNet.neuronLayers[i].Weights[j] = parrentA.QTargetNet.neuronLayers[i].Weights[j];                        
 	    			}
 
     				// second part of the child's chromosome contains the parrentB genes
 	    			for (int j = slicing_point; j < a.QNet.neuronLayers[i].Weights.Count; j++)
 		    		{
     					a.QNet.neuronLayers[i].Weights[j] = parrentB.QNet.neuronLayers[i].Weights[j];
+    					a.QTargetNet.neuronLayers[i].Weights[j] = parrentB.QTargetNet.neuronLayers[i].Weights[j];
 				    }
                 }
 
@@ -123,21 +110,21 @@ public class GeneticsAlgorithm : MonoBehaviour
                         {
                             var newW = Random.Range(-1.0f, 1.0f) * k;
                             a.QNet.neuronLayers[i].Weights[j] = newW;//0.0002f*newW + (1.0f-0.0002f)*a.QNet.neuronLayers[i].Weights[j];
-                            Debug.Log($"Mutating W[{i}][{j}]({a.name})={newW}!");
+                            Debug.Log($"Mutating W[{i}][{j}]({a.Nickname})={newW}!");
                         }                        
                     }
                 }
 
                 for (int j = 0; j < a.wMean.Length; j++)
                 {                        
-                    if (Random.Range(0.0f, 1.0f) < (0.1f/(float)a.wMean.Length))                        
+                    if (Random.Range(0.0f, 1.0f) < (1f/(float)a.wMean.Length))                        
                     {
                         float newW;
                         do {
                             newW = Random.Range(0.0f, 1.0f);
                         } while (newW == 0f);
                         a.wMean[j] = newW;
-                        //Debug.Log($"Mutating LR[{i}][{j}]({a.name})={newLR}!");
+                        Debug.Log($"Mutating Wmean[{j}]({a.Nickname})={a.wMean[j]}!");
                     }
                 }                
             }

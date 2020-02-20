@@ -162,7 +162,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Martin
+  m_Text: 
 --- !u!114 &1330311664888462283
 MonoBehaviour:
   m_ObjectHideFlags: 0
