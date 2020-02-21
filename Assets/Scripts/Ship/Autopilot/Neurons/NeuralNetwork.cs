@@ -7,10 +7,6 @@ public class NeuralNetwork
     public string Name;
     public List<NeuralLayer> neuronLayers { get; private set; }
 
-
-    // Ukladanie chyb ucenia pre analyzu siete
-    public List<float> errorList { get; private set; } = new List<float>();
- 
     public NeuralNetwork(string name=default(string))
     {
         this.neuronLayers = new List<NeuralLayer>();
@@ -82,7 +78,7 @@ public class NeuralNetwork
             }            
         }
 
-        return JsonUtility.ToJson(new JSON_NET { Weights = weights, error = this.errorList }, true);
+        return JsonUtility.ToJson(new JSON_NET { Weights = weights }, true);
     } 
 }
 
@@ -90,5 +86,4 @@ public class NeuralNetwork
 public class JSON_NET
 {
     public List<float> Weights;
-    public List<float> error;
 }

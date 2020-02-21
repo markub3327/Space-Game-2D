@@ -10,8 +10,6 @@ public class GeneticsAlgorithm : MonoBehaviour
 
     public List<AgentDDQN> agents;
 
-    private float tau=0.01f;
-
     private List<float> fitnessList = new List<float>();
 
     public void Update()
@@ -35,11 +33,7 @@ public class GeneticsAlgorithm : MonoBehaviour
                 Debug.Log($"order = {i+1}., name = {agents[i].Nickname}, fitness = {agents[i].fitness}");   
                 agents[i].fitness = 0.0f;
                 agents[i].presiel10Epizod = false;                
-            }
-            for (int j = 0; j < bestAgent.wMean.Length; j++)
-            {
-                Debug.Log($"wMean[{j}]={bestAgent.wMean[j]}");
-            }
+            }            
         }
     }
 
@@ -73,21 +67,7 @@ public class GeneticsAlgorithm : MonoBehaviour
     					a.QNet.neuronLayers[i].Weights[j] = parrentB.QNet.neuronLayers[i].Weights[j];
     					a.QTargetNet.neuronLayers[i].Weights[j] = parrentB.QTargetNet.neuronLayers[i].Weights[j];
 				    }
-                }
-
-                // Random slicing point
-    	    	slicing_point = (Random.Range(1, a.wMean.Length-1));
-
-                // first part of the child's chromosome contains the parrentA genes    
-                for (int j = 0; j < slicing_point; j++)
-                {                        
-                    a.wMean[j] = parrentA.wMean[j];
-                }
-    			// second part of the child's chromosome contains the parrentB genes
-	    		for (int j = slicing_point; j < a.wMean.Length; j++)
-		    	{
-                    a.wMean[j] = parrentB.wMean[j];
-				}
+                }                
 			}
 		}        
 	}
@@ -113,20 +93,7 @@ public class GeneticsAlgorithm : MonoBehaviour
                             Debug.Log($"Mutating W[{i}][{j}]({a.Nickname})={newW}!");
                         }                        
                     }
-                }
-
-                for (int j = 0; j < a.wMean.Length; j++)
-                {                        
-                    if (Random.Range(0.0f, 1.0f) < (1f/(float)a.wMean.Length))                        
-                    {
-                        float newW;
-                        do {
-                            newW = Random.Range(0.0f, 1.0f);
-                        } while (newW == 0f);
-                        a.wMean[j] = newW;
-                        Debug.Log($"Mutating Wmean[{j}]({a.Nickname})={a.wMean[j]}!");
-                    }
-                }                
+                }      
             }
         }
     }

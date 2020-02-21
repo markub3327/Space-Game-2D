@@ -101,7 +101,6 @@ public class ShipController : MonoBehaviour
     private Vector2 respawnPoint;
 
     // Skore v hre
-    public float[] wMean { get; set; } = new float[] { 0.10f, 0.05f, 0.01f, 1.00f, 0.01f }; 
     public float scoreOld { get; set; }
     public float Score 
     {
@@ -109,11 +108,11 @@ public class ShipController : MonoBehaviour
             float mean = 0f;
 
             // Vypocitaj skore hraca
-            mean += (this.Health / (float)ShipController.maxHealth)     *  wMean[0];
-            mean +=     (this.Fuel / (float)ShipController.maxFuel)     *  wMean[1];
-            mean +=     (this.Ammo / (float)ShipController.maxAmmo)     *  wMean[2];
-            mean +=                   ((float)this.myPlanets.Count)     *  wMean[3];
-            mean +=     (this.Hits / (float)ShipController.maxAmmo)     *  wMean[4];
+            //mean += (this.Health / (float)ShipController.maxHealth)     *  0.20f;
+            mean +=     this.Fuel;
+            //mean +=     (this.Ammo / (float)ShipController.maxAmmo)     *  0.01f;
+            mean +=                   ((float)this.myPlanets.Count)     *  1.00f;
+            //mean +=     (this.Hits / (float)ShipController.maxAmmo)     *  0.01f;
 
             return mean;
         }
@@ -173,8 +172,7 @@ public class ShipController : MonoBehaviour
                 }
             }
 
-            var decay = -Time.deltaTime;
-            ChangeFuel(decay);    // plaivo sa znizi o 1 za 1 sekundu
+            ChangeFuel(-0.01f);    // plaivo sa znizi o 1 za 1 sekundu
             //Debug.Log($"decay={decay}"); 
         }        
     }

@@ -18,11 +18,11 @@ public class AgentDDQN : ShipController
 
     private ReplayBuffer replayMemory = new ReplayBuffer();
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 48; // size of minibatch
+    private const int BATCH_SIZE = 32; // size of minibatch
 
     // Epsilon
     private float epsilon = 1.0f;
-    private const float epsilonMin = 0.01f;
+    private const float epsilonMin = 0.05f;
     private float epsilon_decay;
 
     public float fitness { get; set; } = 0;
@@ -135,27 +135,31 @@ public class AgentDDQN : ShipController
                 // Ak uz hrac nema zivoty ani palivo znici sa lod
                 if (this.Health <= 0 || this.Fuel <= 0)
                 {
-                    if (this.myPlanets.Count > 0)
+                    if (this.myPlanets.Count > 1)
                     {
                         var strPlanets = string.Empty;
                         this.myPlanets.ForEach(x => strPlanets += x.name + ", ");
                         Debug.Log($"MyPlanets[{this.name}]: {strPlanets}");
                     }
-                    if (this.Hits > 0)
-                        Debug.Log($"Hits[{this.name}]: {this.Hits}");
+                    //if (this.Hits > 0)
+                    //    Debug.Log($"Hits[{this.name}]: {this.Hits}");
 
                     // Destrukcia lode
                     DestroyShip();
 
                     // Terminalny stav - koniec epizody
                     replayBufferItem.Done = true;
-                    replayBufferItem.Reward = 0.0f;
+                    replayBufferItem.Reward = -1.0f;
                 }
                 else    // pokracuje v hre
                 {
                     var score = this.Score;
                     // Neterminalny stav - pokracuje v hre
-                    replayBufferItem.Done = false;                    
+                    replayBufferItem.Done = false;             
+
+                    //Debug.Log($"score[{this.Nickname}] = {this.Score}");
+                    //Debug.Log($"score_old[{this.Nickname}] = {scoreOld}");
+      
                     replayBufferItem.Reward = score - this.scoreOld;
                     this.scoreOld = score;       // odmena za krok v hre je prirastok v skore po akcii hraca
                     this.levelBox.text = score.ToString("0.000");
@@ -168,7 +172,11 @@ public class AgentDDQN : ShipController
                 }
 
                 // Uloz udalost do bufferu
-                replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
+                if (replayBufferItem.Reward != 0f)
+                {
+                    //Debug.Log($"Reward[{this.Nickname}] = {replayBufferItem.Reward}");
+                    replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
+                }
 
                 // Uchovaj stav predoslej hry
                 this.replayBufferItem = new ReplayBufferItem { State = replayBufferItem.Next_state };
@@ -181,7 +189,7 @@ public class AgentDDQN : ShipController
         {            
             if (this.presiel10Epizod == false)
             {
-                if (num_of_episodes > 0 && (num_of_episodes % 100 == 0))
+                if (num_of_episodes > 0 && (num_of_episodes % 10 == 0))
                 {
                     this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
       
@@ -194,7 +202,7 @@ public class AgentDDQN : ShipController
 
                 num_of_episodes++;
             }
-            if (num_of_episodes > 5000) 
+            if (num_of_episodes > 2000) 
             { 
                 #if UNITY_EDITOR
                     UnityEditor.EditorApplication.isPlaying = false;
@@ -224,13 +232,13 @@ public class AgentDDQN : ShipController
                 Destroy(collision.gameObject);
                 break;
             case "Nebula":
-                if (this.Fuel < ShipController.maxFuel)
-                {
+                //if (this.Fuel < ShipController.maxFuel)
+                //{
                     // Pridaj palivo hracovi
-                    this.ChangeFuel(+1);
+                //    this.ChangeFuel(+1);
                     // Prehraj klip
-                    this.PlaySound(collectibleClip);
-                }
+                //    this.PlaySound(collectibleClip);
+                //}
                 break;
             case "Health":
                 if (this.Health < ShipController.maxHealth)
@@ -336,7 +344,7 @@ public class AgentDDQN : ShipController
             {
                 // Priemer chyby NN
                 avgErr /= (float)sample.Count;
-                QNet.errorList.Add(avgErr);
+                //QNet.errorList.Add(avgErr);
                 Debug.Log($"avgErr.QNet[{this.name}] = {avgErr}");
             }            
         }
@@ -492,7 +500,7 @@ public class AgentDDQN : ShipController
 
 public class ReplayBuffer
 {
-    private const int max_count = 100000;
+    private const int max_count = 10000;
 
     public LinkedList<ReplayBufferItem> items = new LinkedList<ReplayBufferItem>();
 
@@ -509,23 +517,15 @@ public class ReplayBuffer
     public List<ReplayBufferItem> Sample(int batch_size)
     {
         var buff = new List<ReplayBufferItem>(batch_size);
-        //var i = 0;
 
-        foreach (var element in items)
+        foreach (var x in this.items)
         {
-            if (buff.Count < batch_size)
-            {
-                if ((float)rand.NextDouble() < ((float)batch_size/(float)items.Count))
-                {
-                    buff.Add(element);              
-                    //Debug.Log($"selected element i = {i}/{items.Count}");
-                }
-            }
-            else
-                break;  // end of selecting items
-
-            //i++;
+            if (UnityEngine.Random.Range(0.0f, 1.0f) < ((float)batch_size/(float)this.items.Count))                        
+                buff.Add(x);
+            if (buff.Count >= batch_size)
+                break;
         }
+        //Debug.Log($"count = {this.items.Count}, batch_size = {buff.Count}");
 
         return buff;
     }    
