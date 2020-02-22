@@ -37,7 +37,7 @@ public class Projectile : MonoBehaviour
                 // Znizi zivoty hracovi
                 player.ChangeHealth(-0.10f);
                 // Pripise si zasah lode
-                this.firingShip.Hits += 1;                
+                this.firingShip.Hits += 0.01f;                
             }
 
             // Efekt vybuchu

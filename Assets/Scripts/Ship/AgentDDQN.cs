@@ -9,7 +9,7 @@ public class AgentDDQN : ShipController
 {
     private const int num_of_states = Sensors.Radar.num_of_rays * Sensors.Radar.num_of_objs;
 
-    private const int num_of_actions = 18;
+    private const int num_of_actions = 16;
 
     private bool isFirstFrame = true;
 
@@ -22,10 +22,11 @@ public class AgentDDQN : ShipController
 
     // Epsilon
     private float epsilon = 1.0f;
-    private const float epsilonMin = 0.05f;
+    private const float epsilonMin = 0.10f;
     private float epsilon_decay;
 
     public float fitness { get; set; } = 0;
+    public float avgErr { get; set; } = 0;
     public int num_of_episodes { get; set; } = 0;
 
     public TurretController[] turretControllers;
@@ -36,6 +37,8 @@ public class AgentDDQN : ShipController
 
     public bool presiel10Epizod { get; set; } = false;
     public bool testMode = false;
+
+    private int planets_old = 0;
 
     public override void Start()
     {
@@ -62,12 +65,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
-        QNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
+        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 24);
-        QTargetNet.neuronLayers[1].CreateNeurons(24); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
+        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
         // Init Player info panel
@@ -135,14 +138,9 @@ public class AgentDDQN : ShipController
                 // Ak uz hrac nema zivoty ani palivo znici sa lod
                 if (this.Health <= 0 || this.Fuel <= 0)
                 {
-                    if (this.myPlanets.Count > 1)
-                    {
-                        var strPlanets = string.Empty;
-                        this.myPlanets.ForEach(x => strPlanets += x.name + ", ");
-                        Debug.Log($"MyPlanets[{this.name}]: {strPlanets}");
-                    }
-                    //if (this.Hits > 0)
-                    //    Debug.Log($"Hits[{this.name}]: {this.Hits}");
+                    planets_old = 0;
+                    if (this.Hits > 0)
+                        Debug.Log($"Hits[{this.name}]: {this.Hits}");
 
                     // Destrukcia lode
                     DestroyShip();
@@ -150,6 +148,20 @@ public class AgentDDQN : ShipController
                     // Terminalny stav - koniec epizody
                     replayBufferItem.Done = true;
                     replayBufferItem.Reward = -1.0f;
+                }
+                else if (this.myPlanets.Count > planets_old)
+                {
+                    if (this.myPlanets.Count > 1)
+                    {
+                        var strPlanets = string.Empty;
+                        this.myPlanets.ForEach(x => strPlanets += x.name + ", ");
+                        Debug.Log($"MyPlanets[{this.name}]: {strPlanets}");
+                    }
+
+                    // Terminalny stav - koniec epizody
+                    replayBufferItem.Done = true;
+                    replayBufferItem.Reward = +1.0f;
+                    planets_old = this.myPlanets.Count;
                 }
                 else    // pokracuje v hre
                 {
@@ -162,7 +174,7 @@ public class AgentDDQN : ShipController
       
                     replayBufferItem.Reward = score - this.scoreOld;
                     this.scoreOld = score;       // odmena za krok v hre je prirastok v skore po akcii hraca
-                    this.levelBox.text = score.ToString("0.000");
+                    this.levelBox.text = score.ToString("0.00");
                 }
 
                 // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
@@ -171,10 +183,10 @@ public class AgentDDQN : ShipController
                     this.fitness += replayBufferItem.Reward;
                 }
 
-                // Uloz udalost do bufferu
                 if (replayBufferItem.Reward != 0f)
                 {
                     //Debug.Log($"Reward[{this.Nickname}] = {replayBufferItem.Reward}");
+                    // Uloz udalost do bufferu
                     replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
                 }
 
@@ -202,7 +214,7 @@ public class AgentDDQN : ShipController
 
                 num_of_episodes++;
             }
-            if (num_of_episodes > 2000) 
+            if (num_of_episodes > 5000) 
             { 
                 #if UNITY_EDITOR
                     UnityEditor.EditorApplication.isPlaying = false;
@@ -216,6 +228,30 @@ public class AgentDDQN : ShipController
         }
     }
 
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        // Podla oznacenia herneho objektu vykonaj akciu kolizie
+        switch (collision.gameObject.tag)
+        {
+            case "Star":
+                // Prahra clip poskodenia lode
+                this.PlaySound(damageClip);
+                // Uberie sa hracovi zivot
+                this.ChangeHealth(-0.10f);
+                break;
+            case "Nebula":
+                if (this.Fuel < ShipController.maxFuel)
+                {
+                    // Pridaj palivo hracovi
+                    this.ChangeFuel(+0.01f);
+                    // Prehraj klip
+                    this.PlaySound(collectibleClip);
+                }   
+                break;
+
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         // Podla oznacenia herneho objektu vykonaj akciu kolizie
@@ -225,26 +261,17 @@ public class AgentDDQN : ShipController
                 if (this.Ammo < ShipController.maxAmmo)
                 {
                     // Pridaj municiu hracovi
-                    this.ChangeAmmo(+100);
+                    this.ChangeAmmo(+1.0f);
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }
                 Destroy(collision.gameObject);
                 break;
-            case "Nebula":
-                //if (this.Fuel < ShipController.maxFuel)
-                //{
-                    // Pridaj palivo hracovi
-                //    this.ChangeFuel(+1);
-                    // Prehraj klip
-                //    this.PlaySound(collectibleClip);
-                //}
-                break;
             case "Health":
                 if (this.Health < ShipController.maxHealth)
                 {
                     // Pridaj zivot hracovi
-                    this.ChangeHealth(+1);
+                    this.ChangeHealth(+0.10f);
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }
@@ -252,7 +279,7 @@ public class AgentDDQN : ShipController
                 break;
             case "Asteroid":
                 // Uberie sa hracovi zivot
-                this.ChangeHealth(-1);      
+                this.ChangeHealth(-0.10f);      
                 // Prahra clip poskodenia lode
                 this.PlaySound(damageClip);
                 break;
@@ -266,21 +293,15 @@ public class AgentDDQN : ShipController
 
                         planet.dialogBox.Clear();
                         planet.dialogBox.WriteLine($"Planet: {planet.name}");
-                        planet.dialogBox.WriteLine($"Owner: {this.name}");
+                        planet.dialogBox.WriteLine($"Owner: {this.Nickname}");
                     }
                 }
-                break;
-            case "Star":
-                // Prahra clip poskodenia lode
-                this.PlaySound(damageClip);
-                // Uberie sa hracovi zivot
-                this.ChangeHealth(-1);
                 break;
             case "Player":
                 // Prahra clip poskodenia lode
                 this.PlaySound(damageClip);
                 // Uberie sa hracovi zivot
-                this.ChangeHealth(-1);
+                this.ChangeHealth(-0.10f);
                 break;
         }
     }
@@ -291,11 +312,10 @@ public class AgentDDQN : ShipController
         if (replayMemory.Count >= BATCH_SIZE && !testMode)
         {
             var sample = replayMemory.Sample(BATCH_SIZE);
-            float avgErr = 0;
 
             //Debug.Log($"sample.Count = {sample.Count}, memory.Count = {this.replayMemory.Count}");
 
-            for (int i = 0; i < sample.Count; i++)
+            for (int i = 0; i < BATCH_SIZE; i++)
             {
                 float[] targets = new float[num_of_actions];
 
@@ -336,15 +356,15 @@ public class AgentDDQN : ShipController
                     }
                 }
 
+                sample[i].error = math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
                 if (presiel10Epizod)
-                    avgErr += math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
+                    this.avgErr += sample[i].error;
             }
         
             if (presiel10Epizod)
             {
                 // Priemer chyby NN
-                avgErr /= (float)sample.Count;
-                //QNet.errorList.Add(avgErr);
+                this.avgErr /= (float)sample.Count;
                 Debug.Log($"avgErr.QNet[{this.name}] = {avgErr}");
             }            
         }
@@ -367,80 +387,75 @@ public class AgentDDQN : ShipController
 
         switch (action)
         {
-            // case 0x00 - is stop (do nothing)
             // Up
-            case 0x01:
+            case 0x00:
                 this.MoveShip(Vector2.up);
                 break;
             // Up-Right
-            case 0x02:
+            case 0x01:
                 this.MoveShip(ExtendedVector2.up_right);
                 break;
             // Right
-            case 0x03:
+            case 0x02:
                 this.MoveShip(Vector2.right);
                 break;
             // Down-Right
-            case 0x04:
+            case 0x03:
                 this.MoveShip(ExtendedVector2.down_right);
                 break;
             // Down
-            case 0x05:
+            case 0x04:
                 this.MoveShip(Vector2.down);
                 break;
             // Down-Left
-            case 0x06:
+            case 0x05:
                 this.MoveShip(ExtendedVector2.down_left);
                 break;
             // Left
-            case 0x07:
+            case 0x06:
                 this.MoveShip(Vector2.left);
                 break;
             // Up-Left
-            case 0x08:
+            case 0x07:
                 this.MoveShip(ExtendedVector2.up_left);
                 break;
-            // is only firing
-            case 0x09:
-                this.Fire();
-                break;
             // Up
-            case 0x10:
+            case 0x08:
                 this.Fire();
                 this.MoveShip(Vector2.up);
                 break;
             // Up-Right
-            case 0x11:
+            case 0x09:
                 this.Fire();
                 this.MoveShip(ExtendedVector2.up_right);
                 break;
             // Right
-            case 0x12:
+            case 0x10:
                 this.Fire();
                 this.MoveShip(Vector2.right);
                 break;
             // Down-Right
-            case 0x13:
+            case 0x11:
                 this.Fire();
                 this.MoveShip(ExtendedVector2.down_right);
                 break;
             // Down
-            case 0x14:
+            case 0x12:
                 this.Fire();
                 this.MoveShip(Vector2.down);
                 break;
             // Down-Left
-            case 0x15:
+            case 0x13:
                 this.Fire();
                 this.MoveShip(ExtendedVector2.down_left);
                 break;
             // Left
-            case 0x16:
+            case 0x14:
                 this.Fire();
                 this.MoveShip(Vector2.left);
                 break;
             // Up-Left
-            case 0x17:
+            case 0x15:
                 this.Fire();
                 this.MoveShip(ExtendedVector2.up_left);
                 break;
@@ -465,7 +480,7 @@ public class AgentDDQN : ShipController
                 // Vystrel
                 turret.Fire();
                 // Uber z municie hraca jeden naboj
-                this.ChangeAmmo(-1);
+                this.ChangeAmmo(-0.01f);
                 // Ak uz hrac nema municiu nemoze pokracovat v strelbe
                 if (this.Ammo <= 0)
                     break;
@@ -517,13 +532,43 @@ public class ReplayBuffer
     public List<ReplayBufferItem> Sample(int batch_size)
     {
         var buff = new List<ReplayBufferItem>(batch_size);
+		float[] probability = new float[this.items.Count];
+		float min, max, sum = 0.0f;
+        int i = 0;
 
+		// Softmax function
+		/*********************************************************/
+        foreach (var x in this.items)
+		{
+			sum += Unity.Mathematics.math.exp(x.error);
+		}        
         foreach (var x in this.items)
         {
-            if (UnityEngine.Random.Range(0.0f, 1.0f) < ((float)batch_size/(float)this.items.Count))                        
-                buff.Add(x);
-            if (buff.Count >= batch_size)
-                break;
+            probability[i++] = Unity.Mathematics.math.exp(x.error) / sum;
+        }
+		/*********************************************************/
+
+		// Pseudorandom selection
+		/*********************************************************/
+        for (; buff.Count < batch_size;)
+        {
+            var a = UnityEngine.Random.Range(0f, 1f);
+            max = 0f; i = 0;
+
+            foreach (var x in this.items)
+            {
+                min = max;
+			    max += probability[i];
+
+    			// if is a value in range
+	    		if (min <= a && a < max)
+		    	{
+                    //Debug.Log($"i = {i}, prob = {probability[i]}, error = {x.error}");
+                    buff.Add(x);
+                    break;
+                }
+                i++;
+            }
         }
         //Debug.Log($"count = {this.items.Count}, batch_size = {buff.Count}");
 
@@ -540,5 +585,7 @@ public class ReplayBufferItem
     public float        Reward;
     public float[]  Next_state;
     public bool           Done;
+
+    public float         error;
 }
 

@@ -33,7 +33,7 @@ public class ShipController : MonoBehaviour
 
     // Player's ammo
     public UIBarControl ammoBar;
-    public const int maxAmmo = 100;               // maximalny pocet nabojov hraca
+    public const int maxAmmo = 1;               // maximalny pocet nabojov hraca
     private float _ammo = maxAmmo;
     public float Ammo {
         get
@@ -75,7 +75,7 @@ public class ShipController : MonoBehaviour
     public List<PlanetController> myPlanets { get; set; } = new List<PlanetController>();
     
     // Pocet zasahov ostatnych lodi
-    public int Hits { get; set; } = 0;
+    public float Hits { get; set; } = 0;
 
     // Respawn
     public bool IsDestroyed { get; protected set; } = false;  // stav lode, je lod znicena?
@@ -108,11 +108,10 @@ public class ShipController : MonoBehaviour
             float mean = 0f;
 
             // Vypocitaj skore hraca
-            //mean += (this.Health / (float)ShipController.maxHealth)     *  0.20f;
-            mean +=     this.Fuel;
-            //mean +=     (this.Ammo / (float)ShipController.maxAmmo)     *  0.01f;
-            mean +=                   ((float)this.myPlanets.Count)     *  1.00f;
-            //mean +=     (this.Hits / (float)ShipController.maxAmmo)     *  0.01f;
+            mean += this.Health;
+            mean += this.Fuel;
+            mean += this.Ammo;
+            mean += this.Hits;
 
             return mean;
         }
