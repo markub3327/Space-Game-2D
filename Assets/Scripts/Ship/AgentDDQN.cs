@@ -168,26 +168,23 @@ public class AgentDDQN : ShipController
                     var score = this.Score;
                     // Neterminalny stav - pokracuje v hre
                     replayBufferItem.Done = false;             
-
-                    //Debug.Log($"score[{this.Nickname}] = {this.Score}");
-                    //Debug.Log($"score_old[{this.Nickname}] = {scoreOld}");
-      
                     replayBufferItem.Reward = score - this.scoreOld;
-                    this.scoreOld = score;       // odmena za krok v hre je prirastok v skore po akcii hraca
                     this.levelBox.text = score.ToString("0.00");
-                }
-
+                    this.scoreOld = score;       // odmena za krok v hre je prirastok v skore po akcii hraca
+            }
+    
                 // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
                 if (!presiel10Epizod)
                 {
                     this.fitness += replayBufferItem.Reward;
                 }
 
+                // Uloz udalost do bufferu
                 if (replayBufferItem.Reward != 0f)
                 {
-                    //Debug.Log($"Reward[{this.Nickname}] = {replayBufferItem.Reward}");
-                    // Uloz udalost do bufferu
                     replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
+                    //if (replayBufferItem.Reward > 0f)
+                    //Debug.Log($"Reward[{this.Nickname}] = {replayBufferItem.Reward}");
                 }
 
                 // Uchovaj stav predoslej hry
@@ -209,9 +206,6 @@ public class AgentDDQN : ShipController
                     Debug.Log($"episode[{this.name}] = {num_of_episodes}");
                 }
     
-                // Pretrenuj hraca derivaciami
-                this.Training();
-
                 num_of_episodes++;
             }
             if (num_of_episodes > 5000) 
@@ -222,7 +216,10 @@ public class AgentDDQN : ShipController
                     Application.Quit();
                 #endif
             }
-            
+
+            // Pretrenuj hraca derivaciami
+            this.Training();
+        
             // Respawn
             RespawnShip();
         }
@@ -237,7 +234,7 @@ public class AgentDDQN : ShipController
                 // Prahra clip poskodenia lode
                 this.PlaySound(damageClip);
                 // Uberie sa hracovi zivot
-                this.ChangeHealth(-0.10f);
+                this.ChangeHealth(-0.05f);
                 break;
             case "Nebula":
                 if (this.Fuel < ShipController.maxFuel)
@@ -515,11 +512,9 @@ public class AgentDDQN : ShipController
 
 public class ReplayBuffer
 {
-    private const int max_count = 10000;
+    private const int max_count = 50000;
 
     public LinkedList<ReplayBufferItem> items = new LinkedList<ReplayBufferItem>();
-
-    public System.Random rand = new System.Random();
 
     public void Add(ReplayBufferItem item)
     {
@@ -533,18 +528,18 @@ public class ReplayBuffer
     {
         var buff = new List<ReplayBufferItem>(batch_size);
 		float[] probability = new float[this.items.Count];
-		float min, max, sum = 0.0f;
+		float prob_sum = 0.0f;
         int i = 0;
 
 		// Softmax function
 		/*********************************************************/
         foreach (var x in this.items)
 		{
-			sum += Unity.Mathematics.math.exp(x.error);
+			prob_sum += Unity.Mathematics.math.exp(x.error);
 		}        
         foreach (var x in this.items)
         {
-            probability[i++] = Unity.Mathematics.math.exp(x.error) / sum;
+            probability[i++] = Unity.Mathematics.math.exp(x.error) / prob_sum;
         }
 		/*********************************************************/
 
@@ -552,18 +547,12 @@ public class ReplayBuffer
 		/*********************************************************/
         for (; buff.Count < batch_size;)
         {
-            var a = UnityEngine.Random.Range(0f, 1f);
-            max = 0f; i = 0;
-
+            i = 0;
             foreach (var x in this.items)
             {
-                min = max;
-			    max += probability[i];
-
-    			// if is a value in range
-	    		if (min <= a && a < max)
-		    	{
-                    //Debug.Log($"i = {i}, prob = {probability[i]}, error = {x.error}");
+                if (UnityEngine.Random.Range(0f, 1f) < probability[i])                        
+                {                
+    			    //Debug.Log($"i = {i}, prob = {probability[i]}, error = {x.error}");
                     buff.Add(x);
                     break;
                 }

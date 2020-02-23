@@ -2543,7 +2543,6 @@ Transform:
   - {fileID: 1002010167}
   - {fileID: 908386303}
   - {fileID: 1826153657}
-  - {fileID: 2051195407}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2565,7 +2564,6 @@ MonoBehaviour:
   - {fileID: 1855957096}
   - {fileID: 1306896193}
   - {fileID: 1320905206}
-  - {fileID: 2051195408}
 --- !u!1001 &908386302
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2588,7 +2586,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: fb0ff7d97fddcc84093a096a927b5c68,
+      objectReference: {fileID: 21300000, guid: deb435790b9949f478038d632b6701ed,
         type: 3}
     - target: {fileID: 6572750833217738734, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
@@ -2603,17 +2601,17 @@ PrefabInstance:
     - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: Nickname
-      value: Alex
+      value: Warrior
       objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 18.43
+      value: 12.39
       objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -11.58
+      value: -1.95
       objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
@@ -3145,7 +3143,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 486f321c347824440baeab97fee72251,
+      objectReference: {fileID: 21300000, guid: f23a0d4d7052dfe4c899a6fc180aa5bb,
         type: 3}
     - target: {fileID: 6572750833217738734, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
@@ -3160,7 +3158,7 @@ PrefabInstance:
     - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: Nickname
-      value: Jerry
+      value: Troll
       objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
@@ -24041,7 +24039,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: af7226e30c27aab4486f406051ce398e,
+      objectReference: {fileID: 21300000, guid: 1d2d8cb6d5eeca341a7d08d08c00e4c1,
         type: 3}
     - target: {fileID: 6572750833217738734, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
@@ -24056,17 +24054,17 @@ PrefabInstance:
     - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: Nickname
-      value: Sam
+      value: Samurai
       objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -16.33
+      value: -12.42
       objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.15
+      value: -1.57
       objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
@@ -25105,111 +25103,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1172710558}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &2051195406
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 898395952}
-    m_Modifications:
-    - target: {fileID: 35079871182922154, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_Camera
-      value: 
-      objectReference: {fileID: 519420031}
-    - target: {fileID: 5192626294004128775, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 21300000, guid: 9d075835a55fe1543a63ece91d64ab1b,
-        type: 3}
-    - target: {fileID: 5910588056137001611, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 21300000, guid: af7226e30c27aab4486f406051ce398e,
-        type: 3}
-    - target: {fileID: 6572750833217738734, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_Camera
-      value: 
-      objectReference: {fileID: 519420031}
-    - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: myGA
-      value: 
-      objectReference: {fileID: 898395953}
-    - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: Nickname
-      value: Ghost
-      objectReference: {fileID: 0}
-    - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 12.19
-      objectReference: {fileID: 0}
-    - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -1.42
-      objectReference: {fileID: 0}
-    - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 7561708683362344634, guid: abcf8246936514953b5b1f538f928eab,
-        type: 3}
-      propertyPath: m_Name
-      value: Ship-Destroyer
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 8548084380819351838, guid: abcf8246936514953b5b1f538f928eab, type: 3}
-  m_SourcePrefab: {fileID: 100100000, guid: abcf8246936514953b5b1f538f928eab, type: 3}
---- !u!4 &2051195407 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
-    type: 3}
-  m_PrefabInstance: {fileID: 2051195406}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2051195408 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
-    type: 3}
-  m_PrefabInstance: {fileID: 2051195406}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 270f753fbd4c1416eb2b0ac31d76adff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2053957413
 GameObject:
   m_ObjectHideFlags: 0
@@ -25633,13 +25526,18 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: af7226e30c27aab4486f406051ce398e,
+      objectReference: {fileID: 21300000, guid: ea2b242b9e016fb4585e072e5ec55c64,
         type: 3}
     - target: {fileID: 6572750833217738734, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 519420031}
+    - target: {fileID: 6886705795503848144, guid: abcf8246936514953b5b1f538f928eab,
+        type: 3}
+      propertyPath: m_FontData.m_MaxSize
+      value: 96
+      objectReference: {fileID: 0}
     - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: myGA
@@ -25648,7 +25546,7 @@ PrefabInstance:
     - target: {fileID: 6973722366192470321, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: Nickname
-      value: Tom
+      value: Witch
       objectReference: {fileID: 0}
     - target: {fileID: 7561708683362344632, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}

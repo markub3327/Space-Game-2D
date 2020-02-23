@@ -4,8 +4,8 @@ namespace Sensors
 {
     public static class Radar
     {
-        public const float max_distance = 5f;
-        public const float close_range = 1f;
+        public const float max_distance = 9f;
+        public const float close_range = 1.25f;
 
         public const int num_of_rays = 32;
 
@@ -37,11 +37,11 @@ namespace Sensors
                         TransformRadarANN(ray[1], state, idx, parent);
                     }
                     
-                    //for (int i = 0; i < num_of_objs; i++)
-                    //{
-                    //    if (state[idx + i] > 0f)
-                    //        Debug.Log($"Ray({parent.Nickname})(angle={angle}): state[{i}]={state[idx + i]}");
-                    //}
+                    /*for (int i = 0; i < num_of_objs; i++)
+                    {
+                        if (state[idx + i] > 0f)
+                            Debug.Log($"Ray({parent.Nickname})(angle={angle}): state[{i}]={state[idx + i]}");
+                    }*/
                 }
                 //Debug.Log($"idx={idx}, angle = {angle}");
             }

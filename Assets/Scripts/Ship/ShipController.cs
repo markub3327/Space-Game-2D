@@ -110,7 +110,7 @@ public class ShipController : MonoBehaviour
             // Vypocitaj skore hraca
             mean += this.Health;
             mean += this.Fuel;
-            mean += this.Ammo;
+            mean += (this.Ammo * 0.1f);
             mean += this.Hits;
 
             return mean;
