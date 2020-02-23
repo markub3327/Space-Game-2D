@@ -164,7 +164,7 @@ namespace Sensors
             // Inak prekazka vzdialena
             else
             {
-                state[idx + 1] = 1.0f;
+                state[idx + 1] = (1.0f - ray.fraction);
             }
         }  
     }

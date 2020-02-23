@@ -29,7 +29,7 @@ public class GeneticsAlgorithm : MonoBehaviour
             this.Mutation();
             
             this.fitnessList.Add(bestAgent.fitness);
-            this.fitnessList.Add(bestAgent.avgErr);
+            this.errorList.Add(bestAgent.avgErr);
             for (int i = 0; i < agents.Count; i++)
             {
                 Debug.Log($"order = {i+1}., name = {agents[i].Nickname}, fitness = {agents[i].fitness}");   
@@ -174,7 +174,7 @@ public class GeneticsAlgorithm : MonoBehaviour
 
             using (var outf = new StreamWriter("DDQN_bestAgent_fitness.log"))
             {
-                for (int i = 0; i < errorList.Count; i++)
+                for (int i = 0; i < fitnessList.Count; i++)
                 {
                     outf.WriteLine($"fitness = {fitnessList[i]}, error = {errorList[i]}");
                 }

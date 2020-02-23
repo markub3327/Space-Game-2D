@@ -18,7 +18,7 @@ public class AgentDDQN : ShipController
 
     private ReplayBuffer replayMemory = new ReplayBuffer();
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 32; // size of minibatch
+    private const int BATCH_SIZE = 48; // size of minibatch
 
     // Epsilon
     private float epsilon = 1.0f;
@@ -65,12 +65,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
-        QNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 64);
+        QNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
-        QTargetNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 64);
+        QTargetNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
         // Init Player info panel
@@ -303,7 +303,7 @@ public class AgentDDQN : ShipController
         }
     }
 
-    private void Training(float gamma=0.90f, float tau=0.01f)
+    private void Training(float gamma=0.99f, float tau=0.01f)
     {        
         // Ak je v zasobniku dost vzorov k uceniu
         if (replayMemory.Count >= BATCH_SIZE && !testMode)
