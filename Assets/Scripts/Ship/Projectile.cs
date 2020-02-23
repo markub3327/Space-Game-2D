@@ -8,7 +8,7 @@ public class Projectile : MonoBehaviour
 
     public Rigidbody2D rigidbody2d;
 
-    private float timer = 1.0f;
+    private float timer = 1.50f;
 
     // Update is called once per frame
     void Update()
@@ -37,7 +37,7 @@ public class Projectile : MonoBehaviour
                 // Znizi zivoty hracovi
                 player.ChangeHealth(-0.10f);
                 // Pripise si zasah lode
-                this.firingShip.Hits += 0.01f;                
+                this.firingShip.Hits += 0.001f;                
             }
 
             // Efekt vybuchu

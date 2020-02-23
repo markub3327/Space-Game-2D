@@ -4,8 +4,9 @@ namespace Sensors
 {
     public static class Radar
     {
-        public const float max_distance = 9f;
-        public const float close_range = 1.25f;
+        public const float max_distance = 10f;
+        
+        public const float close_range = 1f;
 
         public const int num_of_rays = 32;
 
