@@ -18,7 +18,7 @@ public class AgentDDQN : ShipController
 
     private ReplayBuffer replayMemory = new ReplayBuffer();
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 48; // size of minibatch
+    private const int BATCH_SIZE = 32; // size of minibatch
 
     // Epsilon
     private float epsilon = 1.0f;
@@ -44,7 +44,7 @@ public class AgentDDQN : ShipController
     {
         base.Start();
 
-        epsilon_decay = (epsilon - epsilonMin) / 500000f;
+        epsilon_decay = (epsilon - epsilonMin) / 1000000f;
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
@@ -65,12 +65,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 64);
-        QNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
+        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 64);
-        QTargetNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
+        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
         // Init Player info panel
@@ -171,7 +171,7 @@ public class AgentDDQN : ShipController
                     replayBufferItem.Reward = score - this.scoreOld;
                     this.levelBox.text = score.ToString("0.00");
                     this.scoreOld = score;       // odmena za krok v hre je prirastok v skore po akcii hraca
-            }
+                }
     
                 // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
                 if (!presiel10Epizod)
@@ -208,7 +208,7 @@ public class AgentDDQN : ShipController
     
                 num_of_episodes++;
             }
-            if (num_of_episodes > 5000) 
+            if (num_of_episodes > 1000) 
             { 
                 #if UNITY_EDITOR
                     UnityEditor.EditorApplication.isPlaying = false;
@@ -234,13 +234,13 @@ public class AgentDDQN : ShipController
                 // Prahra clip poskodenia lode
                 this.PlaySound(damageClip);
                 // Uberie sa hracovi zivot
-                this.ChangeHealth(-0.05f);
+                this.ChangeHealth(-0.10f);
                 break;
             case "Nebula":
                 if (this.Fuel < ShipController.maxFuel)
                 {
                     // Pridaj palivo hracovi
-                    this.ChangeFuel(+0.01f);
+                    this.ChangeFuel(+0.006f);
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }   
@@ -258,7 +258,7 @@ public class AgentDDQN : ShipController
                 if (this.Ammo < ShipController.maxAmmo)
                 {
                     // Pridaj municiu hracovi
-                    this.ChangeAmmo(+1.0f);
+                    this.ChangeAmmo(+0.50f);
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }
@@ -303,7 +303,7 @@ public class AgentDDQN : ShipController
         }
     }
 
-    private void Training(float gamma=0.99f, float tau=0.01f)
+    private void Training(float gamma=0.95f, float tau=0.01f)
     {        
         // Ak je v zasobniku dost vzorov k uceniu
         if (replayMemory.Count >= BATCH_SIZE && !testMode)

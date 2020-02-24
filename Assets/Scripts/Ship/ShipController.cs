@@ -171,7 +171,7 @@ public class ShipController : MonoBehaviour
                 }
             }
 
-            ChangeFuel(-0.01f);    // plaivo sa znizi o 1 za 1 sekundu
+            ChangeFuel(-0.006f);    // plaivo sa znizi o 1 za 1 sekundu
             //Debug.Log($"decay={decay}"); 
         }        
     }

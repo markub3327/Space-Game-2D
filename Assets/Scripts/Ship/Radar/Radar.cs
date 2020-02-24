@@ -6,7 +6,7 @@ namespace Sensors
     {
         public const float max_distance = 10f;
         
-        public const float close_range = 1f;
+        public const float close_range = 0.9f;
 
         public const int num_of_rays = 32;
 
@@ -38,11 +38,11 @@ namespace Sensors
                         TransformRadarANN(ray[1], state, idx, parent);
                     }
                     
-                    /*for (int i = 0; i < num_of_objs; i++)
-                    {
-                        if (state[idx + i] > 0f)
-                            Debug.Log($"Ray({parent.Nickname})(angle={angle}): state[{i}]={state[idx + i]}");
-                    }*/
+                    //for (int i = 0; i < num_of_objs; i++)
+                    //{
+                    //    if (state[idx + i] > 0f)
+                    //        Debug.Log($"Ray({parent.Nickname})(angle={angle}): state[{i}]={state[idx + i]}");
+                    //}
                 }
                 //Debug.Log($"idx={idx}, angle = {angle}");
             }
@@ -162,10 +162,7 @@ namespace Sensors
                 state[idx] = 1.0f;
             }
             // Inak prekazka vzdialena
-            else
-            {
-                state[idx + 1] = (1.0f - ray.fraction);
-            }
-        }  
+            state[idx + 1] = (1.0f - ray.fraction);
+        }
     }
 }

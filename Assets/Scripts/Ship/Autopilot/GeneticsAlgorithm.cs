@@ -48,8 +48,11 @@ public class GeneticsAlgorithm : MonoBehaviour
             if (a != bestAgent)
 			{
 				// Pick 2 parents
-                AgentDDQN parrentA=null, parrentB=null;
-				RouletteWheelMechanism(ref parrentA, ref parrentB);
+                AgentDDQN parrentA, parrentB;
+                do {
+                    parrentA = agents[UnityEngine.Random.Range(0, agents.Count)];
+                    parrentB = agents[UnityEngine.Random.Range(0, agents.Count)];
+                } while (parrentA == parrentB);
 
                 for (int i = 0; i < a.QNet.neuronLayers.Count; i++)
                 {
@@ -88,7 +91,7 @@ public class GeneticsAlgorithm : MonoBehaviour
 
                     for (int j = 0; j < a.QNet.neuronLayers[i].Weights.Count; j++)
                     {                        
-                        if (Random.Range(0.0f, 1.0f) < (0.01f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
+                        if (Random.Range(0.0f, 1.0f) < (0.03f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
                         {
                             var newW = Random.Range(-1.0f, 1.0f) * k;
                             a.QNet.neuronLayers[i].Weights[j] = newW;//0.0002f*newW + (1.0f-0.0002f)*a.QNet.neuronLayers[i].Weights[j];
@@ -99,70 +102,6 @@ public class GeneticsAlgorithm : MonoBehaviour
             }
         }
     }
-
-    void RouletteWheelMechanism(ref AgentDDQN idxA, ref AgentDDQN idxB)
-	{
-		float[] probability = new float[agents.Count];
-		float sum = 0.0f;
-
-		// Softmax function
-		/*********************************************************/
-		for (int i = 0; i < agents.Count; i++)
-		{
-			sum += Unity.Mathematics.math.exp(agents[i].fitness);
-		}
-		for (int i = 0; i < agents.Count; i++)
-		{
-			probability[i] = Unity.Mathematics.math.exp(agents[i].fitness) / sum;
-			//Debug.Log($"probability = {probability[i]}");
-			//std::cout << "fitness = " << this->populations[i]->getFitness() << std::endl;
-		}
-		//std::cout << std::endl;
-		/*********************************************************/
-
-		// Pseudorandom selection
-		/*********************************************************/
-        do {
-		float a = UnityEngine.Random.Range(0f, 1f);
-		float b = UnityEngine.Random.Range(0f, 1f);
-		float min = 0, max = 0;
-
-        for (int i = 0; i < agents.Count; i++)
-		{
-            min = max;
-			max += probability[i];
-
-			// if is a value in range
-			if (min <= a && a < max)
-			{
-				//std::cout << "a = " << a << std::endl;
-				//std::cout << "interval = <" << min << "; " << max << ")" << std::endl;
-				//std::cout << "index_of_selectedA = " << i << std::endl;
-				//std::cout << "probability_of_selectedA = " << probability[i] << std::endl;
-				//std::cout << "fitness_of_selectedA = " << this->populations[i]->getFitness() << std::endl;
-				//break;
-
-				idxA = agents[i];
-                //Debug.Log($"idxA={i}");
-			}
-
-			// if is b value in range
-			if (min <= b && b < max)
-			{
-				//std::cout << "b = " << b << std::endl;
-				//std::cout << "interval = <" << min << "; " << max << ")" << std::endl;
-				//std::cout << "index_of_selectedB = " << i << std::endl;
-				//std::cout << "probability_of_selectedB = " << probability[i] << std::endl;
-				//std::cout << "fitness_of_selectedB = " << this->populations[i]->getFitness() << std::endl;
-				//break;
-
-				idxB = agents[i];
-                //Debug.Log($"idxB={i}");
-			}
-		}
-        } while (idxA == idxB);
-		//std::cout << std::endl;
-	}
 
     public void OnApplicationQuit()
     {
