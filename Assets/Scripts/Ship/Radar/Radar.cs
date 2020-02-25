@@ -6,7 +6,7 @@ namespace Sensors
     {
         public const float max_distance = 10f;
         
-        public const float close_range = 0.9f;
+        public const float close_range = 0.09f;
 
         public const int num_of_rays = 32;
 
@@ -41,7 +41,7 @@ namespace Sensors
                     //for (int i = 0; i < num_of_objs; i++)
                     //{
                     //    if (state[idx + i] > 0f)
-                    //        Debug.Log($"Ray({parent.Nickname})(angle={angle}): state[{i}]={state[idx + i]}");
+                    //       Debug.Log($"Ray({parent.Nickname})(angle={angle}): state[{i}]={state[idx + i]}");
                     //}
                 }
                 //Debug.Log($"idx={idx}, angle = {angle}");
@@ -156,13 +156,16 @@ namespace Sensors
 
         private static void TransformDistance(RaycastHit2D ray, float[] state, int idx)
         {
-            // Ak ide o blizku prekazku
-            if (ray.distance <= close_range)
+            // Ked pride ku kontaktu
+            if (ray.fraction <= close_range)
             {
                 state[idx] = 1.0f;
             }
-            // Inak prekazka vzdialena
-            state[idx + 1] = (1.0f - ray.fraction);
+            else
+            {
+                // Vzdialenost od objektu
+                state[idx + 1] = (1.0f - ray.fraction);
+            }
         }
     }
 }
