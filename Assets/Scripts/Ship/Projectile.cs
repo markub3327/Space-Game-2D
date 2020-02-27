@@ -35,9 +35,9 @@ public class Projectile : MonoBehaviour
                 // Prehra zvuk zasahu projektilu
                 player.PlaySound(player.hitClip);
                 // Znizi zivoty hracovi
-                player.ChangeHealth(-0.10f);
+                player.ChangeHealth(-0.50f);
                 // Pripise si zasah lode
-                this.firingShip.Hits += 0.001f;                
+                this.firingShip.Hits += 1;                
             }
 
             // Efekt vybuchu

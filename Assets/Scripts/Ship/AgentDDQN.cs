@@ -22,7 +22,7 @@ public class AgentDDQN : ShipController
 
     // Epsilon
     private float epsilon = 1.0f;
-    private const float epsilonMin = 0.10f;
+    private const float epsilonMin = 0.05f;
     private float epsilon_decay;
 
     public float fitness { get; set; } = 0;
@@ -44,7 +44,7 @@ public class AgentDDQN : ShipController
     {
         base.Start();
 
-        epsilon_decay = (epsilon - epsilonMin) / 1500000f;
+        epsilon_decay = (epsilon - epsilonMin) / 1000000f;
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
@@ -65,12 +65,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 64);
-        QNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 128);
+        QNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 64);
-        QTargetNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 128);
+        QTargetNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
         // Init Player info panel
@@ -183,7 +183,6 @@ public class AgentDDQN : ShipController
                 if (replayBufferItem.Reward != 0f)
                 {
                     replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
-                    //if (replayBufferItem.Reward > 0f)
                     //Debug.Log($"Reward[{this.Nickname}] = {replayBufferItem.Reward}");
                 }
 
@@ -208,14 +207,6 @@ public class AgentDDQN : ShipController
     
                 num_of_episodes++;
             }
-            if (num_of_episodes > 1000) 
-            { 
-                #if UNITY_EDITOR
-                    UnityEditor.EditorApplication.isPlaying = false;
-                #else
-                    Application.Quit();
-                #endif
-            }
 
             // Pretrenuj hraca derivaciami
             this.Training();
@@ -234,13 +225,13 @@ public class AgentDDQN : ShipController
                 // Prahra clip poskodenia lode
                 this.PlaySound(damageClip);
                 // Uberie sa hracovi zivot
-                this.ChangeHealth(-0.10f);
+                this.ChangeHealth(-1.0f);
                 break;
             case "Nebula":
                 if (this.Fuel < ShipController.maxFuel)
                 {
                     // Pridaj palivo hracovi
-                    this.ChangeFuel(+0.006f);
+                    this.ChangeFuel(+1.0f);
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }   
@@ -258,7 +249,7 @@ public class AgentDDQN : ShipController
                 if (this.Ammo < ShipController.maxAmmo)
                 {
                     // Pridaj municiu hracovi
-                    this.ChangeAmmo(+0.50f);
+                    this.ChangeAmmo(+10.00f);
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }
@@ -268,7 +259,7 @@ public class AgentDDQN : ShipController
                 if (this.Health < ShipController.maxHealth)
                 {
                     // Pridaj zivot hracovi
-                    this.ChangeHealth(+0.10f);
+                    this.ChangeHealth(+1.0f);
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }
@@ -276,7 +267,7 @@ public class AgentDDQN : ShipController
                 break;
             case "Asteroid":
                 // Uberie sa hracovi zivot
-                this.ChangeHealth(-0.10f);      
+                this.ChangeHealth(-1.0f);      
                 // Prahra clip poskodenia lode
                 this.PlaySound(damageClip);
                 break;
@@ -298,7 +289,7 @@ public class AgentDDQN : ShipController
                 // Prahra clip poskodenia lode
                 this.PlaySound(damageClip);
                 // Uberie sa hracovi zivot
-                this.ChangeHealth(-0.10f);
+                this.ChangeHealth(-1.0f);
                 break;
         }
     }
@@ -312,7 +303,7 @@ public class AgentDDQN : ShipController
 
             //Debug.Log($"sample.Count = {sample.Count}, memory.Count = {this.replayMemory.Count}");
 
-            for (int i = 0; i < BATCH_SIZE; i++)
+            for (int i = 0; i < sample.Count; i++)
             {
                 float[] targets = new float[num_of_actions];
 
@@ -477,7 +468,7 @@ public class AgentDDQN : ShipController
                 // Vystrel
                 turret.Fire();
                 // Uber z municie hraca jeden naboj
-                this.ChangeAmmo(-0.01f);
+                this.ChangeAmmo(-1.0f);
                 // Ak uz hrac nema municiu nemoze pokracovat v strelbe
                 if (this.Ammo <= 0)
                     break;
@@ -512,7 +503,7 @@ public class AgentDDQN : ShipController
 
 public class ReplayBuffer
 {
-    private const int max_count = 50000;
+    private const int max_count = 10000;
 
     public LinkedList<ReplayBufferItem> items = new LinkedList<ReplayBufferItem>();
 

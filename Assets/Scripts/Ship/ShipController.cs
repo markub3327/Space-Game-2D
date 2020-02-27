@@ -33,7 +33,7 @@ public class ShipController : MonoBehaviour
 
     // Player's ammo
     public UIBarControl ammoBar;
-    public const int maxAmmo = 1;               // maximalny pocet nabojov hraca
+    public const int maxAmmo = 100;               // maximalny pocet nabojov hraca
     private float _ammo = maxAmmo;
     public float Ammo {
         get
@@ -53,7 +53,7 @@ public class ShipController : MonoBehaviour
 
     // Player's fuel
     public UIBarControl fuelBar;
-    public const int maxFuel = 5;                // maximalny pocet paliva v nadrzi hraca
+    public const int maxFuel = 10;                // maximalny pocet paliva v nadrzi hraca
     private float _fuel = maxFuel;
     public float Fuel {
         get
@@ -108,10 +108,10 @@ public class ShipController : MonoBehaviour
             float mean = 0f;
 
             // Vypocitaj skore hraca
-            mean += this.Health;
-            mean += this.Fuel;
-            mean += (this.Ammo * 0.1f);
-            mean += this.Hits;
+            mean += (this.Health / (float)ShipController.maxHealth);
+            mean += (this.Fuel / (float)ShipController.maxFuel);
+            mean += (this.Ammo / (float)ShipController.maxAmmo);
+            mean += (this.Hits / (float)ShipController.maxAmmo);
 
             return mean;
         }
@@ -131,6 +131,12 @@ public class ShipController : MonoBehaviour
 
         // inicializuj skore lode
         this.scoreOld = this.Score;
+
+        // Pre vsetky motory lode
+        foreach (var motor in Motors)
+        {
+            motor.Play();                    
+        }
     }
 
     /// <summary>
@@ -156,22 +162,11 @@ public class ShipController : MonoBehaviour
             rigidbody2d.rotation = rotation;
             rigidbody2d.MovePosition(position);
             
-            // Pre vsetky motory lode
-            foreach (var motor in Motors)
-            {
-                // Ak nie je uz spusteny zapni ho
-                if (!motor.isEmitting)
-                {
-                    // Prehraj animaciu
-                    motor.Play();
+            // Prehraj zvuk motora ak lod nehra
+            if (!audioSource.isPlaying)
+                PlaySound(engineClip);
 
-                    // Prehraj zvuk motora ak nehra
-                    if (!audioSource.isPlaying)
-                        PlaySound(engineClip);
-                }
-            }
-
-            ChangeFuel(-0.006f);    // plaivo sa znizi o 1 za 1 sekundu
+            ChangeFuel(-Time.deltaTime);    // plaivo sa znizi o 1 za 1 sekundu
             //Debug.Log($"decay={decay}"); 
         }        
     }

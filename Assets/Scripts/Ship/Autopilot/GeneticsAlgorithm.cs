@@ -17,6 +17,15 @@ public class GeneticsAlgorithm : MonoBehaviour
     {        
         if (agents.Where(p => p.presiel10Epizod == false).Count() == 0)
         {
+            if (agents[0].num_of_episodes > 1000) 
+            { 
+                #if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;
+                #else
+                    Application.Quit();
+                #endif
+            }
+
             // Replace agents with agents list ordered by his fitness
             this.agents.Sort(new AgentsComparer());
             this.bestAgent = agents[0];
@@ -50,9 +59,10 @@ public class GeneticsAlgorithm : MonoBehaviour
 				// Pick 2 parents
                 AgentDDQN parrentA, parrentB;
                 do {
-                    parrentA = agents[UnityEngine.Random.Range(0, agents.Count)];
-                    parrentB = agents[UnityEngine.Random.Range(0, agents.Count)];
+                    parrentA = agents[UnityEngine.Random.Range(0, (agents.Count>>1))];
+                    parrentB = agents[UnityEngine.Random.Range(0, (agents.Count>>1))];
                 } while (parrentA == parrentB);
+                //Debug.Log($"parrentA={agents.IndexOf(parrentA)}, parrentB={agents.IndexOf(parrentB)}");
 
                 for (int i = 0; i < a.QNet.neuronLayers.Count; i++)
                 {
@@ -91,7 +101,7 @@ public class GeneticsAlgorithm : MonoBehaviour
 
                     for (int j = 0; j < a.QNet.neuronLayers[i].Weights.Count; j++)
                     {                        
-                        if (Random.Range(0.0f, 1.0f) < (0.03f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
+                        if (Random.Range(0.0f, 1.0f) < (0.025f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
                         {
                             var newW = Random.Range(-1.0f, 1.0f) * k;
                             a.QNet.neuronLayers[i].Weights[j] = newW;//0.0002f*newW + (1.0f-0.0002f)*a.QNet.neuronLayers[i].Weights[j];

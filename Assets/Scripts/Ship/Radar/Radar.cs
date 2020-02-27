@@ -164,7 +164,7 @@ namespace Sensors
             else
             {
                 // Vzdialenost od objektu
-                state[idx + 1] = (1.0f - ray.fraction);
+                state[idx + 1] = 1.0f;
             }
         }
     }
