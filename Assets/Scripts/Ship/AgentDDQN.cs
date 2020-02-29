@@ -65,12 +65,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 128);
-        QNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
+        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 128);
-        QTargetNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
+        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
         // Init Player info panel
