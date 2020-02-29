@@ -166,7 +166,7 @@ public class ShipController : MonoBehaviour
             if (!audioSource.isPlaying)
                 PlaySound(engineClip);
 
-            ChangeFuel(-Time.deltaTime);    // plaivo sa znizi o 1 za 1 sekundu
+            ChangeFuel(-0.01f);//(-Time.deltaTime);    // plaivo sa znizi o 1 za 1 sekundu
             //Debug.Log($"decay={decay}"); 
         }        
     }

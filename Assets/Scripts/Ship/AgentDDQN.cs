@@ -22,7 +22,7 @@ public class AgentDDQN : ShipController
 
     // Epsilon
     private float epsilon = 1.0f;
-    private const float epsilonMin = 0.05f;
+    private const float epsilonMin = 0.10f;
     private float epsilon_decay;
 
     public float fitness { get; set; } = 0;
@@ -44,7 +44,7 @@ public class AgentDDQN : ShipController
     {
         base.Start();
 
-        epsilon_decay = (epsilon - epsilonMin) / 1000000f;
+        epsilon_decay = (epsilon - epsilonMin) / 750000f;
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
@@ -294,7 +294,7 @@ public class AgentDDQN : ShipController
         }
     }
 
-    private void Training(float gamma=0.95f, float tau=0.01f)
+    private void Training(float gamma=0.90f, float tau=0.01f)
     {        
         // Ak je v zasobniku dost vzorov k uceniu
         if (replayMemory.Count >= BATCH_SIZE && !testMode)
