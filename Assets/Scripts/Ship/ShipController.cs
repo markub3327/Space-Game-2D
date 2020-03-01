@@ -98,7 +98,8 @@ public class ShipController : MonoBehaviour
     // Collider
     private PolygonCollider2D collider2d;
 
-    private Vector2 respawnPoint;
+    public Vector2 respawnPoint { get; set; }
+    public bool IsRespawned { get; set; } = true;
 
     // Skore v hre
     public float scoreOld { get; set; }
@@ -166,12 +167,7 @@ public class ShipController : MonoBehaviour
             if (!audioSource.isPlaying)
                 PlaySound(engineClip);
 
-<<<<<<< HEAD
-            ChangeFuel(-0.04f);//(-Time.deltaTime);    // plaivo sa znizi o 1 za 1 sekundu
-            //Debug.Log($"decay={decay}"); 
-=======
             ChangeFuel(-0.01f);
->>>>>>> master
         }        
     }
 
@@ -213,6 +209,7 @@ public class ShipController : MonoBehaviour
         rigidbody2d.position = respawnPoint;  //Respawn.getPoint();
         IsDestroyed = false;
         collider2d.enabled = true;
+        IsRespawned = true;
 
         animator.SetBool("Winner", false);
         animator.SetBool("Destroyed", false);

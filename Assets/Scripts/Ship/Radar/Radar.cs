@@ -159,12 +159,12 @@ namespace Sensors
             // Ked pride ku kontaktu
             if (ray.fraction <= close_range)
             {
-                state[idx] = (1.0f - ray.fraction);
+                state[idx] = 1.0f;      //(1.0f - ray.fraction);
             }
             else
             {
                 // Vzdialenost od objektu
-                state[idx + 1] = (1.0f - ray.fraction);
+                state[idx + 1] = 1.0f;  //(1.0f - ray.fraction);
             }
         }
     }
