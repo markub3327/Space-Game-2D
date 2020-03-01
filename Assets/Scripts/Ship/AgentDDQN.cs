@@ -7,10 +7,12 @@ using System.IO;
 
 public class AgentDDQN : ShipController
 {
-    private const int num_of_states = Sensors.Radar.num_of_rays * Sensors.Radar.num_of_objs;
-
+    private const int num_of_frames = 4;
+    private const int num_of_states = Sensors.Radar.num_of_rays * Sensors.Radar.num_of_objs * num_of_frames;
     private const int num_of_actions = 16;
 
+
+    private List<float> frameBuffer = new List<float>();
     private bool isFirstFrame = true;
 
     public NeuralNetwork QNet = new NeuralNetwork();
@@ -44,7 +46,7 @@ public class AgentDDQN : ShipController
     {
         base.Start();
 
-        epsilon_decay = (epsilon - epsilonMin) / 750000f;
+        epsilon_decay = (epsilon - epsilonMin) / 1000000f;
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
@@ -65,12 +67,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 128);
-        QNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 64);
+        QNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 128);
-        QTargetNet.neuronLayers[1].CreateNeurons(128); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 64);
+        QTargetNet.neuronLayers[1].CreateNeurons(64); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
         // Init Player info panel
@@ -116,7 +118,12 @@ public class AgentDDQN : ShipController
         }        
 
         // Nacitaj stav, t=0
-        this.replayBufferItem = new ReplayBufferItem { State = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this) };
+        this.frameBuffer.AddRange(Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this));
+        this.frameBuffer.AddRange(Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this));
+        this.frameBuffer.AddRange(Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this));
+        this.frameBuffer.AddRange(Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this));
+        this.replayBufferItem = new ReplayBufferItem { State = this.frameBuffer.ToArray() };
+        //Debug.Log($"1. frameBuffer.Count = {this.frameBuffer.Count}");
     }
 
     public void Update()
@@ -132,8 +139,14 @@ public class AgentDDQN : ShipController
             }
             else    // Ide o druhy obraz? => ziskaj reakciu za akciu a uloz ju
             {
+                // LIFO
+                if (this.frameBuffer.Count >= num_of_states)
+                    this.frameBuffer.RemoveRange(0, (Sensors.Radar.num_of_rays * Sensors.Radar.num_of_objs));
+                this.frameBuffer.AddRange(Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this));
+                //Debug.Log($"frameBuffer.Count = {this.frameBuffer.Count}");
+
                 // Nacitaj stav hry
-                replayBufferItem.Next_state = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this);
+                replayBufferItem.Next_state = this.frameBuffer.ToArray();
 
                 // Ak uz hrac nema zivoty ani palivo znici sa lod
                 if (this.Health <= 0 || this.Fuel <= 0)
@@ -294,7 +307,7 @@ public class AgentDDQN : ShipController
         }
     }
 
-    private void Training(float gamma=0.90f, float tau=0.01f)
+    private void Training(float gamma=0.95f, float tau=0.01f)
     {        
         // Ak je v zasobniku dost vzorov k uceniu
         if (replayMemory.Count >= BATCH_SIZE && !testMode)
