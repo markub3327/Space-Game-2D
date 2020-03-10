@@ -4,9 +4,11 @@ namespace Sensors
 {
     public static class Radar
     {
-        public const float max_distance = 10f;
+        public const float max_distance = 10.0f;
         
-        public const float close_range = 0.09f;
+        public const float close_range = 1.0f;
+
+        public const float middle_range = 5.0f;
 
         public const int num_of_rays = 32;
 
@@ -156,15 +158,26 @@ namespace Sensors
 
         private static void TransformDistance(RaycastHit2D ray, float[] state, int idx)
         {
-            // Ked pride ku kontaktu
-            if (ray.fraction <= close_range)
+            // blizka prekazka
+            if (ray.distance <= close_range)
             {
-                state[idx] = 1.0f;      //(1.0f - ray.fraction);
+                state[idx] = 1.0f;
+                state[idx + 1] = 1.0f;
+                //Debug.Log("Round1");
             }
+            // stredne vzdialena prekazka
+            else if (ray.distance <= middle_range)
+            {
+                state[idx] = 0.0f;
+                state[idx + 1] = 1.0f;
+                //Debug.Log("Round2");
+            }
+            // vzdialena prekazka
             else
             {
-                // Vzdialenost od objektu
-                state[idx + 1] = 1.0f;  //(1.0f - ray.fraction);
+                state[idx] = 1.0f;
+                state[idx + 1] = 0.0f;                
+                //Debug.Log("Round3");
             }
         }
     }

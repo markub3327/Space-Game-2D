@@ -13,6 +13,12 @@ public class GeneticsAlgorithm : MonoBehaviour
     private List<float> fitnessList = new List<float>();
     private List<float> errorList = new List<float>();
 
+    public void Start()
+    {
+        // Random seed
+        UnityEngine.Random.InitState((int)System.DateTime.Now.Ticks); 
+    }
+
     public void Update()
     {        
         if (agents.Where(p => p.presiel10Epizod == false).Count() == 0)
@@ -101,7 +107,7 @@ public class GeneticsAlgorithm : MonoBehaviour
 
                     for (int j = 0; j < a.QNet.neuronLayers[i].Weights.Count; j++)
                     {                        
-                        if (Random.Range(0.0f, 1.0f) < (0.025f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
+                        if (Random.Range(0.0f, 1.0f) < (0.01f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
                         {
                             var newW = Random.Range(-1.0f, 1.0f) * k;
                             a.QNet.neuronLayers[i].Weights[j] = newW;//0.0002f*newW + (1.0f-0.0002f)*a.QNet.neuronLayers[i].Weights[j];
@@ -125,7 +131,7 @@ public class GeneticsAlgorithm : MonoBehaviour
             {
                 for (int i = 0; i < fitnessList.Count; i++)
                 {
-                    outf.WriteLine($"fitness = {fitnessList[i]}, error = {errorList[i]}");
+                    outf.WriteLine($"fitness={fitnessList[i]};error={errorList[i]}");
                 }
             }
 

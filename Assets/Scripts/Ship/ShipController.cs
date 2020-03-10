@@ -102,17 +102,17 @@ public class ShipController : MonoBehaviour
     public bool IsRespawned { get; set; } = true;
 
     // Skore v hre
-    public float scoreOld { get; set; }
     public float Score 
     {
         get {
             float mean = 0f;
 
             // Vypocitaj skore hraca
-            mean += (this.Health / (float)ShipController.maxHealth);
-            mean += (this.Fuel / (float)ShipController.maxFuel);
-            mean += (this.Ammo / (float)ShipController.maxAmmo);
-            mean += (this.Hits / (float)ShipController.maxAmmo);
+            mean += (this.Health / (float)ShipController.maxHealth) * 0.1f;
+            mean += (this.Fuel / (float)ShipController.maxFuel)     * 0.1f;
+            mean += (this.Ammo / (float)ShipController.maxAmmo)     * 0.1f;
+            mean += (this.Hits / (float)(ShipController.maxHealth*2));
+            mean += this.myPlanets.Count;
 
             return mean;
         }
@@ -129,9 +129,6 @@ public class ShipController : MonoBehaviour
         collider2d = GetComponent<PolygonCollider2D>();
 
         respawnPoint = this.transform.position;
-
-        // inicializuj skore lode
-        this.scoreOld = this.Score;
 
         // Pre vsetky motory lode
         foreach (var motor in Motors)
@@ -187,9 +184,6 @@ public class ShipController : MonoBehaviour
         }
         this.myPlanets.Clear();
         this.Hits = 0;
-
-        // inicializuj skore lode
-        this.scoreOld = this.Score;
 
         animator.SetBool("Respawn", false);
         animator.SetBool("Destroyed", true);

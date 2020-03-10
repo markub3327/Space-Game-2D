@@ -11,7 +11,6 @@ public class AgentDDQN : ShipController
     private const int num_of_states = Sensors.Radar.num_of_rays * Sensors.Radar.num_of_objs * num_of_frames;
     private const int num_of_actions = 16;
 
-
     private List<float> frameBuffer = new List<float>();
     private bool isFirstFrame = true;
 
@@ -67,12 +66,12 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
-        QNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
+        QNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
-        QTargetNet.neuronLayers[1].CreateNeurons(32); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
+        QTargetNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
         // Init Player info panel
@@ -153,7 +152,7 @@ public class AgentDDQN : ShipController
                 {
                     planets_old = 0;
                     if (this.Hits > 0)
-                        Debug.Log($"Hits[{this.name}]: {this.Hits}");
+                        Debug.Log($"Hits[{this.Nickname}]: {this.Hits}");
 
                     // Destrukcia lode
                     DestroyShip();
@@ -168,7 +167,7 @@ public class AgentDDQN : ShipController
                     {
                         var strPlanets = string.Empty;
                         this.myPlanets.ForEach(x => strPlanets += x.name + ", ");
-                        Debug.Log($"MyPlanets[{this.name}]: {strPlanets}");
+                        Debug.Log($"MyPlanets[{this.Nickname}]: {strPlanets}");
                     }
 
                     // Terminalny stav - koniec epizody
@@ -178,26 +177,22 @@ public class AgentDDQN : ShipController
                 }
                 else    // pokracuje v hre
                 {
-                    var score = this.Score;
                     // Neterminalny stav - pokracuje v hre
                     replayBufferItem.Done = false;             
-                    replayBufferItem.Reward = score - this.scoreOld;
-                    this.levelBox.text = score.ToString("0.00");
-                    this.scoreOld = score;       // odmena za krok v hre je prirastok v skore po akcii hraca
+                    replayBufferItem.Reward = 0.0f;
                 }
     
                 // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
+                var score = this.Score;
                 if (!presiel10Epizod)
                 {
-                    this.fitness += replayBufferItem.Reward;
+                    this.fitness += score;
                 }
+                this.levelBox.text = score.ToString("0.00");
 
                 // Uloz udalost do bufferu
-                if (replayBufferItem.Reward != 0f)
-                {
-                    replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
-                    //Debug.Log($"Reward[{this.Nickname}] = {replayBufferItem.Reward}");
-                }
+                replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat
+                //Debug.Log($"Reward[{this.Nickname}] = {replayBufferItem.Reward}");
 
                 // Uchovaj stav predoslej hry
                 this.replayBufferItem = new ReplayBufferItem { State = replayBufferItem.Next_state };
@@ -214,8 +209,8 @@ public class AgentDDQN : ShipController
                 {
                     this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
       
-                    Debug.Log($"epsilon[{this.name}] = {epsilon}");
-                    Debug.Log($"episode[{this.name}] = {num_of_episodes}");
+                    Debug.Log($"epsilon[{this.Nickname}] = {epsilon}");
+                    Debug.Log($"episode[{this.Nickname}] = {num_of_episodes}");
                 }
     
                 num_of_episodes++;
@@ -307,7 +302,7 @@ public class AgentDDQN : ShipController
         }
     }
 
-    private void Training(float gamma=0.95f, float tau=0.01f)
+    private void Training(float gamma=0.99f, float tau=0.01f)
     {        
         // Ak je v zasobniku dost vzorov k uceniu
         if (replayMemory.Count >= BATCH_SIZE && !testMode)
@@ -315,7 +310,7 @@ public class AgentDDQN : ShipController
             var sample = replayMemory.Sample(BATCH_SIZE);
 
             //Debug.Log($"sample.Count = {sample.Count}, memory.Count = {this.replayMemory.Count}");
-
+            this.avgErr = 0f;
             for (int i = 0; i < sample.Count; i++)
             {
                 float[] targets = new float[num_of_actions];
@@ -343,6 +338,7 @@ public class AgentDDQN : ShipController
                     // TD
                     targets[sample[i].Action] = sample[i].Reward;
                 }
+                //Debug.Log($"target[{i}] = {targets[sample[i].Action]}");
 
                 // Training Q network            
                 QNet.Run(sample[i].State);
@@ -357,16 +353,15 @@ public class AgentDDQN : ShipController
                     }
                 }
 
-                sample[i].error = math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
                 if (presiel10Epizod)
-                    this.avgErr += sample[i].error;
+                    this.avgErr += math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
             }
         
             if (presiel10Epizod)
             {
                 // Priemer chyby NN
                 this.avgErr /= (float)sample.Count;
-                Debug.Log($"avgErr.QNet[{this.name}] = {avgErr}");
+                Debug.Log($"avgErr.QNet[{this.Nickname}] = {avgErr}");
             }            
         }
     }
@@ -376,14 +371,16 @@ public class AgentDDQN : ShipController
         int action = 0;
 
         // Vyuzivaj naucenu vedomost
-        if (UnityEngine.Random.Range(0.0f, 1.0f) > epsilon || testMode)
+        if (UnityEngine.Random.Range(0.0f, 1.0f) < epsilon || testMode)
+        {
+            action = UnityEngine.Random.Range(0, num_of_actions);
+            //this.isActionRandom = true;
+        }
+        else
         {
             QNet.Run(state);
             GetMaxQ(QNet.neuronLayers[2].Neurons, ref action);
-        }
-        else    // Skumaj prostredie
-        {
-            action = UnityEngine.Random.Range(0, num_of_actions);
+            //this.isActionRandom = false;
         }
 
         switch (action)
@@ -516,57 +513,30 @@ public class AgentDDQN : ShipController
 
 public class ReplayBuffer
 {
-    private const int max_count = 10000;
+    private const int max_count = 20000;
 
-    public LinkedList<ReplayBufferItem> items = new LinkedList<ReplayBufferItem>();
+    public List<ReplayBufferItem> items = new List<ReplayBufferItem>();
 
     public void Add(ReplayBufferItem item)
     {
         // LIFO
         if (items.Count >= max_count)    
-            items.RemoveFirst();
-        items.AddLast(item);        
+            items.RemoveAt(0);
+        items.Add(item);        
     }
 
     public List<ReplayBufferItem> Sample(int batch_size)
     {
-        var buff = new List<ReplayBufferItem>(batch_size);
-		float[] probability = new float[this.items.Count];
-		float prob_sum = 0.0f;
-        int i = 0;
+        List<ReplayBufferItem> buff = new List<ReplayBufferItem>(batch_size);
 
-		// Softmax function
-		/*********************************************************/
-        foreach (var x in this.items)
-		{
-			prob_sum += Unity.Mathematics.math.exp(x.error);
-		}        
-        foreach (var x in this.items)
+        for (int i = 0; i < batch_size; i++)
         {
-            probability[i++] = Unity.Mathematics.math.exp(x.error) / prob_sum;
+            var idx = UnityEngine.Random.Range(0, this.Count);
+            buff.Add(this.items[idx]);
         }
-		/*********************************************************/
-
-		// Pseudorandom selection
-		/*********************************************************/
-        for (; buff.Count < batch_size;)
-        {
-            i = 0;
-            foreach (var x in this.items)
-            {
-                if (UnityEngine.Random.Range(0f, 1f) < probability[i])                        
-                {                
-    			    //Debug.Log($"i = {i}, prob = {probability[i]}, error = {x.error}");
-                    buff.Add(x);
-                    break;
-                }
-                i++;
-            }
-        }
-        //Debug.Log($"count = {this.items.Count}, batch_size = {buff.Count}");
 
         return buff;
-    }    
+    }
 
     public int Count { get { return items.Count; } }
 }
@@ -578,7 +548,5 @@ public class ReplayBufferItem
     public float        Reward;
     public float[]  Next_state;
     public bool           Done;
-
-    public float         error;
 }
 
