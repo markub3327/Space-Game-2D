@@ -205,9 +205,10 @@ public class AgentDDQN : ShipController
                 var score = this.Score;
                 if (!presiel10Epizod)
                 {
-                    this.fitness += score;
+                    this.fitness += score - this.score_old;
+                    this.score_old = score;
                 }
-                this.levelBox.text = score.ToString("0.00");
+                this.levelBox.text = this.fitness.ToString("0.0");
 
                 // Uloz udalost do bufferu
                 replayMemory.Add(replayBufferItem);    // pridaj do pamate trenovacich dat

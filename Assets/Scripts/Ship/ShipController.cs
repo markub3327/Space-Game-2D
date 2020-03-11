@@ -102,6 +102,7 @@ public class ShipController : MonoBehaviour
     public bool IsRespawned { get; set; } = true;
 
     // Skore v hre
+    public float score_old;
     public float Score 
     {
         get {
@@ -135,6 +136,8 @@ public class ShipController : MonoBehaviour
         {
             motor.Play();                    
         }
+
+        this.score_old = this.Score;
     }
 
     /// <summary>
@@ -164,7 +167,7 @@ public class ShipController : MonoBehaviour
             if (!audioSource.isPlaying)
                 PlaySound(engineClip);
 
-            ChangeFuel(-0.006f);
+            ChangeFuel(-0.01f);
         }        
     }
 
@@ -184,6 +187,7 @@ public class ShipController : MonoBehaviour
         }
         this.myPlanets.Clear();
         this.Hits = 0;
+        this.score_old = this.Score;
 
         animator.SetBool("Respawn", false);
         animator.SetBool("Destroyed", true);
