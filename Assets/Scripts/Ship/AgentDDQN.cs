@@ -19,11 +19,11 @@ public class AgentDDQN : ShipController
 
     private ReplayBuffer replayMemory = new ReplayBuffer();
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 32; // size of minibatch
+    private const int BATCH_SIZE = 48; // size of minibatch
 
     // Epsilon
     private float epsilon = 1.0f;
-    private const float epsilonMin = 0.10f;
+    private const float epsilonMin = 0.15f;
     private float epsilon_decay;
 
     public float fitness { get; set; } = 0;
@@ -67,11 +67,11 @@ public class AgentDDQN : ShipController
 
         //var num_of_inputs = num_of_states * num_of_frames;
         QNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
-        QNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QNet.neuronLayers[1].CreateNeurons(48);
         QNet.neuronLayers[2].CreateNeurons(num_of_actions);
 
         QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
-        QTargetNet.neuronLayers[1].CreateNeurons(48); // 24, 32, 48, 64(lode sa po 2000 iteraciach skoro nehybu), 128(stal na mieste), 256(letel k okrajom Vesmiru)
+        QTargetNet.neuronLayers[1].CreateNeurons(48);
         QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
     
         // Init Player info panel
@@ -230,10 +230,10 @@ public class AgentDDQN : ShipController
         switch (collision.gameObject.tag)
         {
             case "Star":
-                // Prahra clip poskodenia lode
-                this.PlaySound(damageClip);
                 // Uberie sa hracovi zivot
                 this.ChangeHealth(-1.0f);
+                // Prahra clip poskodenia lode
+                this.PlaySound(damageClip);
                 break;
             case "Nebula":
                 if (this.Fuel < ShipController.maxFuel)
@@ -253,11 +253,26 @@ public class AgentDDQN : ShipController
         // Podla oznacenia herneho objektu vykonaj akciu kolizie
         switch (collision.gameObject.tag)
         {
+            case "Star":
+                // Uberie sa hracovi zivot
+                this.ChangeHealth(-1.0f);
+                // Prahra clip poskodenia lode
+                this.PlaySound(damageClip);
+                break;
+            case "Nebula":
+                if (this.Fuel < ShipController.maxFuel)
+                {
+                    // Pridaj palivo hracovi
+                    this.ChangeFuel(+1.0f);
+                    // Prehraj klip
+                    this.PlaySound(collectibleClip);
+                }   
+                break;
             case "Ammo":
                 if (this.Ammo < ShipController.maxAmmo)
                 {
                     // Pridaj municiu hracovi
-                    this.ChangeAmmo(+10.00f);
+                    this.ChangeAmmo(+50.00f);
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }
@@ -294,10 +309,10 @@ public class AgentDDQN : ShipController
                 }
                 break;
             case "Player":
-                // Prahra clip poskodenia lode
-                this.PlaySound(damageClip);
                 // Uberie sa hracovi zivot
                 this.ChangeHealth(-1.0f);
+                // Prahra clip poskodenia lode
+                this.PlaySound(damageClip);
                 break;
         }
     }
@@ -337,9 +352,9 @@ public class AgentDDQN : ShipController
                 {
                     // TD
                     targets[sample[i].Action] = sample[i].Reward;
+                    //Debug.Log($"target[{i}] = {targets[sample[i].Action]}");
                 }
-                //Debug.Log($"target[{i}] = {targets[sample[i].Action]}");
-
+                
                 // Training Q network            
                 QNet.Run(sample[i].State);
                 QNet.Training(sample[i].State, targets);
@@ -373,14 +388,22 @@ public class AgentDDQN : ShipController
         // Vyuzivaj naucenu vedomost
         if (UnityEngine.Random.Range(0.0f, 1.0f) < epsilon || testMode)
         {
-            action = UnityEngine.Random.Range(0, num_of_actions);
-            //this.isActionRandom = true;
+            // Ak nema naboje vybera z akcii bez strelby
+            if (this.Ammo == 0f)
+            {
+                action = UnityEngine.Random.Range(0, num_of_actions/2);
+                //Debug.Log($"action = {action}");
+            }
+            else 
+            // Inak vybera zo vsetkych akcii
+            {
+                action = UnityEngine.Random.Range(0, num_of_actions);
+            }
         }
         else
         {
             QNet.Run(state);
             GetMaxQ(QNet.neuronLayers[2].Neurons, ref action);
-            //this.isActionRandom = false;
         }
 
         switch (action)

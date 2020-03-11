@@ -108,9 +108,9 @@ public class ShipController : MonoBehaviour
             float mean = 0f;
 
             // Vypocitaj skore hraca
-            mean += (this.Health / (float)ShipController.maxHealth) * 0.1f;
-            mean += (this.Fuel / (float)ShipController.maxFuel)     * 0.1f;
-            mean += (this.Ammo / (float)ShipController.maxAmmo)     * 0.1f;
+            mean += (this.Health / (float)ShipController.maxHealth) * 0.01f;
+            mean += (this.Fuel / (float)ShipController.maxFuel)     * 0.01f;
+            mean += (this.Ammo / (float)ShipController.maxAmmo)     * 0.01f;
             mean += (this.Hits / (float)(ShipController.maxHealth*2));
             mean += this.myPlanets.Count;
 
@@ -164,7 +164,7 @@ public class ShipController : MonoBehaviour
             if (!audioSource.isPlaying)
                 PlaySound(engineClip);
 
-            ChangeFuel(-0.01f);
+            ChangeFuel(-0.006f);
         }        
     }
 

@@ -24,7 +24,7 @@ namespace Sensors
             // Vysli luce pod uhlami po 11.25 stupnoch (32 skenov)
             for (idx = 0, angle = 0f; angle < 360; angle += 11.25f, idx+=num_of_objs)
             {
-                Debug.DrawRay(origin, lookDirection.Shift(angle), Color.magenta);
+                //Debug.DrawRay(origin, lookDirection.Shift(angle), Color.magenta);
                 var ray = Physics2D.RaycastAll(origin, lookDirection.Shift(angle), max_distance);
                 
                 if (ray.Length > 0)
