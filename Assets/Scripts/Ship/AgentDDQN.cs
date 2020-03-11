@@ -388,17 +388,7 @@ public class AgentDDQN : ShipController
         // Vyuzivaj naucenu vedomost
         if (UnityEngine.Random.Range(0.0f, 1.0f) < epsilon || testMode)
         {
-            // Ak nema naboje vybera z akcii bez strelby
-            if (this.Ammo == 0f)
-            {
-                action = UnityEngine.Random.Range(0, num_of_actions/2);
-                //Debug.Log($"action = {action}");
-            }
-            else 
-            // Inak vybera zo vsetkych akcii
-            {
-                action = UnityEngine.Random.Range(0, num_of_actions);
-            }
+            action = UnityEngine.Random.Range(0, num_of_actions);
         }
         else
         {
