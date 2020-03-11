@@ -24,43 +24,43 @@ public class GeneticsAlgorithm : MonoBehaviour
         // Ak vsetci hraci su zniceny obnov populaciu hracov
         if (agents.Where(p => p.IsDestroyed == false).Count() == 0)
         {
+            if (agents.Where(p => p.presiel10Epizod == false).Count() == 0)
+            {
+                if (agents[0].num_of_episodes > 1000) 
+                {   
+                   #if UNITY_EDITOR
+                        UnityEditor.EditorApplication.isPlaying = false;
+                    #else
+                        Application.Quit();
+                    #endif
+                }
+
+                // Replace agents with agents list ordered by his fitness
+                this.agents.Sort(new AgentsComparer());
+                this.bestAgent = agents[0];
+                //Debug.Log($"The best agent is {bestAgent.name}, fitness = {bestAgent.fitness}");
+
+                // Krizenie
+                this.Crossover();
+
+                // Mutacia
+                this.Mutation();
+            
+                this.fitnessList.Add(bestAgent.fitness);
+                this.errorList.Add(bestAgent.avgErr);
+                for (int i = 0; i < agents.Count; i++)
+                {
+                    Debug.Log($"order = {i+1}., name = {agents[i].Nickname}, fitness = {agents[i].fitness}");   
+                    agents[i].fitness = 0.0f;
+                    agents[i].presiel10Epizod = false;                
+                }
+            }
+
             foreach (var a in agents)
             {
                 // Respawn
                 a.RespawnShip();
-            }
-        }
-
-        if (agents.Where(p => p.presiel10Epizod == false).Count() == 0)
-        {
-            if (agents[0].num_of_episodes > 1000) 
-            { 
-                #if UNITY_EDITOR
-                    UnityEditor.EditorApplication.isPlaying = false;
-                #else
-                    Application.Quit();
-                #endif
-            }
-
-            // Replace agents with agents list ordered by his fitness
-            this.agents.Sort(new AgentsComparer());
-            this.bestAgent = agents[0];
-            //Debug.Log($"The best agent is {bestAgent.name}, fitness = {bestAgent.fitness}");
-
-            // Krizenie
-            this.Crossover();
-
-            // Mutacia
-            this.Mutation();
-            
-            this.fitnessList.Add(bestAgent.fitness);
-            this.errorList.Add(bestAgent.avgErr);
-            for (int i = 0; i < agents.Count; i++)
-            {
-                Debug.Log($"order = {i+1}., name = {agents[i].Nickname}, fitness = {agents[i].fitness}");   
-                agents[i].fitness = 0.0f;
-                agents[i].presiel10Epizod = false;                
-            }            
+            }           
         }
     }
 
