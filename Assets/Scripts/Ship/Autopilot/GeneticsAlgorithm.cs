@@ -21,6 +21,16 @@ public class GeneticsAlgorithm : MonoBehaviour
 
     public void Update()
     {        
+        // Ak vsetci hraci su zniceny obnov populaciu hracov
+        if (agents.Where(p => p.IsDestroyed == false).Count() == 0)
+        {
+            foreach (var a in agents)
+            {
+                // Respawn
+                a.RespawnShip();
+            }
+        }
+
         if (agents.Where(p => p.presiel10Epizod == false).Count() == 0)
         {
             if (agents[0].num_of_episodes > 1000) 

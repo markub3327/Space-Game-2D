@@ -19,7 +19,7 @@ public class AgentDDQN : ShipController
 
     private ReplayBuffer replayMemory = new ReplayBuffer();
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 48; // size of minibatch
+    private const int BATCH_SIZE = 32; // size of minibatch
 
     // Epsilon
     private float epsilon = 1.0f;
@@ -150,12 +150,27 @@ public class AgentDDQN : ShipController
                 // Ak uz hrac nema zivoty ani palivo znici sa lod
                 if (this.Health <= 0 || this.Fuel <= 0)
                 {
+                    // Destrukcia lode
+                    DestroyShip();
+
                     planets_old = 0;
                     if (this.Hits > 0)
                         Debug.Log($"Hits[{this.Nickname}]: {this.Hits}");
 
-                    // Destrukcia lode
-                    DestroyShip();
+                    if (this.presiel10Epizod == false)
+                    {
+                        if (num_of_episodes > 0 && (num_of_episodes % 10 == 0))
+                        {
+                            this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
+      
+                            Debug.Log($"epsilon[{this.Nickname}] = {epsilon}");
+                            Debug.Log($"episode[{this.Nickname}] = {num_of_episodes}");
+                        }
+                        num_of_episodes++;
+                    }
+
+                    // Pretrenuj hraca derivaciami
+                    this.Training();
 
                     // Terminalny stav - koniec epizody
                     replayBufferItem.Done = true;
@@ -169,6 +184,10 @@ public class AgentDDQN : ShipController
                         this.myPlanets.ForEach(x => strPlanets += x.name + ", ");
                         Debug.Log($"MyPlanets[{this.Nickname}]: {strPlanets}");
                     }
+
+                    // Vytaz hry - ziskal vsetky planety
+                    if (this.myPlanets.Count == 4)
+                        this.WinnerShip();
 
                     // Terminalny stav - koniec epizody
                     replayBufferItem.Done = true;
@@ -200,27 +219,6 @@ public class AgentDDQN : ShipController
                 // Prepni na prvy obraz (akcia lode)
                 this.isFirstFrame = true;
             }                        
-        }
-        else    // Ak je lod znicena = cas na preucenie siete (nove vedomosti)
-        {            
-            if (this.presiel10Epizod == false)
-            {
-                if (num_of_episodes > 0 && (num_of_episodes % 10 == 0))
-                {
-                    this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
-      
-                    Debug.Log($"epsilon[{this.Nickname}] = {epsilon}");
-                    Debug.Log($"episode[{this.Nickname}] = {num_of_episodes}");
-                }
-    
-                num_of_episodes++;
-            }
-
-            // Pretrenuj hraca derivaciami
-            this.Training();
-        
-            // Respawn
-            RespawnShip();
         }
     }
 

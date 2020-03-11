@@ -168,7 +168,7 @@ public class ShipController : MonoBehaviour
         }        
     }
 
-    protected void DestroyShip()
+    public void DestroyShip()
     {
         IsDestroyed = true;
         collider2d.enabled = false;
@@ -189,7 +189,7 @@ public class ShipController : MonoBehaviour
         animator.SetBool("Destroyed", true);
     }
 
-    protected void WinnerShip()
+    public void WinnerShip()
     {
         IsDestroyed = true;
         collider2d.enabled = false;
@@ -198,7 +198,7 @@ public class ShipController : MonoBehaviour
         animator.SetBool("Winner", true);
     }
 
-    protected void RespawnShip()
+    public void RespawnShip()
     {
         rigidbody2d.position = respawnPoint;  //Respawn.getPoint();
         IsDestroyed = false;
