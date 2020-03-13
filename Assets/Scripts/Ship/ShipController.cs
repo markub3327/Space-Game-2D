@@ -109,13 +109,13 @@ public class ShipController : MonoBehaviour
             float mean = 0f;
 
             // Vypocitaj skore hraca
-            mean += (this.Health / (float)ShipController.maxHealth) * 0.01f;
-            mean += (this.Fuel / (float)ShipController.maxFuel)     * 0.01f;
-            mean += (this.Ammo / (float)ShipController.maxAmmo)     * 0.01f;
-            mean += (this.Hits / (float)(ShipController.maxHealth*2));
-            mean += this.myPlanets.Count;
+            mean += (this.Health / (float)ShipController.maxHealth)     * 8f;
+            mean += (this.Fuel / (float)ShipController.maxFuel)         * 4f;
+            mean += (this.Ammo / (float)ShipController.maxAmmo)         * 1f;
+            mean += (this.Hits / (float)(ShipController.maxHealth*2))   * 16f;
+            mean += this.myPlanets.Count                                * 32f;
 
-            return mean;
+            return (mean / 61f);
         }
     }
 

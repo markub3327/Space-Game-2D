@@ -150,12 +150,12 @@ public class AgentDDQN : ShipController
                 // Ak uz hrac nema zivoty ani palivo znici sa lod
                 if (this.Health <= 0 || this.Fuel <= 0)
                 {
-                    // Destrukcia lode
-                    DestroyShip();
-
-                    planets_old = 0;
                     if (this.Hits > 0)
                         Debug.Log($"Hits[{this.Nickname}]: {this.Hits}");
+
+                    // Destrukcia lode
+                    DestroyShip();
+                    planets_old = 0;
 
                     if (this.presiel10Epizod == false)
                     {
