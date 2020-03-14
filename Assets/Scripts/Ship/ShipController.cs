@@ -102,20 +102,24 @@ public class ShipController : MonoBehaviour
     public bool IsRespawned { get; set; } = true;
 
     // Skore v hre
-    public float score_old;
+    public readonly float[] Wmean = { 0.20f, 0.10f, 0.05f, 0.50f, 1.00f };
+    public float Wmean_sum { get; set; }
+    public float score_old { get; set; }
     public float Score 
     {
         get {
-            float mean = 0f;
+            float mean;
 
             // Vypocitaj skore hraca
-            mean += (this.Health / (float)ShipController.maxHealth)     * 8f;
-            mean += (this.Fuel / (float)ShipController.maxFuel)         * 4f;
-            mean += (this.Ammo / (float)ShipController.maxAmmo)         * 1f;
-            mean += (this.Hits / (float)(ShipController.maxHealth*2))   * 16f;
-            mean += this.myPlanets.Count                                * 32f;
+            mean = (this.Health / (float)ShipController.maxHealth)      * Wmean[0];
+            mean += (this.Fuel / (float)ShipController.maxFuel)         * Wmean[1];
+            mean += (this.Ammo / (float)ShipController.maxAmmo)         * Wmean[2];
+            mean += (this.Hits / (float)(ShipController.maxHealth*2))   * Wmean[3];
+            mean += this.myPlanets.Count                                * Wmean[4];
 
-            return (mean / 61f);
+            //Debug.Log($"mean = {mean}, mean_sum = {Wmean_sum}, score = {(mean / Wmean_sum)}");
+
+            return (mean / Wmean_sum);
         }
     }
 
@@ -137,6 +141,7 @@ public class ShipController : MonoBehaviour
             motor.Play();                    
         }
 
+        this.Wmean_sum = Wmean.Sum();
         this.score_old = this.Score;
     }
 
@@ -167,7 +172,7 @@ public class ShipController : MonoBehaviour
             if (!audioSource.isPlaying)
                 PlaySound(engineClip);
 
-            ChangeFuel(-0.01f);
+            ChangeFuel(-0.015f);
         }        
     }
 

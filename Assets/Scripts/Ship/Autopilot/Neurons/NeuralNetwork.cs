@@ -43,10 +43,8 @@ public class NeuralNetwork
         }
     }
 
-    public float Training(float[] externalInput, float[] feedBack)
+    public void Training(float[] externalInput, int idx, float target)// float[] feedBack)
     {
-        float err = 0f;
-
         for (int i = neuronLayers.Count - 1; i >= 0; i--)
         {
             if (neuronLayers[i].type == NeuronLayerType.INPUT)
@@ -55,15 +53,13 @@ public class NeuralNetwork
             }
             else if (neuronLayers[i].type == NeuronLayerType.OUTPUT)
             {
-                neuronLayers[i].RunTraining(feedBack, ref err);
+                neuronLayers[i].RunTraining(target, idx);
             }
             else
             {
                 neuronLayers[i].RunTraining();
             }
         }
-
-        return err;
     }
 
     public override string ToString()

@@ -23,7 +23,7 @@ public class AgentDDQN : ShipController
 
     // Epsilon
     private float epsilon = 1.0f;
-    private const float epsilonMin = 0.15f;
+    private const float epsilonMin = 0.10f;
     private float epsilon_decay;
 
     public float fitness { get; set; } = 0;
@@ -49,30 +49,38 @@ public class AgentDDQN : ShipController
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
+        QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 2nd hidden
         QNet.CreateLayer(NeuronLayerType.OUTPUT);   // Output
 
         QTargetNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QTargetNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
+        QTargetNet.CreateLayer(NeuronLayerType.HIDDEN);   // 2nd hidden
         QTargetNet.CreateLayer(NeuronLayerType.OUTPUT);   // Output
 
         QNet.SetEdge(QNet.neuronLayers[1], QNet.neuronLayers[0]);
         QNet.SetEdge(QNet.neuronLayers[2], QNet.neuronLayers[1]);
+        QNet.SetEdge(QNet.neuronLayers[3], QNet.neuronLayers[2]);
         QNet.SetBPGEdge(QNet.neuronLayers[0], QNet.neuronLayers[1]);
         QNet.SetBPGEdge(QNet.neuronLayers[1], QNet.neuronLayers[2]);
+        QNet.SetBPGEdge(QNet.neuronLayers[2], QNet.neuronLayers[3]);
 
         QTargetNet.SetEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[0]);
         QTargetNet.SetEdge(QTargetNet.neuronLayers[2], QTargetNet.neuronLayers[1]);
+        QTargetNet.SetEdge(QTargetNet.neuronLayers[3], QTargetNet.neuronLayers[2]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[0], QTargetNet.neuronLayers[1]);
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[1], QTargetNet.neuronLayers[2]);
+        QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[2], QTargetNet.neuronLayers[3]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
-        QNet.neuronLayers[1].CreateNeurons(48);
-        QNet.neuronLayers[2].CreateNeurons(num_of_actions);
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
+        QNet.neuronLayers[1].CreateNeurons(32);
+        QNet.neuronLayers[2].CreateNeurons(24);
+        QNet.neuronLayers[3].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 48);
-        QTargetNet.neuronLayers[1].CreateNeurons(48);
-        QTargetNet.neuronLayers[2].CreateNeurons(num_of_actions);
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
+        QTargetNet.neuronLayers[1].CreateNeurons(32);
+        QTargetNet.neuronLayers[2].CreateNeurons(24);
+        QTargetNet.neuronLayers[3].CreateNeurons(num_of_actions);
     
         // Init Player info panel
         this.nameBox.text = this.Nickname;
@@ -151,7 +159,7 @@ public class AgentDDQN : ShipController
                 if (this.Health <= 0 || this.Fuel <= 0)
                 {
                     if (this.Hits > 0)
-                        Debug.Log($"Hits[{this.Nickname}]: {this.Hits}");
+                        Debug.Log($"Kills[{this.Nickname}]: {(this.Hits / (float)(ShipController.maxHealth*2))}");
 
                     // Destrukcia lode
                     DestroyShip();
@@ -322,13 +330,12 @@ public class AgentDDQN : ShipController
         if (replayMemory.Count >= BATCH_SIZE && !testMode)
         {
             var sample = replayMemory.Sample(BATCH_SIZE);
+            float target;
 
             //Debug.Log($"sample.Count = {sample.Count}, memory.Count = {this.replayMemory.Count}");
             this.avgErr = 0f;
             for (int i = 0; i < sample.Count; i++)
             {
-                float[] targets = new float[num_of_actions];
-
                 // Non-terminal state     
                 if (sample[i].Done == false)
                 {
@@ -339,24 +346,24 @@ public class AgentDDQN : ShipController
 
                     // Vyber nasledujuce Q
                     var next_Q = math.min(
-                        GetMaxQ(QNet.neuronLayers[2].Neurons),
-                        GetMaxQ(QTargetNet.neuronLayers[2].Neurons)
+                        GetMaxQ(QNet.neuronLayers[3].Neurons),
+                        GetMaxQ(QTargetNet.neuronLayers[3].Neurons)
                     );
 
                     // TD
-                    targets[sample[i].Action] = sample[i].Reward + (gamma * next_Q);
+                    target = sample[i].Reward + (gamma * next_Q);
                 }
                 // terminal state
                 else
                 {
                     // TD
-                    targets[sample[i].Action] = sample[i].Reward;
+                    target = sample[i].Reward;
                     //Debug.Log($"target[{i}] = {targets[sample[i].Action]}");
                 }
                 
                 // Training Q network            
                 QNet.Run(sample[i].State);
-                QNet.Training(sample[i].State, targets);
+                QNet.Training(sample[i].State, sample[i].Action, target);
 
                 // Soft update Q Target network
                 for (int j = 0; j < this.QNet.neuronLayers.Count; j++)
@@ -368,7 +375,7 @@ public class AgentDDQN : ShipController
                 }
 
                 if (presiel10Epizod)
-                    this.avgErr += math.abs(targets[sample[i].Action] - QNet.neuronLayers[2].Neurons[sample[i].Action].output);
+                    this.avgErr += math.abs(target - QNet.neuronLayers[3].Neurons[sample[i].Action].output);
             }
         
             if (presiel10Epizod)
@@ -392,7 +399,7 @@ public class AgentDDQN : ShipController
         else
         {
             QNet.Run(state);
-            GetMaxQ(QNet.neuronLayers[2].Neurons, ref action);
+            GetMaxQ(QNet.neuronLayers[3].Neurons, ref action);
         }
 
         switch (action)
@@ -525,7 +532,7 @@ public class AgentDDQN : ShipController
 
 public class ReplayBuffer
 {
-    private const int max_count = 20000;
+    private const int max_count = 10000;
 
     public List<ReplayBufferItem> items = new List<ReplayBufferItem>();
 

@@ -35,7 +35,7 @@ public class NeuralLayer
                 IndexW = this.Weights.Count,
                 num_of_inputs = num_of_inputs,
                 momentum = 0.9f,
-                learning_rate = 0.001f
+                learning_rate = 0.0005f
             });
             for (int n = 0; n <= num_of_inputs; n++)
             {
@@ -59,7 +59,7 @@ public class NeuralLayer
                 IndexW = this.Weights.Count,
                 num_of_inputs = num_of_inputs,
                 momentum = 0.9f,
-                learning_rate = 0.001f
+                learning_rate = 0.0005f
             });
             for (int n = 0; n <= num_of_inputs; n++)
             {
@@ -194,7 +194,7 @@ public class NeuralLayer
         deltaWeightsNative.Dispose();
     }
 
-    public void RunTraining(float[] o, ref float err)
+    public void RunTraining(float feedback, int idx)
     {
         var neuronsNative = new NativeArray<Neuron>(Neurons.ToArray(), Allocator.TempJob);
         var weightsNative = new NativeArray<float>(Weights.ToArray(), Allocator.TempJob);
@@ -208,7 +208,8 @@ public class NeuralLayer
         var job = new NeuronOutTrainingJob
         {
             Edges    =  new NativeArray<Neuron>(Edges.Neurons.ToArray(), Allocator.TempJob),
-            Feedback =  new NativeArray<float>(o, Allocator.TempJob),
+            Feedback =  feedback,
+            idx      =  idx,
             Neurons  =  neuronsNative,
             Weights  =  weightsNative,
             deltaWeights =  deltaWeightsNative

@@ -12,8 +12,8 @@ public struct NeuronOutTrainingJob : IJobParallelFor
     public NativeArray<Neuron> Edges;
 
     // Spatna-vazba od hry 
-    [DeallocateOnJobCompletion, ReadOnly]
-    public NativeArray<float> Feedback;
+    public float Feedback;
+    public int idx;
 
      // Pole neuronov (entit)
     [NativeDisableParallelForRestriction]
@@ -31,18 +31,20 @@ public struct NeuronOutTrainingJob : IJobParallelFor
     public void Execute(int index)
     {
         var neuron = this.Neurons[index];
+        float diff;
 
         // Vypocitaj chybu siete podla vystupu metodou Huber loss function
-        var diff = Feedback[index] - neuron.output;
-
-        //if (math.abs(diff) > 1.0f)
-            // MAE (Mean absolute error)
-        //    neuron.sigma = math.sign(diff) * NeuronFn.derivELU(neuron.output);
-        //else
-        // MSE (Mean squared error)
-        neuron.sigma = diff * NeuronFn.derivELU(neuron.output);         
-        
+        if (index == idx)
+        {
+            diff = Feedback - neuron.output;
+        }
+        else
+        {
+            diff = 0f;            
+        }
+        neuron.sigma = diff * NeuronFn.derivELU(neuron.output);
         //Debug.Log($"sigma = {neuron.sigma}");
+        //Debug.Log($"diff = {diff}");
 
         // Adaptuj vahy podla chyby neuronu
         for (int n = 0; n < neuron.num_of_inputs; n++)
@@ -54,7 +56,7 @@ public struct NeuronOutTrainingJob : IJobParallelFor
         // Bias
         deltaWeights[neuron.IndexW + neuron.num_of_inputs] = neuron.learning_rate * neuron.sigma + (neuron.momentum * deltaWeights[neuron.IndexW + neuron.num_of_inputs]);
         Weights[neuron.IndexW + neuron.num_of_inputs] += deltaWeights[neuron.IndexW + neuron.num_of_inputs];
-       
+
         // Copy back
         this.Neurons[index] = neuron;
     }
