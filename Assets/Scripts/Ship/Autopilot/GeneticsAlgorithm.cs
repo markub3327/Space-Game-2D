@@ -22,8 +22,8 @@ public class GeneticsAlgorithm : MonoBehaviour
     public void Update()
     {        
         // Ak vsetci hraci su zniceny obnov populaciu hracov
-        if (agents.Where(p => p.IsDestroyed == false).Count() == 0)
-        {
+        //if (agents.Where(p => p.IsDestroyed == false).Count() == 0)
+        //{
             if (agents.Where(p => p.presiel10Epizod == false).Count() == 0)
             {
                 if (agents[0].num_of_episodes > 1000) 
@@ -56,12 +56,12 @@ public class GeneticsAlgorithm : MonoBehaviour
                 }
             }
 
-            foreach (var a in agents)
-            {
-                // Respawn
-                a.RespawnShip();
-            }           
-        }
+            //foreach (var a in agents)
+            //{
+            //    // Respawn
+            //    a.RespawnShip();
+            //}           
+        //}
     }
 
     private void Crossover()
@@ -117,7 +117,7 @@ public class GeneticsAlgorithm : MonoBehaviour
 
                     for (int j = 0; j < a.QNet.neuronLayers[i].Weights.Count; j++)
                     {                        
-                        if (Random.Range(0.0f, 1.0f) < (0.05f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
+                        if (Random.Range(0.0f, 1.0f) < (0.01f/(float)a.QNet.neuronLayers[i].Weights.Count))                        
                         {
                             var newW = Random.Range(-1.0f, 1.0f) * k;
                             a.QNet.neuronLayers[i].Weights[j] = newW;//0.0002f*newW + (1.0f-0.0002f)*a.QNet.neuronLayers[i].Weights[j];

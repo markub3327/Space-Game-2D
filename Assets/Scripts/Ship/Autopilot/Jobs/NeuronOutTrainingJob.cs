@@ -40,7 +40,7 @@ public struct NeuronOutTrainingJob : IJobParallelFor
         }
         else
         {
-            diff = 0f;            
+            diff = 0f - neuron.output;            
         }
         neuron.sigma = diff * NeuronFn.derivELU(neuron.output);
         //Debug.Log($"sigma = {neuron.sigma}");

@@ -12,7 +12,7 @@ namespace Sensors
 
         public const int num_of_rays = 32;
 
-        public const int num_of_objs = 70;
+        public const int num_of_objs = 58;
 
         // Radar okolo lode
         public static float[] Scan(Vector2 origin, Vector2 lookDirection, ShipController parent)
@@ -72,71 +72,53 @@ namespace Sensors
                     TransformDistance(ray, state, idx + 24);
                     break;
                 case "Nebula-Red":
-                    // Ak lod potrebuje palivo
-                    if (parent.Fuel > (ShipController.maxFuel-1))
-                        TransformDistance(ray, state, idx + 26);
-                    else if (parent.Fuel > (ShipController.maxFuel/2f))
-                        TransformDistance(ray, state, idx + 28);
-                    else
-                        TransformDistance(ray, state, idx + 30);
+                    TransformDistance(ray, state, idx + 26);
                     break;
                 case "Nebula-Blue":
-                    // Ak lod potrebuje palivo
-                    if (parent.Fuel > (ShipController.maxFuel-1))
-                        TransformDistance(ray, state, idx + 32);
-                    else if (parent.Fuel > (ShipController.maxFuel/2f))
-                        TransformDistance(ray, state, idx + 34);
-                    else
-                        TransformDistance(ray, state, idx + 36);
+                    TransformDistance(ray, state, idx + 28);
                     break;
                 case "Nebula-Silver":
-                    // Ak lod potrebuje palivo
-                    if (parent.Fuel > (ShipController.maxFuel-1))
-                        TransformDistance(ray, state, idx + 38);
-                    else if (parent.Fuel > (ShipController.maxFuel/2f))
-                        TransformDistance(ray, state, idx + 40);
-                    else
-                        TransformDistance(ray, state, idx + 42);
+                    TransformDistance(ray, state, idx + 30);
                     break;
                 case "Asteroid":
-                    TransformDistance(ray, state, idx + 44);
+                    TransformDistance(ray, state, idx + 32);
                     break;
                 case "Sun":
-                    TransformDistance(ray, state, idx + 46);
+                    TransformDistance(ray, state, idx + 34);
                     break;                
                 case "Ammo":
                     // Ak lod potrebuje palivo
                     if (parent.Ammo > (ShipController.maxAmmo-10))
-                        TransformDistance(ray, state, idx + 48);
+                        TransformDistance(ray, state, idx + 36);
                     else if (parent.Ammo > (ShipController.maxAmmo/2f))
-                        TransformDistance(ray, state, idx + 50);
+                        TransformDistance(ray, state, idx + 38);
                     else
-                        TransformDistance(ray, state, idx + 52);
+                        TransformDistance(ray, state, idx + 40);
                     break;                
                 case "Health":
                     // Ak lod potrebuje palivo
                     if (parent.Health > (ShipController.maxHealth-1))                
-                        TransformDistance(ray, state, idx + 54);
+                        TransformDistance(ray, state, idx + 42);
                     else if (parent.Health > (ShipController.maxHealth/2f))                
-                        TransformDistance(ray, state, idx + 56);
+                        TransformDistance(ray, state, idx + 44);
                     else
-                        TransformDistance(ray, state, idx + 58);
+                        TransformDistance(ray, state, idx + 46);
                     break;                
                 case "Moon":
-                    TransformDistance(ray, state, idx + 60);
+                    TransformDistance(ray, state, idx + 48);
                     break;                
                 case "Fobos":
-                    TransformDistance(ray, state, idx + 62);
+                    TransformDistance(ray, state, idx + 50);
                     break;       
                 case "Projectile":
                     var projectile = ray.collider.GetComponent<Projectile>();
                     if (projectile.firingShip == parent)
-                        TransformDistance(ray, state, idx + 64);
+                        TransformDistance(ray, state, idx + 52);
                     else
-                        TransformDistance(ray, state, idx + 66);
+                        TransformDistance(ray, state, idx + 54);
                     break;
                 case "Ship-Destroyer":
-                    TransformDistance(ray, state, idx + 68);
+                    TransformDistance(ray, state, idx + 56);
                     break;
                 default:
                     Debug.Log($"ray.name = {ray.collider.name}, ray.fraction = {ray.fraction}");
