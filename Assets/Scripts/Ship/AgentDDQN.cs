@@ -156,7 +156,7 @@ public class AgentDDQN : ShipController
                 replayBufferItem.Next_state = this.frameBuffer.ToArray();
                 
                 // Ak uz hrac nema zivoty ani palivo znici sa lod
-                if (this.Health <= 0)
+                if (this.Health <= 0 || this.Fuel <= 0)
                 {
                     if (this.Hits > 0)
                         Debug.Log($"Kills[{this.Nickname}]: {(this.Hits / (float)(ShipController.maxHealth*2))}");
@@ -321,7 +321,7 @@ public class AgentDDQN : ShipController
     {        
         // Exploration/Exploitation parameter decay
         if (this.epsilon > epsilonMin)
-            this.epsilon *= 0.9999f; //this.epsilon_decay;  // od 100% nahody po 1%
+            this.epsilon *= 0.999f; //this.epsilon_decay;  // od 100% nahody po 1%
 
         // Ak je v zasobniku dost vzorov k uceniu
         if (replayMemory.Count >= BATCH_SIZE && !testMode)

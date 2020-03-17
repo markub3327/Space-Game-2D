@@ -52,7 +52,7 @@ public class ShipController : MonoBehaviour
     }   // aktualny stav hracovej municie 
 
     // Player's fuel
-    /*public UIBarControl fuelBar;
+    public UIBarControl fuelBar;
     public const int maxFuel = 10;                // maximalny pocet paliva v nadrzi hraca
     private float _fuel = maxFuel;
     public float Fuel {
@@ -69,7 +69,7 @@ public class ShipController : MonoBehaviour
             if (fuelBar != null)
               fuelBar.SetValue(_fuel / (float)maxFuel);
         }
-    }*/
+    }
 
     // Zoznam planet, ktore vlastni lod
     public List<PlanetController> myPlanets { get; set; } = new List<PlanetController>();
@@ -109,10 +109,8 @@ public class ShipController : MonoBehaviour
             float mean;
 
             // Vypocitaj skore hraca
-            mean  = (this.Health / (float)ShipController.maxHealth)   * 0.05f;
-            mean += (this.Ammo / (float)ShipController.maxAmmo)       * 0.01f;
-            mean += (this.Hits / (float)(ShipController.maxHealth*2)) * 0.10f;
-            mean += this.myPlanets.Count                              * 0.84f;
+            mean = (this.Hits / (float)(ShipController.maxHealth*2))  * 0.05f;  //  5% pre uspesnu strelbu
+            mean += this.myPlanets.Count                              * 0.95f;  // 95% pre uspesny zber planet 
 
             return mean;
         }
@@ -145,8 +143,8 @@ public class ShipController : MonoBehaviour
     /// <param name="move">Normalizovany vektor udavajuci smer a velkost pohybu</param>
     protected void MoveShip(Vector2 move)
     {
-        //if (this.Fuel > 0f)
-        //{
+        if (this.Fuel > 0f)
+        {
             // Vypocitaj zmenu rychlosti rotacie a pozicie hraca
             var position = rigidbody2d.position;
             var rotation = rigidbody2d.rotation;
@@ -166,8 +164,8 @@ public class ShipController : MonoBehaviour
             if (!audioSource.isPlaying)
                 PlaySound(engineClip);
 
-        //ChangeFuel(-0.015f);
-        //}        
+            ChangeFuel(-0.006f);
+        }        
     }
 
     public void DestroyShip()
@@ -178,7 +176,7 @@ public class ShipController : MonoBehaviour
         // obnov zivoty, palivo a municiu lode na maximum
         this.Health = maxHealth;
         this.Ammo = maxAmmo;
-        //this.Fuel = maxFuel;
+        this.Fuel = maxFuel;
         // Znicena lod straca vlastnictvo u planety
         foreach (var p in this.myPlanets)
         {
@@ -200,7 +198,7 @@ public class ShipController : MonoBehaviour
         // obnov zivoty, palivo a municiu lode na maximum
         this.Health = maxHealth;
         this.Ammo = maxAmmo;
-        //this.Fuel = maxFuel;
+        this.Fuel = maxFuel;
         // Znicena lod straca vlastnictvo u planety
         foreach (var p in this.myPlanets)
         {
@@ -242,13 +240,13 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav municie hraca
     /// </summary>
     /// <param name="amount">Mnozstvo municie, ktore sa pripocita k sucasnemu stavu municie</param>
-    /*public void ChangeFuel(float amount)
+    public void ChangeFuel(float amount)
     {
         if (!IsDestroyed)
         {
             this.Fuel = Mathf.Clamp(Fuel + amount, 0f, maxFuel);
         }
-    }*/
+    }
 
     /// <summary>
     /// Zmeni stav zivota hraca

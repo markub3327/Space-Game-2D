@@ -107,7 +107,7 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!60 &5643909071257595920
 PolygonCollider2D:
@@ -317,21 +317,16 @@ MonoBehaviour:
   healthBar: {fileID: 8313577754348573267}
   ammoBar: {fileID: 2637749432310433811}
   fuelBar: {fileID: 120408872112281115}
-  myPlanets: []
-  Hits: 0
   collectibleClip: {fileID: 8300000, guid: af5f8b64e3f58f24c87ff8f789b04f6c, type: 3}
   damageClip: {fileID: 8300000, guid: 9b1bb1f450b7d444fa4a8019d13519a7, type: 3}
   hitClip: {fileID: 8300000, guid: ae904c7305df7344d86b2092c0cb3a26, type: 3}
   throwClip: {fileID: 8300000, guid: b2edfd40873655249ba0e01a5cf705be, type: 3}
-  scoreOld: 0
-  fitness: 0
-  num_of_episodes: 0
+  Nickname: 
   turretControllers:
   - {fileID: 4813157408587100586}
   - {fileID: 3617979878420534391}
   nameBox: {fileID: 6886705795503848144}
   levelBox: {fileID: 7190794469098261108}
-  presiel10Epizod: 0
   testMode: 0
 --- !u!1 &9101201141709214759
 GameObject:
