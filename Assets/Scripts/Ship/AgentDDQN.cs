@@ -194,7 +194,7 @@ public class AgentDDQN : ShipController
                 {
                     // Neterminalny stav - pokracuje v hre
                     replayBufferItem.Done = false;             
-                    replayBufferItem.Reward = 0.0f;
+                    replayBufferItem.Reward = -0.004f;
                 }
 
                 // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
@@ -205,7 +205,7 @@ public class AgentDDQN : ShipController
                     this.score_old = score;
                 }
                 // Vypis fitness hraca
-                this.levelBox.text = this.fitness.ToString("0.0");
+                this.levelBox.text = this.fitness.ToString("0.00");
 
                 //Debug.Log($"reward[{this.Nickname}]  = {replayBufferItem.Reward}");
                 //Debug.Log($"deltaScore[{this.Nickname}]  = {deltaScore}");

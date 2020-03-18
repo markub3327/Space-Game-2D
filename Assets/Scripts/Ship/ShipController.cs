@@ -109,8 +109,10 @@ public class ShipController : MonoBehaviour
             float mean;
 
             // Vypocitaj skore hraca
-            mean = (this.Hits / (float)(ShipController.maxHealth*2))  * 0.05f;  //  5% pre uspesnu strelbu
-            mean += this.myPlanets.Count                              * 0.95f;  // 95% pre uspesny zber planet 
+            mean  = (this.Health / (float)ShipController.maxHealth)   * 0.04f;  //  4% pre zivoty
+            mean += (this.Ammo / (float)ShipController.maxAmmo)       * 0.01f;  //  1% pre municiu
+            mean += (this.Hits / (float)(ShipController.maxHealth*2)) * 0.05f;  //  5% pre uspesnu strelbu
+            mean += this.myPlanets.Count                              * 0.90f;  // 90% pre uspesny zber planet 
 
             return mean;
         }
@@ -164,7 +166,7 @@ public class ShipController : MonoBehaviour
             if (!audioSource.isPlaying)
                 PlaySound(engineClip);
 
-            ChangeFuel(-0.006f);
+            ChangeFuel(-0.004f);
         }        
     }
 
