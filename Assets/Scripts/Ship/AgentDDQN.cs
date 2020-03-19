@@ -45,7 +45,7 @@ public class AgentDDQN : ShipController
     {
         base.Start();
 
-        //epsilon_decay = (epsilon - epsilonMin) / 500000f;
+        epsilon_decay = (epsilon - epsilonMin) / 1000000f;
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
@@ -319,10 +319,6 @@ public class AgentDDQN : ShipController
 
     private void Training(float gamma=0.95f, float tau=0.01f)
     {        
-        // Exploration/Exploitation parameter decay
-        if (this.epsilon > epsilonMin)
-            this.epsilon *= 0.999f; //this.epsilon_decay;  // od 100% nahody po 1%
-
         // Ak je v zasobniku dost vzorov k uceniu
         if (replayMemory.Count >= BATCH_SIZE && !testMode)
         {
@@ -474,6 +470,10 @@ public class AgentDDQN : ShipController
                 this.MoveShip(ExtendedVector2.up_left);
                 break;
         }
+
+        // Exploration/Exploitation parameter decay
+        if (this.epsilon > epsilonMin)
+            this.epsilon -= this.epsilon_decay;  // od 100% nahody po 1%
 
         return action;
     }
