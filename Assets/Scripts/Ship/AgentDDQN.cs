@@ -19,7 +19,7 @@ public class AgentDDQN : ShipController
 
     private ReplayBuffer replayMemory = new ReplayBuffer();
     private ReplayBufferItem replayBufferItem = null;
-    private const int BATCH_SIZE = 32; // size of minibatch
+    private const int BATCH_SIZE = 16; // size of minibatch
 
     // Epsilon
     private float epsilon = 1.0f;
@@ -45,7 +45,7 @@ public class AgentDDQN : ShipController
     {
         base.Start();
 
-        epsilon_decay = (epsilon - epsilonMin) / 1000000f;
+        epsilon_decay = (epsilon - epsilonMin) / 1500000f;
 
         QNet.CreateLayer(NeuronLayerType.INPUT);    // Input layer
         QNet.CreateLayer(NeuronLayerType.HIDDEN);   // 1st hidden
@@ -72,14 +72,14 @@ public class AgentDDQN : ShipController
         QTargetNet.SetBPGEdge(QTargetNet.neuronLayers[2], QTargetNet.neuronLayers[3]);
 
         //var num_of_inputs = num_of_states * num_of_frames;
-        QNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
-        QNet.neuronLayers[1].CreateNeurons(32);
-        QNet.neuronLayers[2].CreateNeurons(24);
+        QNet.neuronLayers[0].CreateNeurons(num_of_states, 128);
+        QNet.neuronLayers[1].CreateNeurons(128);
+        QNet.neuronLayers[2].CreateNeurons(64);
         QNet.neuronLayers[3].CreateNeurons(num_of_actions);
 
-        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 32);
-        QTargetNet.neuronLayers[1].CreateNeurons(32);
-        QTargetNet.neuronLayers[2].CreateNeurons(24);
+        QTargetNet.neuronLayers[0].CreateNeurons(num_of_states, 128);
+        QTargetNet.neuronLayers[1].CreateNeurons(128);
+        QTargetNet.neuronLayers[2].CreateNeurons(64);
         QTargetNet.neuronLayers[3].CreateNeurons(num_of_actions);
     
         // Init Player info panel
@@ -161,9 +161,15 @@ public class AgentDDQN : ShipController
                     if (this.Hits > 0)
                         Debug.Log($"Kills[{this.Nickname}]: {(this.Hits / (float)(ShipController.maxHealth*2))}");
 
+                    // pocitadlo epizod
+                    this.GA_epizody();
+
                     // Destrukcia lode
                     this.DestroyShip();
                     planets_old = 0;
+
+                    // Pretrenuj hraca derivaciami
+                    this.Training();
 
                     // Terminalny stav - koniec epizody
                     replayBufferItem.Done = true;
@@ -181,9 +187,15 @@ public class AgentDDQN : ShipController
                     // Vytaz hry - ziskal vsetky planety
                     if (this.myPlanets.Count == 4)
                     {
+                        // pocitadlo epizod
+                        this.GA_epizody();
+
                         this.WinnerShip();
                         planets_old = 0;
                     }
+
+                    // Pretrenuj hraca derivaciami
+                    this.Training();
 
                     // Terminalny stav - koniec epizody
                     replayBufferItem.Done = true;
@@ -198,14 +210,14 @@ public class AgentDDQN : ShipController
                 }
 
                 // Vypocet fitness pre Geneticky algoritmus vyberu jedincov
-                var score = this.Score;
                 if (!presiel10Epizod)
                 {
+                    var score = this.Score;
                     this.fitness += score - this.score_old;
                     this.score_old = score;
                 }
                 // Vypis fitness hraca
-                this.levelBox.text = this.fitness.ToString("0.00");
+                this.levelBox.text = this.fitness.ToString("0");
 
                 //Debug.Log($"reward[{this.Nickname}]  = {replayBufferItem.Reward}");
                 //Debug.Log($"deltaScore[{this.Nickname}]  = {deltaScore}");
@@ -220,25 +232,20 @@ public class AgentDDQN : ShipController
                 this.isFirstFrame = true;
             }                        
         }
-        else
-        {
-            if (this.presiel10Epizod == false)
-            {
-                if (num_of_episodes > 0 && (num_of_episodes % 10 == 0))
-                {
-                    this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
-      
-                    Debug.Log($"epsilon[{this.Nickname}] = {epsilon}");
-                    Debug.Log($"episode[{this.Nickname}] = {num_of_episodes}");
-                }
-                num_of_episodes++;
-            }
+    }
 
-            // Pretrenuj hraca derivaciami
-            this.Training();
-            
-            // Obnov hraca do hry
-            this.RespawnShip();
+    private void GA_epizody()
+    {
+        if (this.presiel10Epizod == false)
+        {
+            if (num_of_episodes > 0 && (num_of_episodes % 10 == 0))
+            {
+                this.presiel10Epizod = true; // po 10000 epizodach vygeneruje 1000 generacii populacie 
+      
+                Debug.Log($"epsilon[{this.Nickname}] = {epsilon}");
+                Debug.Log($"episode[{this.Nickname}] = {num_of_episodes}");
+            }
+            num_of_episodes++;
         }
     }
 
