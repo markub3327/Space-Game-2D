@@ -82,6 +82,15 @@ public class AgentDDQN : ShipController
         QTargetNet.neuronLayers[2].CreateNeurons(64);
         QTargetNet.neuronLayers[3].CreateNeurons(num_of_actions);
     
+        // make q_target = q_primary
+        for (int i = 0; i < this.QNet.neuronLayers.Count; i++)
+        {
+            for (int j = 0; j < this.QNet.neuronLayers[i].Weights.Count; j++)
+            {                        
+                this.QTargetNet.neuronLayers[i].Weights[j] = this.QNet.neuronLayers[i].Weights[j];
+            }
+        }
+
         // Init Player info panel
         this.nameBox.text = this.Nickname;
         this.levelBox.text = ((int)this.fitness).ToString();
@@ -206,7 +215,7 @@ public class AgentDDQN : ShipController
                 {
                     // Neterminalny stav - pokracuje v hre
                     replayBufferItem.Done = false;             
-                    replayBufferItem.Reward = -0.004f;
+                    replayBufferItem.Reward = -0.008f;
                 }
 
                 // Vypocet fitness pre Geneticky algoritmus vyberu jedincov

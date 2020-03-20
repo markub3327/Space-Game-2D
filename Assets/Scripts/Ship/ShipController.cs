@@ -166,7 +166,7 @@ public class ShipController : MonoBehaviour
             if (!audioSource.isPlaying)
                 PlaySound(engineClip);
 
-            ChangeFuel(-0.004f);
+            ChangeFuel(-0.008f);
         }        
     }
 
