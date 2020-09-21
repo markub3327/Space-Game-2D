@@ -54,6 +54,8 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -65,6 +67,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -126,7 +129,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1.4191617}
+    oldSize: {x: 2.2266667, y: 3.16}
     newSize: {x: 8.64, y: 3.2}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -322,12 +325,12 @@ MonoBehaviour:
   hitClip: {fileID: 8300000, guid: ae904c7305df7344d86b2092c0cb3a26, type: 3}
   throwClip: {fileID: 8300000, guid: b2edfd40873655249ba0e01a5cf705be, type: 3}
   Nickname: 
+  testMode: 0
+  nameBox: {fileID: 6886705795503848144}
+  levelBox: {fileID: 7190794469098261108}
   turretControllers:
   - {fileID: 4813157408587100586}
   - {fileID: 3617979878420534391}
-  nameBox: {fileID: 6886705795503848144}
-  levelBox: {fileID: 7190794469098261108}
-  testMode: 0
 --- !u!1 &9101201141709214759
 GameObject:
   m_ObjectHideFlags: 0
@@ -688,7 +691,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &120408872112281115 stripped
@@ -736,7 +739,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &8943249232721743333

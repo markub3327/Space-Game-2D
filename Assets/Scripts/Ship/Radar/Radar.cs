@@ -5,14 +5,8 @@ namespace Sensors
     public static class Radar
     {
         public const float max_distance = 10.0f;
-        
-        public const float close_range = 1.0f;
-
-        public const float middle_range = 5.0f;
-
-        public const int num_of_rays = 32;
-
-        public const int num_of_objs = 58;
+        public const int num_of_rays = 16;
+        public const int num_of_objs = 27;
 
         // Radar okolo lode
         public static float[] Scan(Vector2 origin, Vector2 lookDirection, ShipController parent)
@@ -21,8 +15,8 @@ namespace Sensors
             float angle;
             int idx;
 
-            // Vysli luce pod uhlami po 11.25 stupnoch (32 skenov)
-            for (idx = 0, angle = 0f; angle < 360; angle += 11.25f, idx+=num_of_objs)
+            // Vysli luce pod uhlami po 22.5 stupnoch (16 skenov)
+            for (idx = 0, angle = 0f; angle < 360; angle += 22.5f, idx+=num_of_objs)
             {
                 //Debug.DrawRay(origin, lookDirection.Shift(angle), Color.magenta);
                 var ray = Physics2D.RaycastAll(origin, lookDirection.Shift(angle), max_distance);
@@ -39,14 +33,7 @@ namespace Sensors
                         //Debug.Log($"Ray({parent.name})(angle={angle}): name = {ray[1].collider.name}, fraction = {ray[1].fraction}");
                         TransformRadarANN(ray[1], state, idx, parent);
                     }
-                    
-                    //for (int i = 0; i < num_of_objs; i++)
-                    //{
-                    //    if (state[idx + i] > 0f)
-                    //       Debug.Log($"Ray({parent.Nickname})(angle={angle}): state[{i}]={state[idx + i]}");
-                    //}
                 }
-                //Debug.Log($"idx={idx}, angle = {angle}");
             }
 
             return state;
@@ -60,68 +47,64 @@ namespace Sensors
                     TransformPlanetANN(ray, state, idx, parent);
                     break;
                 case "Earth":
-                    TransformPlanetANN(ray, state, idx + 6, parent);
+                    TransformPlanetANN(ray, state, idx + 3, parent);
                     break;
                 case "Mars":
-                    TransformPlanetANN(ray, state, idx + 12, parent);
+                    TransformPlanetANN(ray, state, idx + 6, parent);
                     break;
                 case "Jupiter":
-                    TransformPlanetANN(ray, state, idx + 18, parent);
+                    TransformPlanetANN(ray, state, idx + 9, parent);
                     break;
                 case "Space":
-                    TransformDistance(ray, state, idx + 24);
+                    state[idx + 12] = 1.0f - (ray.distance / max_distance);
                     break;
                 case "Nebula-Red":
-                    TransformDistance(ray, state, idx + 26);
+                    state[idx + 13] = 1.0f - (ray.distance / max_distance);
                     break;
                 case "Nebula-Blue":
-                    TransformDistance(ray, state, idx + 28);
+                    state[idx + 14] = 1.0f - (ray.distance / max_distance);
                     break;
                 case "Nebula-Silver":
-                    TransformDistance(ray, state, idx + 30);
+                    state[idx + 15] = 1.0f - (ray.distance / max_distance);
                     break;
                 case "Asteroid":
-                    TransformDistance(ray, state, idx + 32);
+                    state[idx + 16] = 1.0f - (ray.distance / max_distance);
                     break;
                 case "Sun":
-                    TransformDistance(ray, state, idx + 34);
+                    state[idx + 17] = 1.0f - (ray.distance / max_distance);
                     break;                
                 case "Ammo":
-                    // Ak lod potrebuje palivo
-                    if (parent.Ammo > (ShipController.maxAmmo-10))
-                        TransformDistance(ray, state, idx + 36);
-                    else if (parent.Ammo > (ShipController.maxAmmo/2f))
-                        TransformDistance(ray, state, idx + 38);
+                    // Ak lod potrebuje municiu
+                    if (parent.Ammo >= ShipController.maxAmmo)
+                        state[idx + 18] = 1.0f - (ray.distance / max_distance);
                     else
-                        TransformDistance(ray, state, idx + 40);
+                        state[idx + 19] = 1.0f - (ray.distance / max_distance);
                     break;                
                 case "Health":
                     // Ak lod potrebuje palivo
-                    if (parent.Health > (ShipController.maxHealth-1))                
-                        TransformDistance(ray, state, idx + 42);
-                    else if (parent.Health > (ShipController.maxHealth/2f))                
-                        TransformDistance(ray, state, idx + 44);
+                    if (parent.Health >= ShipController.maxHealth)                
+                        state[idx + 20] = 1.0f - (ray.distance / max_distance);
                     else
-                        TransformDistance(ray, state, idx + 46);
-                    break;                
+                        state[idx + 21] = 1.0f - (ray.distance / max_distance);
+                break;                
                 case "Moon":
-                    TransformDistance(ray, state, idx + 48);
+                    state[idx + 22] = 1.0f - (ray.distance / max_distance);
                     break;                
                 case "Fobos":
-                    TransformDistance(ray, state, idx + 50);
+                    state[idx + 23] = 1.0f - (ray.distance / max_distance);
                     break;       
                 case "Projectile":
                     var projectile = ray.collider.GetComponent<Projectile>();
                     if (projectile.firingShip == parent)
-                        TransformDistance(ray, state, idx + 52);
+                        state[idx + 24] = 1.0f - (ray.distance / max_distance);
                     else
-                        TransformDistance(ray, state, idx + 54);
-                    break;
+                        state[idx + 25] = 1.0f - (ray.distance / max_distance);
+                break;
                 case "Ship-Destroyer":
-                    TransformDistance(ray, state, idx + 56);
+                    state[idx + 26] = 1.0f - (ray.distance / max_distance);
                     break;
                 default:
-                    Debug.Log($"ray.name = {ray.collider.name}, ray.fraction = {ray.fraction}");
+                    Debug.Log($"ray.name = {ray.collider.name}, distance = {1.0f - (ray.distance / max_distance)}");
                     break;
             }
         } 
@@ -131,36 +114,11 @@ namespace Sensors
             var planet = ray.collider.GetComponent<PlanetController>();
             // Ak planeta nema vlastnika oznaci sa ako volna planeta
             if (planet.OwnerPlanet == null)
-                TransformDistance(ray, state, idx);
+                state[idx] = 1.0f - (ray.distance / max_distance);
             else if (planet.OwnerPlanet == parent.gameObject)
-                TransformDistance(ray, state, idx + 2);
+                state[idx + 1] = 1.0f - (ray.distance / max_distance);
             else
-                TransformDistance(ray, state, idx + 4);
+                state[idx + 2] = 1.0f - (ray.distance / max_distance);
         }    
-
-        private static void TransformDistance(RaycastHit2D ray, float[] state, int idx)
-        {
-            // blizka prekazka
-            if (ray.distance <= close_range)
-            {
-                state[idx] = 1.0f;
-                state[idx + 1] = 1.0f;
-                //Debug.Log("Round1");
-            }
-            // stredne vzdialena prekazka
-            else if (ray.distance <= middle_range)
-            {
-                state[idx] = 0.0f;
-                state[idx + 1] = 1.0f;
-                //Debug.Log("Round2");
-            }
-            // vzdialena prekazka
-            else
-            {
-                state[idx] = 1.0f;
-                state[idx + 1] = 0.0f;                
-                //Debug.Log("Round3");
-            }
-        }
     }
 }

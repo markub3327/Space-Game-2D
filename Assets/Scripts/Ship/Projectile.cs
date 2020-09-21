@@ -36,6 +36,7 @@ public class Projectile : MonoBehaviour
                 player.PlaySound(player.hitClip);
                 // Znizi zivoty hracovi
                 player.ChangeHealth(-0.50f);
+                player.reward = -0.20f;
                 // Pripise si zasah lode
                 this.firingShip.Hits += 1;                
             }

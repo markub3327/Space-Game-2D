@@ -8,7 +8,7 @@ public class TurretController : MonoBehaviour
 
     private ShipController controller;
 
-    private float speed = 30.0f;
+    private float speed = 25.0f;
 
     public void Start()
     {

@@ -101,22 +101,7 @@ public class ShipController : MonoBehaviour
     public Vector2 respawnPoint { get; set; }
     public bool IsRespawned { get; set; } = true;
 
-    // Skore v hre
-    public float score_old { get; set; }
-    public float Score 
-    {
-        get {
-            float mean;
-
-            // Vypocitaj skore hraca
-            mean  = (this.Health / (float)ShipController.maxHealth)   * 0.04f;  //  4% pre zivoty
-            mean += (this.Ammo / (float)ShipController.maxAmmo)       * 0.01f;  //  1% pre municiu
-            mean += (this.Hits / (float)(ShipController.maxHealth*2)) * 0.05f;  //  5% pre uspesnu strelbu
-            mean += (this.myPlanets.Count * this.myPlanets.Count)     * 0.90f;  // 90% pre uspesny zber planet 
-
-            return mean;
-        }
-    }
+    public float reward { get; set; } = 0;
 
     public string Nickname;
 
@@ -136,7 +121,7 @@ public class ShipController : MonoBehaviour
             motor.Play();                    
         }
 
-        this.score_old = this.Score;
+        //this.score_old = this.Score;
     }
 
     /// <summary>
@@ -166,7 +151,7 @@ public class ShipController : MonoBehaviour
             if (!audioSource.isPlaying)
                 PlaySound(engineClip);
 
-            ChangeFuel(-0.008f);
+            ChangeFuel(-0.015f);
         }        
     }
 
@@ -186,7 +171,7 @@ public class ShipController : MonoBehaviour
         }
         this.myPlanets.Clear();
         this.Hits = 0;
-        this.score_old = this.Score;
+        //this.score_old = this.Score;
 
         animator.SetBool("Respawn", false);
         animator.SetBool("Destroyed", true);
@@ -208,7 +193,7 @@ public class ShipController : MonoBehaviour
         }
         this.myPlanets.Clear();
         this.Hits = 0;
-        this.score_old = this.Score;
+        //this.score_old = this.Score;
 
         animator.SetBool("Respawn", false);
         animator.SetBool("Winner", true);

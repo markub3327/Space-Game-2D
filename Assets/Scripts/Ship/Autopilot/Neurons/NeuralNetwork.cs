@@ -1,65 +1,53 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 public class NeuralNetwork
 {
-    public string Name;
     public List<NeuralLayer> neuronLayers { get; private set; }
 
-    public NeuralNetwork(string name=default(string))
+    public NeuralNetwork()
     {
         this.neuronLayers = new List<NeuralLayer>();
-        this.Name = name;
     }
 
-    public void CreateLayer(NeuronLayerType type)
+    public void addLayer(int units, NeuronLayerType type, int? num_of_inputs=null, NeuralLayer edge=null)
     {
-        this.neuronLayers.Add(new NeuralLayer(type));
+        this.neuronLayers.Add(new NeuralLayer(units, num_of_inputs, edge, type));
     }
     
-    public void SetBPGEdge(NeuralLayer layer, NeuralLayer BPG_egdes)
+    public void setBPGEdge(NeuralLayer layer, NeuralLayer edge)
     {
-        layer.BPG_egdes = BPG_egdes;
+        layer.BPG_egde = edge;
     }
 
-    public void SetEdge(NeuralLayer layer, NeuralLayer edge)
+    public float[] predict(float[] input)
     {
-        layer.Edges = edge;
-    }
+        neuronLayers[0].predict(input);
 
-    public void Run(float[] externalInput)
-    {
-        for (int i = 0; i < neuronLayers.Count; i++)
+        for (int i = 1; i < neuronLayers.Count; i++)
         {
-            if (neuronLayers[i].type == NeuronLayerType.INPUT)
-            {
-                neuronLayers[i].Run(externalInput);
-            }
-            else
-            {
-                neuronLayers[i].Run();
-            }
+            neuronLayers[i].predict();
         }
+
+        float[] output = new float[neuronLayers[neuronLayers.Count - 1].neurons.Length];
+        for (int n = 0; n < output.Length; n++)
+        {
+            output[n] = neuronLayers[neuronLayers.Count - 1].neurons[n].output;
+        }
+
+        return output;
     }
 
-    public void Training(float[] externalInput, int idx, float target)// float[] feedBack)
+    public void update(float[] input, float[] y)
     {
-        for (int i = neuronLayers.Count - 1; i >= 0; i--)
+        neuronLayers[neuronLayers.Count - 1].update(y: y);
+
+        for (int i = neuronLayers.Count - 2; i >= 1; i--)
         {
-            if (neuronLayers[i].type == NeuronLayerType.INPUT)
-            {
-                neuronLayers[i].RunTraining(externalInput);
-            }
-            else if (neuronLayers[i].type == NeuronLayerType.OUTPUT)
-            {
-                neuronLayers[i].RunTraining(target, idx);
-            }
-            else
-            {
-                neuronLayers[i].RunTraining();
-            }
+            neuronLayers[i].update();
         }
+
+        neuronLayers[0].update(input: input);
     }
 
     public override string ToString()
@@ -68,9 +56,9 @@ public class NeuralNetwork
 
         for (int i = 0; i < this.neuronLayers.Count; i++)
         {
-            for (int j = 0; j < this.neuronLayers[i].Weights.Count; j++)
+            for (int j = 0; j < this.neuronLayers[i].neurons.Length; j++)
             {
-                weights.Add(this.neuronLayers[i].Weights[j]);
+                weights.AddRange(this.neuronLayers[i].neurons[j].weights);
             }            
         }
 
