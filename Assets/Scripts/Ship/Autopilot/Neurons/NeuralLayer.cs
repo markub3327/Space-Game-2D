@@ -22,15 +22,16 @@ public class NeuralLayer
         {
             for (int i = 0; i < units; i++)
             {
-                this.neurons[i] = new Neuron(num_of_inputs.Value, units, new ReLU());
+                this.neurons[i] = new Neuron(num_of_inputs.Value, units, new Swish());
             }
         }
         else if (type == NeuronLayerType.HIDDEN)
         {
             for (int i = 0; i < units; i++)
             {
-                this.neurons[i] = new Neuron(this.edge.neurons.Length, units, new ReLU());
+                this.neurons[i] = new Neuron(this.edge.neurons.Length, units, new Swish());
             }
+            this.edge.BPG_egde = this;
         }
         else if (type == NeuronLayerType.OUTPUT)
         {
@@ -38,49 +39,7 @@ public class NeuralLayer
             {
                 this.neurons[i] = new Neuron(this.edge.neurons.Length, units, new Linear());
             }
-        }
-    }
-
-    public void predict(float[] input=null)
-    {
-        if (this.edge != null)
-        {
-            foreach (var n in this.neurons)
-            {
-                n.predict(this.edge);
-            } 
-        }
-        else
-        {
-            foreach (var n in this.neurons)
-            {
-                n.predict(input);
-            } 
-        }
-    }
-
-    public void update(float[] input=null, float[] y=null)
-    {
-        if (type == NeuronLayerType.INPUT)
-        {
-            for (int m = 0; m < this.neurons.Length; m++)
-            {
-                this.neurons[m].update(input, this.BPG_egde, m);
-            } 
-        }
-        else if (type == NeuronLayerType.OUTPUT)
-        {
-            for (int m = 0; m < this.neurons.Length; m++)
-            {
-                this.neurons[m].update(this.edge, y[m]);
-            }
-        }
-        else
-        {
-            for (int m = 0; m < this.neurons.Length; m++)
-            {
-                this.neurons[m].update(this.edge, this.BPG_egde, m);
-            }
+            this.edge.BPG_egde = this;
         }
     }
 }

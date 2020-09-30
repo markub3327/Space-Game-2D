@@ -129,7 +129,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.2266667, y: 3.16}
+    oldSize: {x: 1.67, y: 2.37}
     newSize: {x: 8.64, y: 3.2}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -137,53 +137,53 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.0988024, y: -0.6377246}
-      - {x: -0.053892218, y: -0.5928144}
-      - {x: -0.06287426, y: -0.497006}
-      - {x: 0.08383234, y: -0.6197605}
-      - {x: 0.14371258, y: -0.6437126}
-      - {x: 0.2724551, y: -0.6407186}
-      - {x: 0.3203593, y: -0.6197605}
-      - {x: 0.3443114, y: -0.5898204}
-      - {x: 0.35329342, y: -0.66167665}
-      - {x: 0.38622755, y: -0.6826348}
-      - {x: 0.41317368, y: -0.6826348}
-      - {x: 0.44011977, y: -0.6736527}
-      - {x: 0.4700599, y: -0.6377246}
-      - {x: 0.4700599, y: -0.5868264}
-      - {x: 0.46407187, y: -0.36526948}
-      - {x: 0.45808384, y: -0.28143713}
-      - {x: 0.46107787, y: -0.032934133}
-      - {x: 0.3952096, y: 0.038922157}
-      - {x: 0.41017964, y: 0.08083832}
-      - {x: 0.41017964, y: 0.30838326}
-      - {x: 0.35029942, y: 0.38622755}
-      - {x: 0.33532935, y: 0.5778443}
-      - {x: 0.32934132, y: 0.5838324}
-      - {x: 0.3203593, y: 0.5808383}
-      - {x: 0.30239522, y: 0.45508984}
-      - {x: 0.08383234, y: 0.66167665}
-      - {x: -0.08383234, y: 0.66167665}
-      - {x: -0.11077845, y: 0.5838324}
-      - {x: -0.16467066, y: 0.5838324}
-      - {x: -0.29940122, y: 0.4491018}
-      - {x: -0.3203593, y: 0.5778443}
-      - {x: -0.32634732, y: 0.5838324}
-      - {x: -0.33532935, y: 0.5808383}
-      - {x: -0.3443114, y: 0.3952096}
-      - {x: -0.41017964, y: 0.30838326}
-      - {x: -0.41017964, y: 0.08083832}
-      - {x: -0.4011976, y: 0.038922157}
-      - {x: -0.45808384, y: -0.032934133}
-      - {x: -0.4491018, y: -0.35029942}
-      - {x: -0.46407187, y: -0.36526948}
-      - {x: -0.4700599, y: -0.46407187}
-      - {x: -0.4700599, y: -0.6467066}
-      - {x: -0.42814374, y: -0.6826348}
-      - {x: -0.38922158, y: -0.6826348}
-      - {x: -0.35329342, y: -0.66167665}
-      - {x: -0.3203593, y: -0.6197605}
-      - {x: -0.23652695, y: -0.6467066}
+    - - {x: -0.16499999, y: -1.0649999}
+      - {x: -0.089999996, y: -0.98999995}
+      - {x: -0.105, y: -0.83}
+      - {x: 0.14, y: -1.035}
+      - {x: 0.24, y: -1.0749999}
+      - {x: 0.45499998, y: -1.0699999}
+      - {x: 0.53499997, y: -1.035}
+      - {x: 0.575, y: -0.98499995}
+      - {x: 0.59, y: -1.105}
+      - {x: 0.645, y: -1.14}
+      - {x: 0.69, y: -1.14}
+      - {x: 0.73499995, y: -1.125}
+      - {x: 0.78499997, y: -1.0649999}
+      - {x: 0.78499997, y: -0.97999996}
+      - {x: 0.775, y: -0.61}
+      - {x: 0.765, y: -0.47}
+      - {x: 0.77, y: -0.055}
+      - {x: 0.65999997, y: 0.065}
+      - {x: 0.685, y: 0.13499999}
+      - {x: 0.685, y: 0.515}
+      - {x: 0.585, y: 0.645}
+      - {x: 0.56, y: 0.965}
+      - {x: 0.55, y: 0.97499996}
+      - {x: 0.53499997, y: 0.96999997}
+      - {x: 0.505, y: 0.76}
+      - {x: 0.14, y: 1.105}
+      - {x: -0.14, y: 1.105}
+      - {x: -0.185, y: 0.97499996}
+      - {x: -0.275, y: 0.97499996}
+      - {x: -0.5, y: 0.75}
+      - {x: -0.53499997, y: 0.965}
+      - {x: -0.545, y: 0.97499996}
+      - {x: -0.56, y: 0.96999997}
+      - {x: -0.575, y: 0.65999997}
+      - {x: -0.685, y: 0.515}
+      - {x: -0.685, y: 0.13499999}
+      - {x: -0.66999996, y: 0.065}
+      - {x: -0.765, y: -0.055}
+      - {x: -0.75, y: -0.585}
+      - {x: -0.775, y: -0.61}
+      - {x: -0.78499997, y: -0.775}
+      - {x: -0.78499997, y: -1.0799999}
+      - {x: -0.715, y: -1.14}
+      - {x: -0.65, y: -1.14}
+      - {x: -0.59, y: -1.105}
+      - {x: -0.53499997, y: -1.035}
+      - {x: -0.39499998, y: -1.0799999}
 --- !u!82 &1038945012877477378
 AudioSource:
   m_ObjectHideFlags: 0
@@ -315,22 +315,26 @@ MonoBehaviour:
   - {fileID: 5495537060841826277}
   - {fileID: 2728702685953351279}
   engineClip: {fileID: 8300000, guid: 13b966499bd964912a24e90a8a5d1bc6, type: 3}
-  maxSpeed: 10
-  maxTorque: 100
+  maxSpeed: 15
+  maxTorque: 150
   healthBar: {fileID: 8313577754348573267}
   ammoBar: {fileID: 2637749432310433811}
   fuelBar: {fileID: 120408872112281115}
   collectibleClip: {fileID: 8300000, guid: af5f8b64e3f58f24c87ff8f789b04f6c, type: 3}
-  damageClip: {fileID: 8300000, guid: 9b1bb1f450b7d444fa4a8019d13519a7, type: 3}
-  hitClip: {fileID: 8300000, guid: ae904c7305df7344d86b2092c0cb3a26, type: 3}
+  damageClip: {fileID: 8300000, guid: ae904c7305df7344d86b2092c0cb3a26, type: 3}
+  hitClip: {fileID: 8300000, guid: 9b1bb1f450b7d444fa4a8019d13519a7, type: 3}
   throwClip: {fileID: 8300000, guid: b2edfd40873655249ba0e01a5cf705be, type: 3}
-  Nickname: 
-  testMode: 0
+  score: 0
   nameBox: {fileID: 6886705795503848144}
   levelBox: {fileID: 7190794469098261108}
   turretControllers:
   - {fileID: 4813157408587100586}
   - {fileID: 3617979878420534391}
+  step: 0
+  Nickname: 
+  epLoss: 0
+  fitness: 0
+  testMode: 0
 --- !u!1 &9101201141709214759
 GameObject:
   m_ObjectHideFlags: 0
@@ -480,12 +484,12 @@ PrefabInstance:
     - target: {fileID: 463878527547867188, guid: 43cb658df815f4988afe1d2be2382dd4,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.2
+      value: 0.36
       objectReference: {fileID: 0}
     - target: {fileID: 463878527547867188, guid: 43cb658df815f4988afe1d2be2382dd4,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.75
+      value: -1.2
       objectReference: {fileID: 0}
     - target: {fileID: 463878527547867188, guid: 43cb658df815f4988afe1d2be2382dd4,
         type: 3}
@@ -537,6 +541,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Motor2
       objectReference: {fileID: 0}
+    - target: {fileID: 4038740904736320338, guid: 43cb658df815f4988afe1d2be2382dd4,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 43cb658df815f4988afe1d2be2382dd4, type: 3}
 --- !u!4 &2833944755652768951 stripped
@@ -561,12 +570,12 @@ PrefabInstance:
     - target: {fileID: 463878527547867188, guid: 43cb658df815f4988afe1d2be2382dd4,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.2
+      value: -0.36
       objectReference: {fileID: 0}
     - target: {fileID: 463878527547867188, guid: 43cb658df815f4988afe1d2be2382dd4,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.75
+      value: -1.2
       objectReference: {fileID: 0}
     - target: {fileID: 463878527547867188, guid: 43cb658df815f4988afe1d2be2382dd4,
         type: 3}
@@ -617,6 +626,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Motor1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4038740904736320338, guid: 43cb658df815f4988afe1d2be2382dd4,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 43cb658df815f4988afe1d2be2382dd4, type: 3}

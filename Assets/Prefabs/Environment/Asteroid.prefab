@@ -48,6 +48,8 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -59,6 +61,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -149,3 +152,10 @@ MonoBehaviour:
   starTransform: {fileID: 0}
   explosionAnim: {fileID: 2236869965556612302, guid: a46f1b74d539148bc8e80adc59f89978,
     type: 3}
+  sprites:
+  - {fileID: 21300000, guid: 06d504f65681f406d85536be14e93abd, type: 3}
+  - {fileID: 21300000, guid: 190ec9e7534b24e1ca942ecdbbc0dab7, type: 3}
+  - {fileID: 21300000, guid: 3dc2602a675af4856a7ef7f6fa756e5c, type: 3}
+  - {fileID: 21300000, guid: 1477f483a7d5747389b74f6fb55ce78b, type: 3}
+  - {fileID: 21300000, guid: 2c1941f1d395247c9bacda524b5a17ad, type: 3}
+  - {fileID: 21300000, guid: 1090be5cb77214ac69dc739b4d07a60a, type: 3}

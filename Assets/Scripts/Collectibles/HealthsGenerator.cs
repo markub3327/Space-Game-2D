@@ -25,7 +25,6 @@ public class HealthsGenerator : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        // Pocet srdiecok v hre (musia chybat 2 zivoty)
         if (freePoints.Count > 0)
         {
             Timer -= Time.deltaTime;

@@ -4,9 +4,8 @@ namespace Sensors
 {
     public static class Radar
     {
-        public const float max_distance = 10.0f;
         public const int num_of_rays = 16;
-        public const int num_of_objs = 27;
+        public const int num_of_objs = 25;
 
         // Radar okolo lode
         public static float[] Scan(Vector2 origin, Vector2 lookDirection, ShipController parent)
@@ -15,11 +14,11 @@ namespace Sensors
             float angle;
             int idx;
 
-            // Vysli luce pod uhlami po 22.5 stupnoch (16 skenov)
+            // Vysli luce pod uhlami po 22.5 stupnoch
             for (idx = 0, angle = 0f; angle < 360; angle += 22.5f, idx+=num_of_objs)
             {
                 //Debug.DrawRay(origin, lookDirection.Shift(angle), Color.magenta);
-                var ray = Physics2D.RaycastAll(origin, lookDirection.Shift(angle), max_distance);
+                var ray = Physics2D.RaycastAll(origin, lookDirection.Shift(angle), 20.0f);
                 
                 if (ray.Length > 0)
                 {
@@ -56,55 +55,47 @@ namespace Sensors
                     TransformPlanetANN(ray, state, idx + 9, parent);
                     break;
                 case "Space":
-                    state[idx + 12] = 1.0f - (ray.distance / max_distance);
+                    state[idx + 12] = ray.fraction;
                     break;
                 case "Nebula-Red":
-                    state[idx + 13] = 1.0f - (ray.distance / max_distance);
+                    state[idx + 13] = ray.fraction;
                     break;
                 case "Nebula-Blue":
-                    state[idx + 14] = 1.0f - (ray.distance / max_distance);
+                    state[idx + 14] = ray.fraction;
                     break;
                 case "Nebula-Silver":
-                    state[idx + 15] = 1.0f - (ray.distance / max_distance);
+                    state[idx + 15] = ray.fraction;
                     break;
                 case "Asteroid":
-                    state[idx + 16] = 1.0f - (ray.distance / max_distance);
+                    state[idx + 16] = ray.fraction;
                     break;
                 case "Sun":
-                    state[idx + 17] = 1.0f - (ray.distance / max_distance);
+                    state[idx + 17] = ray.fraction;
                     break;                
                 case "Ammo":
-                    // Ak lod potrebuje municiu
-                    if (parent.Ammo >= ShipController.maxAmmo)
-                        state[idx + 18] = 1.0f - (ray.distance / max_distance);
-                    else
-                        state[idx + 19] = 1.0f - (ray.distance / max_distance);
+                    state[idx + 18] = ray.fraction;
                     break;                
                 case "Health":
-                    // Ak lod potrebuje palivo
-                    if (parent.Health >= ShipController.maxHealth)                
-                        state[idx + 20] = 1.0f - (ray.distance / max_distance);
-                    else
-                        state[idx + 21] = 1.0f - (ray.distance / max_distance);
-                break;                
+                    state[idx + 19] = ray.fraction;
+                    break;
                 case "Moon":
-                    state[idx + 22] = 1.0f - (ray.distance / max_distance);
+                    state[idx + 20] = ray.fraction;
                     break;                
                 case "Fobos":
-                    state[idx + 23] = 1.0f - (ray.distance / max_distance);
+                    state[idx + 21] = ray.fraction;
                     break;       
                 case "Projectile":
                     var projectile = ray.collider.GetComponent<Projectile>();
                     if (projectile.firingShip == parent)
-                        state[idx + 24] = 1.0f - (ray.distance / max_distance);
+                        state[idx + 22] = ray.fraction;
                     else
-                        state[idx + 25] = 1.0f - (ray.distance / max_distance);
-                break;
+                        state[idx + 23] = ray.fraction;
+                    break;
                 case "Ship-Destroyer":
-                    state[idx + 26] = 1.0f - (ray.distance / max_distance);
+                    state[idx + 24] = ray.fraction;
                     break;
                 default:
-                    Debug.Log($"ray.name = {ray.collider.name}, distance = {1.0f - (ray.distance / max_distance)}");
+                    Debug.Log($"ray.name = {ray.collider.name}, distance = {ray.distance}, fraction = {ray.fraction}");
                     break;
             }
         } 
@@ -114,11 +105,11 @@ namespace Sensors
             var planet = ray.collider.GetComponent<PlanetController>();
             // Ak planeta nema vlastnika oznaci sa ako volna planeta
             if (planet.OwnerPlanet == null)
-                state[idx] = 1.0f - (ray.distance / max_distance);
+                state[idx] = ray.fraction;
             else if (planet.OwnerPlanet == parent.gameObject)
-                state[idx + 1] = 1.0f - (ray.distance / max_distance);
+                state[idx + 1] = ray.fraction;
             else
-                state[idx + 2] = 1.0f - (ray.distance / max_distance);
+                state[idx + 2] = ray.fraction;
         }    
     }
 }

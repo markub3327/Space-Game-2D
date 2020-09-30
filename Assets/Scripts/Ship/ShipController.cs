@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.UI;
 
 public class ShipController : MonoBehaviour
 {
     // Engine systems
     public ParticleSystem[] Motors;             // animacia plamenov motora
     public AudioClip engineClip;                // zvukovy klip motorov
-    public float maxSpeed = 10.0f;               // max rychlost lode
-    public float maxTorque = 100.0f;            // max rychlost rotacie lode
+    public const float maxSpeed = 10.0f;              // max rychlost lode
+    public const float maxTorque = 100.0f;            // max rychlost rotacie lode
     public Vector2 LookDirection { get; private set; }  = Vector2.up; // Smer predu lode
 
     // Player's health
@@ -33,7 +34,7 @@ public class ShipController : MonoBehaviour
 
     // Player's ammo
     public UIBarControl ammoBar;
-    public const int maxAmmo = 100;               // maximalny pocet nabojov hraca
+    public const int maxAmmo = 30;               // maximalny pocet nabojov hraca
     private float _ammo = maxAmmo;
     public float Ammo {
         get
@@ -53,7 +54,7 @@ public class ShipController : MonoBehaviour
 
     // Player's fuel
     public UIBarControl fuelBar;
-    public const int maxFuel = 10;                // maximalny pocet paliva v nadrzi hraca
+    public const int maxFuel = 5;                // maximalny pocet paliva v nadrzi hraca
     private float _fuel = maxFuel;
     public float Fuel {
         get
@@ -72,10 +73,8 @@ public class ShipController : MonoBehaviour
     }
 
     // Zoznam planet, ktore vlastni lod
-    public List<PlanetController> myPlanets { get; set; } = new List<PlanetController>();
-    
-    // Pocet zasahov ostatnych lodi
-    public float Hits { get; set; } = 0;
+    protected List<PlanetController> myPlanets { get; set; } = new List<PlanetController>();
+    public int pocet_planet = 0;
 
     // Respawn
     public bool IsDestroyed { get; protected set; } = false;  // stav lode, je lod znicena?
@@ -100,9 +99,17 @@ public class ShipController : MonoBehaviour
 
     public Vector2 respawnPoint { get; set; }
     public bool IsRespawned { get; set; } = true;
+    public float score = 0;
+    protected float reward;
 
-    public float reward { get; set; } = 0;
+    // Lod
+    public Text nameBox;
+    public Text levelBox;
+    public TurretController[] turretControllers;
 
+    // Premenne herneho prostredia
+    public int episode { get; protected set; } = 0;
+    public int step = 0;
     public string Nickname;
 
     // Start is called before the first frame update
@@ -121,7 +128,9 @@ public class ShipController : MonoBehaviour
             motor.Play();                    
         }
 
-        //this.score_old = this.Score;
+        // Init Player info panel
+        this.nameBox.text = this.Nickname;
+        this.levelBox.text = "0";
     }
 
     /// <summary>
@@ -146,16 +155,16 @@ public class ShipController : MonoBehaviour
             // Zmen pohyb a rotaciu lode
             rigidbody2d.rotation = rotation;
             rigidbody2d.MovePosition(position);
-            
+
             // Prehraj zvuk motora ak lod nehra
             if (!audioSource.isPlaying)
                 PlaySound(engineClip);
 
-            ChangeFuel(-0.015f);
+            ChangeFuel(-Time.deltaTime * 0.25f);
         }        
     }
 
-    public void DestroyShip()
+    protected void DestroyShip()
     {
         IsDestroyed = true;
         collider2d.enabled = false;
@@ -170,14 +179,13 @@ public class ShipController : MonoBehaviour
             p.OwnerPlanet = null;
         }
         this.myPlanets.Clear();
-        this.Hits = 0;
         //this.score_old = this.Score;
 
         animator.SetBool("Respawn", false);
         animator.SetBool("Destroyed", true);
     }
 
-    public void WinnerShip()
+    protected void WinnerShip()
     {
         IsDestroyed = true;
         collider2d.enabled = false;
@@ -192,7 +200,6 @@ public class ShipController : MonoBehaviour
             p.OwnerPlanet = null;
         }
         this.myPlanets.Clear();
-        this.Hits = 0;
         //this.score_old = this.Score;
 
         animator.SetBool("Respawn", false);
@@ -205,6 +212,7 @@ public class ShipController : MonoBehaviour
         IsDestroyed = false;
         collider2d.enabled = true;
         IsRespawned = true;
+        this.score = 0;
 
         animator.SetBool("Winner", false);
         animator.SetBool("Destroyed", false);
@@ -215,7 +223,7 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav municie hraca
     /// </summary>
     /// <param name="amount">Mnozstvo municie, ktore sa pripocita k sucasnemu stavu municie</param>
-    public void ChangeAmmo(float amount)
+    protected void ChangeAmmo(float amount)
     {
         if (!IsDestroyed)
         {
@@ -227,7 +235,7 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav municie hraca
     /// </summary>
     /// <param name="amount">Mnozstvo municie, ktore sa pripocita k sucasnemu stavu municie</param>
-    public void ChangeFuel(float amount)
+    protected void ChangeFuel(float amount)
     {
         if (!IsDestroyed)
         {
@@ -239,7 +247,7 @@ public class ShipController : MonoBehaviour
     /// Zmeni stav zivota hraca
     /// </summary>
     /// <param name="amount">Mnozstvo zivota, ktore sa pripocita k sucasnemu stavu zivota</param>
-    public void ChangeHealth(float amount)
+    protected void ChangeHealth(float amount)
     {
         if (!IsDestroyed)
         {
@@ -251,11 +259,152 @@ public class ShipController : MonoBehaviour
     /// Prehra zvukovy klip
     /// </summary>
     /// <param name="clip">Zvukovy klip</param>
-    public void PlaySound(AudioClip clip)
+    protected void PlaySound(AudioClip clip)
     {
         if (!IsDestroyed)
         {
             audioSource.PlayOneShot(clip);
+        }
+    }
+
+    protected void Fire()
+    {
+        if (this.Ammo > 0)
+        {       
+            // Prehra zvuk vystrelu
+            this.PlaySound(throwClip);
+                     
+            foreach (var turret in this.turretControllers)
+            {
+                // Vystrel
+                turret.Fire();
+                // Uber z municie hraca jeden naboj
+                this.ChangeAmmo(-1.0f);
+                // Ak uz hrac nema municiu nemoze pokracovat v strelbe
+                if (this.Ammo <= 0)
+                    break;
+            }
+        }
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        // Podla oznacenia herneho objektu vykonaj akciu kolizie
+        switch (collision.gameObject.tag)
+        {
+            case "Star":
+                // Uberie sa hracovi zivot
+                this.ChangeHealth(-1.0f);
+                this.reward = -0.75f;
+                // Prahra clip poskodenia lode
+                this.PlaySound(damageClip);
+                break;
+
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Podla oznacenia herneho objektu vykonaj akciu kolizie
+        switch (collision.gameObject.tag)
+        {
+            case "Star":
+                // Uberie sa hracovi zivot
+                this.ChangeHealth(-1.0f);
+                this.reward = -0.75f;
+                // Prahra clip poskodenia lode
+                this.PlaySound(damageClip);
+                break;
+            case "Ammo":
+                if (this.Ammo < ShipController.maxAmmo)
+                {
+                    // Pridaj municiu hracovi
+                    this.ChangeAmmo(+10.00f);
+                    this.reward = 0.10f;
+                    // Prehraj klip
+                    this.PlaySound(collectibleClip);
+                }
+                Destroy(collision.gameObject);
+                break;
+            case "Health":
+                if (this.Health < ShipController.maxHealth)
+                {
+                    // Pridaj zivot hracovi
+                    this.ChangeHealth(+1.0f);
+                    this.reward = 0.10f;
+                    // Prehraj klip
+                    this.PlaySound(collectibleClip);
+                }
+                Destroy(collision.gameObject);
+                break;
+            case "Nebula":
+                if (this.Fuel < ShipController.maxFuel)
+                {
+                    // Pridaj zivot hracovi
+                    this.ChangeFuel(+ShipController.maxFuel);
+                    this.reward = 0.10f;
+                    // Prehraj klip
+                    this.PlaySound(collectibleClip);
+                }
+                collision.gameObject.SetActive(false);
+                break;
+            case "Asteroid":
+                // Uberie sa hracovi zivot
+                this.ChangeHealth(-1.0f);      
+                this.reward = -0.10f;
+                // Prahra clip poskodenia lode
+                this.PlaySound(damageClip);
+                break;
+            case "Planet":
+                {
+                    var planet = collision.gameObject.GetComponent<PlanetController>();
+                    if (planet.OwnerPlanet == null)
+                    {
+                        planet.OwnerPlanet = this.gameObject;
+                        this.myPlanets.Add(planet);
+                        this.reward = 1.0f;
+
+                        planet.dialogBox.Clear();
+                        planet.dialogBox.WriteLine($"Planet: {planet.name}");
+                        planet.dialogBox.WriteLine($"Owner: {this.Nickname}");
+                    }
+                }
+                break;
+            case "Player":
+                // Uberie sa hracovi zivot
+                this.ChangeHealth(-1.0f);
+                this.reward = -0.10f;
+                // Prahra clip poskodenia lode
+                this.PlaySound(damageClip);
+                break;
+            case "Space":
+                this.reward = -1.0f;
+                break;
+            //default:
+                //Debug.Log($"collision_tag: {collision.gameObject.tag}");
+                //break;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        // Podla oznacenia herneho objektu vykonaj akciu kolizie
+        switch (collider.gameObject.tag)
+        {
+            case "Projectile":
+                var firingShip = collider.gameObject.GetComponent<Projectile>().firingShip.gameObject;
+                if (firingShip != this.gameObject)
+                {
+                    // Prehra zvuk zasahu projektilu
+                    this.PlaySound(this.hitClip);
+                    // Znizi zivoty hracovi
+                    this.ChangeHealth(-0.50f);
+                    this.reward = -0.10f;
+                }
+                break;
+            default:
+                Debug.Log($"collider_tag: {collider.gameObject.tag}");
+                break;
         }
     }
 }

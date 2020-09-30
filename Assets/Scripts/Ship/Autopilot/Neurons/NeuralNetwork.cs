@@ -15,39 +15,49 @@ public class NeuralNetwork
         this.neuronLayers.Add(new NeuralLayer(units, num_of_inputs, edge, type));
     }
     
-    public void setBPGEdge(NeuralLayer layer, NeuralLayer edge)
-    {
-        layer.BPG_egde = edge;
-    }
-
     public float[] predict(float[] input)
     {
-        neuronLayers[0].predict(input);
-
-        for (int i = 1; i < neuronLayers.Count; i++)
+        // feed-forward
+        for (int m = 0; m < this.neuronLayers[0].neurons.Length; m++)
         {
-            neuronLayers[i].predict();
+            this.neuronLayers[0].neurons[m].predict(input);
         }
 
-        float[] output = new float[neuronLayers[neuronLayers.Count - 1].neurons.Length];
-        for (int n = 0; n < output.Length; n++)
+        for (int l = 1; l < this.neuronLayers.Count-1; l++)
         {
-            output[n] = neuronLayers[neuronLayers.Count - 1].neurons[n].output;
+            for (int m = 0; m < this.neuronLayers[l].neurons.Length; m++)
+            {
+                this.neuronLayers[l].neurons[m].predict(this.neuronLayers[l].edge);
+            }
         }
 
-        return output;
+        var y = new float[this.neuronLayers[this.neuronLayers.Count-1].neurons.Length];
+        for (int m = 0; m < this.neuronLayers[this.neuronLayers.Count-1].neurons.Length; m++)
+        {
+            y[m] = this.neuronLayers[this.neuronLayers.Count-1].neurons[m].predict(this.neuronLayers[this.neuronLayers.Count-1].edge);   
+        }
+        return y;
     }
 
-    public void update(float[] input, float[] y)
+    public void train(float[] x, float[] y)
     {
-        neuronLayers[neuronLayers.Count - 1].update(y: y);
-
-        for (int i = neuronLayers.Count - 2; i >= 1; i--)
+        for (int m = 0; m < this.neuronLayers[this.neuronLayers.Count-1].neurons.Length; m++)
         {
-            neuronLayers[i].update();
+            this.neuronLayers[this.neuronLayers.Count-1].neurons[m].train(this.neuronLayers[this.neuronLayers.Count-1].edge, y[m]);
         }
 
-        neuronLayers[0].update(input: input);
+        for (int l = this.neuronLayers.Count-2; l >= 1; l--)
+        {
+            for (int m = 0; m < this.neuronLayers[l].neurons.Length; m++)
+            {
+               this.neuronLayers[l].neurons[m].train(this.neuronLayers[l].edge, this.neuronLayers[l].BPG_egde, m);
+            }
+        }
+
+        for (int m = 0; m < this.neuronLayers[0].neurons.Length; m++)
+        {
+            this.neuronLayers[0].neurons[m].train(x, this.neuronLayers[0].BPG_egde, m);
+        }
     }
 
     public override string ToString()

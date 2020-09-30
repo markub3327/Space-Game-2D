@@ -8,7 +8,7 @@ public class Projectile : MonoBehaviour
 
     public Rigidbody2D rigidbody2d;
 
-    private float timer = 1.50f;
+    private float timer = 1f;
 
     // Update is called once per frame
     void Update()
@@ -28,19 +28,6 @@ public class Projectile : MonoBehaviour
     {
         if (collider.gameObject != firingShip.gameObject)
         {
-            //Debug.Log($"collider{this.firingShip.name}.name = {collider.gameObject.name}");
-            if (collider.gameObject.tag == "Player")
-            {
-                var player = collider.gameObject.GetComponent<ShipController>();
-                // Prehra zvuk zasahu projektilu
-                player.PlaySound(player.hitClip);
-                // Znizi zivoty hracovi
-                player.ChangeHealth(-0.50f);
-                player.reward = -0.20f;
-                // Pripise si zasah lode
-                this.firingShip.Hits += 1;                
-            }
-
             // Efekt vybuchu
             hitEffect.Play();
             // Znici strelu pri zrazke s objektom

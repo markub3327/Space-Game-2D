@@ -5,12 +5,12 @@ using System.Linq;
 
 public class RespawnPoints : MonoBehaviour
 {
-    public List<ShipController> ships;
+    private List<ShipController> ships;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        ships = new List<ShipController>(GetComponentsInChildren<ShipController>());
     }
 
     // Update is called once per frame

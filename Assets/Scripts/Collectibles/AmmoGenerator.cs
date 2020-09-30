@@ -16,16 +16,9 @@ public class AmmoGenerator : MonoBehaviour
     private const float maxTime = 10f;
     private float Timer = maxTime;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
     // Update is called once per frame
     private void Update()
     {
-        // Pocet srdiecok v hre (musia chybat 2 zivoty)
         if (freePoints.Count > 0)
         {
             Timer -= Time.deltaTime;

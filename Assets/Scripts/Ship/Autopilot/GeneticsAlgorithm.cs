@@ -6,14 +6,22 @@ using System.IO;
 
 public class GeneticsAlgorithm : MonoBehaviour
 {
-    public AgentDDQN bestAgent = null;
+    private AgentDDQN bestAgent = null;
 
-    public List<AgentDDQN> agents;
+    private List<AgentDDQN> agents;
+
+    public GameObject[] nebulas;
+    
+    private StreamWriter log_file;
+
 
     public void Start()
     {
         // Random seed
         UnityEngine.Random.InitState((int)System.DateTime.Now.Ticks); 
+
+        agents = new List<AgentDDQN>(GetComponentsInChildren<AgentDDQN>());
+        log_file = File.CreateText("bestAgent.log");
     }
 
     public void Update()
@@ -24,27 +32,39 @@ public class GeneticsAlgorithm : MonoBehaviour
             // Replace agents with agents list ordered by his fitness
             this.agents.Sort(new AgentsComparer());
             this.bestAgent = agents[0];
-            Debug.Log($"The best agent is {bestAgent.name}, fitness = {bestAgent.score}");
-            Debug.Log($"The worst agent is {agents[agents.Count-1].name}, fitness = {agents[agents.Count-1].score}");
+            Debug.Log($"The best agent is {bestAgent.Nickname}, fitness = {bestAgent.fitness}, score = {bestAgent.score}");
+            Debug.Log($"The worst agent is {agents[agents.Count-1].Nickname}, fitness = {agents[agents.Count-1].fitness}, score = {agents[agents.Count-1].score}");
 
             if (agents[0].episode >= 1000) 
-            {   
-            
-                   #if UNITY_EDITOR
-                        UnityEditor.EditorApplication.isPlaying = false;
-                    #else
-                        Application.Quit();
-                    #endif
+            {
+                #if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;
+                #else
+                    Application.Quit();
+                #endif
             }
 
             // Krizenie
             this.Crossover();
 
+            // log bestAgent to file
+            this.log_file.WriteLine($"{this.bestAgent.episode};{this.bestAgent.step};{this.bestAgent.score};{this.bestAgent.fitness};{this.bestAgent.epLoss};{ReplayBuffer.Count};{this.bestAgent.pocet_planet}");
+
             // obnova lodi - respawn
             foreach (var a in agents)
             {
-                a.score = 0.0f;
+                a.score = 0f;
+                a.step = 0;
+                a.epLoss = 0f;
+                a.pocet_planet = 0;
+
                 a.RespawnShip();
+            }
+
+            // obnov hmloviny
+            foreach (var n in this.nebulas)
+            {
+                n.SetActive(true);
             }
         }
     }
@@ -97,18 +117,10 @@ public class GeneticsAlgorithm : MonoBehaviour
         if (this.bestAgent != null)
         {
             File.WriteAllText(Application.dataPath + "/DDQN_Weights_QNet.save", bestAgent.QNet.ToString());
-            File.WriteAllText(Application.dataPath + "/DDQN_Weights_QTargetNet.save", bestAgent.QTargetNet.ToString());    
-
-            //using (var outf = new StreamWriter("DDQN_bestAgent_fitness.log"))
-            //{
-            //    for (int i = 0; i < fitnessList.Count; i++)
-            //    {
-            //        outf.WriteLine($"fitness={fitnessList[i]};error={errorList[i]}");
-            //    }
-            //}
-
             Debug.Log("DDQN saved!");
         }
+
+        log_file.Close();
     }
 }
 
