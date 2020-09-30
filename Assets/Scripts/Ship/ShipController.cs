@@ -73,8 +73,7 @@ public class ShipController : MonoBehaviour
     }
 
     // Zoznam planet, ktore vlastni lod
-    protected List<PlanetController> myPlanets { get; set; } = new List<PlanetController>();
-    public int pocet_planet = 0;
+    public List<PlanetController> myPlanets { get; protected set; } = new List<PlanetController>();
 
     // Respawn
     public bool IsDestroyed { get; protected set; } = false;  // stav lode, je lod znicena?
@@ -108,7 +107,7 @@ public class ShipController : MonoBehaviour
     public TurretController[] turretControllers;
 
     // Premenne herneho prostredia
-    public int episode { get; protected set; } = 0;
+    public int episode { get; set; } = 0;
     public int step = 0;
     public string Nickname;
 
@@ -169,17 +168,11 @@ public class ShipController : MonoBehaviour
         IsDestroyed = true;
         collider2d.enabled = false;
 
-        // obnov zivoty, palivo a municiu lode na maximum
-        this.Health = maxHealth;
-        this.Ammo = maxAmmo;
-        this.Fuel = maxFuel;
         // Znicena lod straca vlastnictvo u planety
         foreach (var p in this.myPlanets)
         {
             p.OwnerPlanet = null;
         }
-        this.myPlanets.Clear();
-        //this.score_old = this.Score;
 
         animator.SetBool("Respawn", false);
         animator.SetBool("Destroyed", true);
@@ -190,17 +183,11 @@ public class ShipController : MonoBehaviour
         IsDestroyed = true;
         collider2d.enabled = false;
 
-        // obnov zivoty, palivo a municiu lode na maximum
-        this.Health = maxHealth;
-        this.Ammo = maxAmmo;
-        this.Fuel = maxFuel;
         // Znicena lod straca vlastnictvo u planety
         foreach (var p in this.myPlanets)
         {
             p.OwnerPlanet = null;
         }
-        this.myPlanets.Clear();
-        //this.score_old = this.Score;
 
         animator.SetBool("Respawn", false);
         animator.SetBool("Winner", true);
@@ -208,11 +195,19 @@ public class ShipController : MonoBehaviour
 
     public void RespawnShip()
     {
+        // obnov zivoty, palivo a municiu lode na maximum
+        this.Health = maxHealth;
+        this.Ammo = maxAmmo;
+        this.Fuel = maxFuel;
+
         rigidbody2d.position = respawnPoint;  //Respawn.getPoint();
         IsDestroyed = false;
         collider2d.enabled = true;
         IsRespawned = true;
         this.score = 0;
+
+        // vycisti zoznam planet
+        this.myPlanets.Clear();
 
         animator.SetBool("Winner", false);
         animator.SetBool("Destroyed", false);
@@ -346,7 +341,7 @@ public class ShipController : MonoBehaviour
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }
-                collision.gameObject.SetActive(false);
+                collision.gameObject.GetComponent<NebulaController>().Delete();
                 break;
             case "Asteroid":
                 // Uberie sa hracovi zivot

@@ -29,7 +29,7 @@ public class AmmoGenerator : MonoBehaviour
                 obj.name = "Ammo";
 
                 // Vymaz pouzity bod z volnych (obsadeny)
-                freePoints.Remove(freePoints[idx]);
+                freePoints.RemoveAt(idx);
 
                 // Resetuj casovac
                 Timer = maxTime;

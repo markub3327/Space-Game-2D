@@ -4892,6 +4892,7 @@ GameObject:
   - component: {fileID: 8031307784296908189}
   - component: {fileID: 5812403647571584887}
   - component: {fileID: 4936642617126680544}
+  - component: {fileID: 6568861195960581060}
   m_Layer: 0
   m_Name: Nebula
   m_TagString: Nebula
@@ -5012,3 +5013,15 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &6568861195960581060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8674290839193575467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20277e3342e3e43709c251547e0673ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

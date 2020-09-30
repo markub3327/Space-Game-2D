@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
+using System.IO;
 
 public class PlayerControlledShip : ShipController
 {
+    public StreamWriter log_file;
+
     // Use this for initialization
     public override void Start()
     {
@@ -9,6 +12,8 @@ public class PlayerControlledShip : ShipController
         base.Start();
 
         this.reward = -0.001f;         // za pohyb lode        
+
+        log_file = File.CreateText("clovek.log");
     }
 
     public void Update()
@@ -37,22 +42,26 @@ public class PlayerControlledShip : ShipController
             // Ak uz hrac nema zivoty ani palivo znici sa lod
             if (this.Health <= 0 || this.Fuel <= 0)
             {
+                show_stat();
+
+                this.episode += 1;
+                this.score = 0f;
+                this.step = 0;
+
                 // Destrukcia lode
                 this.DestroyShip();
-                    
-                this.episode += 1;
-
-                show_stat();
             }
             // hrac obsadil vsetky planety
             else if (this.myPlanets.Count >= 4)
             {
-                Debug.Log("Vytaz!!!");
-                WinnerShip();
+                show_stat();
 
                 this.episode += 1;
+                this.score = 0f;
+                this.step = 0;
 
-                show_stat();
+                Debug.Log("Vytaz!!!");
+                WinnerShip();
             }
 
             this.reward = -0.001f;         // za pohyb lode
@@ -73,5 +82,13 @@ public class PlayerControlledShip : ShipController
         Debug.Log($"episode[{this.Nickname}]: {episode}");
         Debug.Log($"step[{this.Nickname}]: {step}");
         Debug.Log($"score[{this.Nickname}]: {score}");
+
+        // log bestAgent to file
+        this.log_file.WriteLine($"{this.episode};{this.step};{this.score};{this.myPlanets.Count};{this.Health};{this.Ammo};{this.Fuel}");
+    }
+
+    public void OnApplicationQuit()
+    {
+        log_file.Close();
     }
 }

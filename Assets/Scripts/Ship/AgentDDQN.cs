@@ -15,12 +15,11 @@ public class AgentDDQN : ShipController
     private ReplayBufferItem replayBufferItem = null;
     private const int BATCH_SIZE = 32; // size of minibatch
     public float epLoss = 0.0f;
-    public float fitness = 0.0f;
 
     // Epsilon
     private float epsilon = 1.0f;
     private const float epsilonMin = 0.01f;
-    private float epsilon_decay = 0.998f;
+    private float epsilon_decay = 0.995f;
 
     // Premenne herneho prostredia
     public bool testMode = false;
@@ -30,15 +29,58 @@ public class AgentDDQN : ShipController
         base.Start();
 
         // vytvor Q siet
-        QNet.addLayer(256, NeuronLayerType.INPUT, num_of_states);
-        QNet.addLayer(256, NeuronLayerType.HIDDEN, edge:QNet.neuronLayers[0]);
+        QNet.addLayer(128, NeuronLayerType.INPUT, num_of_states);
+        QNet.addLayer(128, NeuronLayerType.HIDDEN, edge:QNet.neuronLayers[0]);
         QNet.addLayer(num_of_actions, NeuronLayerType.OUTPUT, edge:QNet.neuronLayers[1]);
 
         // vytvor Q_target siet
-        QTargetNet.addLayer(256, NeuronLayerType.INPUT, num_of_states);
-        QTargetNet.addLayer(256, NeuronLayerType.HIDDEN, edge:QTargetNet.neuronLayers[0]);
+        QTargetNet.addLayer(128, NeuronLayerType.INPUT, num_of_states);
+        QTargetNet.addLayer(128, NeuronLayerType.HIDDEN, edge:QTargetNet.neuronLayers[0]);
         QTargetNet.addLayer(num_of_actions, NeuronLayerType.OUTPUT, edge:QTargetNet.neuronLayers[1]);
     
+        /*var lines = File.ReadAllLines("dataset.csv");
+        var out_log = File.CreateText("log.csv");
+        var x_train = new float[lines.Length][];
+        var y_train = new float[lines.Length][];
+        for (int i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i].Split(';');
+            x_train[i] = new float[1] { float.Parse(line[0]) };
+            y_train[i] = new float[1] { float.Parse(line[1]) };
+            Debug.Log($"x: {x_train[i][0]}, y: {y_train[i][0]}");
+        }
+        Debug.Log($"pocet_vzorov: {lines.Length}");
+
+        for (int t = 0; t < 1000; t++)
+        {
+            float avgErr = 0f;
+
+            for (int v = 0; v < lines.Length; v++)
+            {
+                var target = QNet.predict(x_train[v]);
+                
+                // Vypocet gradientu
+                QNet.train(x_train[v], y_train[v]);
+
+                // Mean absolute error
+                var delta = y_train[v][0] - target[0];
+                float mean = math.mul(delta, delta);
+                avgErr += mean;
+
+                if (t == 999)
+                {
+                    out_log.WriteLine($"x:{x_train[v][0]};y:{target[0]};y_true:{y_train[v][0]}");
+                    Debug.Log($"y: {target[0]}, y_true: {y_train[v][0]}");
+                }
+            }
+
+            // Priemer chyby NN
+            avgErr /= (float)lines.Length;
+            Debug.Log($"avgErr.QNet[{this.Nickname}] = {avgErr}");
+        }
+        out_log.Close();
+        UnityEditor.EditorApplication.isPlaying = false;*/
+
         // Nacitaj vahy zo subora ak existuje
         var str1 = Application.dataPath + "/DDQN_Weights_QNet.save";
         if (File.Exists(str1))
@@ -84,8 +126,7 @@ public class AgentDDQN : ShipController
             this.replayBufferItem.Reward = this.reward;
             this.score += this.replayBufferItem.Reward;
             this.step += 1;
-            this.fitness = ((this.Health / (float)ShipController.maxHealth) * 0.10f) + ((this.Fuel / (float)ShipController.maxFuel) * 0.10f) + ((this.Ammo / (float)ShipController.maxAmmo) * 0.05f) + ((float)this.myPlanets.Count * 0.75f);
-            this.levelBox.text = this.fitness.ToString("0.00");
+            this.levelBox.text = this.score.ToString("0.00");
 
             // Ak uz hrac nema zivoty ani palivo znici sa lod
             if (this.Health <= 0 || this.Fuel <= 0)
@@ -93,14 +134,12 @@ public class AgentDDQN : ShipController
                 // Terminalny stav - koniec epizody
                 this.replayBufferItem.Done = true;
 
-                this.pocet_planet = this.myPlanets.Count;
                 show_stat();
 
                 // Destrukcia lode
                 this.DestroyShip();
                 
                 this.epLoss /= (float)this.step;
-                this.episode += 1;
 
                 // Exploration/Exploitation parameter decay
                 if (this.epsilon > epsilonMin)
@@ -112,14 +151,12 @@ public class AgentDDQN : ShipController
                 // Terminalny stav - koniec epizody
                 this.replayBufferItem.Done = true;
 
-                this.pocet_planet = this.myPlanets.Count;
                 show_stat();
 
                 Debug.Log("Vytaz!!!");
                 WinnerShip();
 
                 this.epLoss /= (float)this.step;
-                this.episode += 1;
             }
             // pokracuje v hre
             else
@@ -140,7 +177,7 @@ public class AgentDDQN : ShipController
         }
     }
 
-    private float Training(float gamma=0.95f, float tau=0.01f)
+    private float Training(float gamma=0.90f, float tau=0.01f)
     {
         float avgErr = 0f;
 
@@ -165,15 +202,15 @@ public class AgentDDQN : ShipController
                 // TD
                 target[sample[i].Action] = sample[i].Reward;
             }
-                
+
             // Training Q network  - Mini-batch gradient descent with momentum           
             QNet.train(sample[i].State, target);
 
             // Mean absolute error
-            float mean = math.abs(target[sample[i].Action] - QNet.neuronLayers[QNet.neuronLayers.Count - 1].neurons[sample[i].Action].output) / (float)num_of_actions;
-            avgErr += mean;
+            var delta = target[sample[i].Action] - QNet.neuronLayers[QNet.neuronLayers.Count - 1].neurons[sample[i].Action].output;
+            avgErr += math.mul(delta, delta) / (float)num_of_actions;
         }
-        
+
         // Soft update Q Target network
         for (int j = 0; j < this.QTargetNet.neuronLayers.Count; j++)
         {
@@ -186,7 +223,7 @@ public class AgentDDQN : ShipController
         // Priemer chyby NN
         avgErr /= (float)BATCH_SIZE;
         //Debug.Log($"avgErr.QNet[{this.Nickname}] = {avgErr}");
- 
+
         return avgErr;
     }
 
@@ -282,10 +319,12 @@ public class AgentDDQN : ShipController
                 break;
             case 16:
                 // ... do nothing (no action)
+                // Debug.Log($"nerobi nic");
                 break;
             case 17:
                 // ... only firing
                 this.Fire();
+                // Debug.Log($"iba striela");
                 break;
         }
 
@@ -304,7 +343,6 @@ public class AgentDDQN : ShipController
         Debug.Log($"episode[{this.Nickname}]: {episode}");
         Debug.Log($"step[{this.Nickname}]: {step}");
         Debug.Log($"score[{this.Nickname}]: {score}");
-        Debug.Log($"fitness[{this.Nickname}]: {fitness}");
         Debug.Log($"epsilon[{this.Nickname}]: {epsilon}");
         Debug.Log($"epLoss[{this.Nickname}]: {epLoss}");
         Debug.Log($"replay_buffer[{this.Nickname}]: {ReplayBuffer.Count}");

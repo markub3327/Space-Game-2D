@@ -1074,6 +1074,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 403156128}
+  - component: {fileID: 403156129}
   m_Layer: 0
   m_Name: Nebulas
   m_TagString: Untagged
@@ -1098,6 +1099,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &403156129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 403156127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afb9f490076c040cb805f2e9c1c0a36c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  freeFuels: []
 --- !u!1 &450520658
 GameObject:
   m_ObjectHideFlags: 0
@@ -1705,7 +1719,6 @@ MonoBehaviour:
   healthBar: {fileID: 197938312}
   ammoBar: {fileID: 46894893}
   fuelBar: {fileID: 1126339533}
-  pocet_planet: 0
   collectibleClip: {fileID: 8300000, guid: af5f8b64e3f58f24c87ff8f789b04f6c, type: 3}
   damageClip: {fileID: 8300000, guid: 709a835b61b848644946696fdd5e5a4d, type: 3}
   hitClip: {fileID: 8300000, guid: 9b1bb1f450b7d444fa4a8019d13519a7, type: 3}
@@ -25185,7 +25198,7 @@ PrefabInstance:
     - target: {fileID: 7561708683362344634, guid: abcf8246936514953b5b1f538f928eab,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8548084380819351838, guid: abcf8246936514953b5b1f538f928eab, type: 3}

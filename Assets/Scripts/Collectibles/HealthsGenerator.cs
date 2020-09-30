@@ -35,7 +35,7 @@ public class HealthsGenerator : MonoBehaviour
                 obj.name = "Health";
                 
                 // Vymaz pouzity bod z volnych (obsadeny)
-                freePoints.Remove(freePoints[idx]);
+                freePoints.RemoveAt(idx);
 
                 // Resetuj casovac
                 Timer = maxTime;

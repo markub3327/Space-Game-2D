@@ -27,13 +27,13 @@ public class GeneticsAlgorithm : MonoBehaviour
     public void Update()
     {        
         // Ak vsetci hraci su zniceny obnov populaciu hracov
-        if (agents.Where(p => p.IsDestroyed == false).Count() == 0)
+        if (agents.Count > 0 && agents.Where(p => p.IsDestroyed == false).Count() == 0)
         {
             // Replace agents with agents list ordered by his fitness
             this.agents.Sort(new AgentsComparer());
             this.bestAgent = agents[0];
-            Debug.Log($"The best agent is {bestAgent.Nickname}, fitness = {bestAgent.fitness}, score = {bestAgent.score}");
-            Debug.Log($"The worst agent is {agents[agents.Count-1].Nickname}, fitness = {agents[agents.Count-1].fitness}, score = {agents[agents.Count-1].score}");
+            Debug.Log($"The best agent is {bestAgent.Nickname}, score = {bestAgent.score}");
+            Debug.Log($"The worst agent is {agents[agents.Count-1].Nickname}, score = {agents[agents.Count-1].score}");
 
             if (agents[0].episode >= 1000) 
             {
@@ -45,10 +45,10 @@ public class GeneticsAlgorithm : MonoBehaviour
             }
 
             // Krizenie
-            this.Crossover();
+            //this.Crossover();
 
             // log bestAgent to file
-            this.log_file.WriteLine($"{this.bestAgent.episode};{this.bestAgent.step};{this.bestAgent.score};{this.bestAgent.fitness};{this.bestAgent.epLoss};{ReplayBuffer.Count};{this.bestAgent.pocet_planet}");
+            this.log_file.WriteLine($"{this.bestAgent.episode};{this.bestAgent.step};{this.bestAgent.score};{this.bestAgent.epLoss};{ReplayBuffer.Count};{this.bestAgent.myPlanets.Count};{this.bestAgent.Health};{this.bestAgent.Ammo};{this.bestAgent.Fuel}");
 
             // obnova lodi - respawn
             foreach (var a in agents)
@@ -56,7 +56,7 @@ public class GeneticsAlgorithm : MonoBehaviour
                 a.score = 0f;
                 a.step = 0;
                 a.epLoss = 0f;
-                a.pocet_planet = 0;
+                a.episode += 1;
 
                 a.RespawnShip();
             }
