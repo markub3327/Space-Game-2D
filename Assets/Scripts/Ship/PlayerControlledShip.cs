@@ -5,15 +5,19 @@ public class PlayerControlledShip : ShipController
 {
     public StreamWriter log_file;
 
+    private ReplayBufferItem replayBufferItem = null;
+
     // Use this for initialization
     public override void Start()
     {
         // Spusti prvu funkciu nadtriedy
         base.Start();
 
-        this.reward = -0.001f;         // za pohyb lode        
-
         log_file = File.CreateText("clovek.log");
+
+        // Nacitaj stav, t=0
+        this.replayBufferItem = new ReplayBufferItem { State = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this) };
+        this.reward = -0.001f;
     }
 
     public void Update()
@@ -25,6 +29,7 @@ public class PlayerControlledShip : ShipController
             float axisH = Input.GetAxis("Horizontal");
             float axisV = Input.GetAxis("Vertical");
             Vector2 move = new Vector2(axisH, axisV).normalized;
+            Debug.Log($"move: {move.x}, {move.y}");
 
             // Pohni s lodou podla vstupu od uzivatela
             this.MoveShip(move);
@@ -34,19 +39,21 @@ public class PlayerControlledShip : ShipController
                 Fire();
             }
 
-            this.score += this.reward;
+            // Nacitaj stav hry
+            this.replayBufferItem.Next_state = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this);
+            
+            this.replayBufferItem.Reward = this.reward;
+            this.score += this.replayBufferItem.Reward;
             this.step += 1;
-            //this.fitness = ((this.Health / (float)ShipController.maxHealth) * 0.10f) + ((this.Fuel / (float)ShipController.maxFuel) * 0.10f) + ((this.Ammo / (float)ShipController.maxAmmo) * 0.05f) + ((float)this.Hits * 0.05f) + ((float)this.myPlanets.Count * 0.70f);
             this.levelBox.text = this.score.ToString("0.00");
 
             // Ak uz hrac nema zivoty ani palivo znici sa lod
             if (this.Health <= 0 || this.Fuel <= 0)
             {
-                show_stat();
+                // Terminalny stav - koniec epizody
+                this.replayBufferItem.Done = true;
 
-                this.episode += 1;
-                this.score = 0f;
-                this.step = 0;
+                show_stat();
 
                 // Destrukcia lode
                 this.DestroyShip();
@@ -54,17 +61,26 @@ public class PlayerControlledShip : ShipController
             // hrac obsadil vsetky planety
             else if (this.myPlanets.Count >= 4)
             {
-                show_stat();
+                // Terminalny stav - koniec epizody
+                this.replayBufferItem.Done = true;
 
-                this.episode += 1;
-                this.score = 0f;
-                this.step = 0;
+                show_stat();
 
                 Debug.Log("Vytaz!!!");
                 WinnerShip();
             }
+            // pokracuje v hre
+            else
+            {
+                // Neterminalny stav - pokracuje v hre
+                this.replayBufferItem.Done = false;             
+            }
 
-            this.reward = -0.001f;         // za pohyb lode
+            // Uloz udalost do bufferu
+            ReplayBuffer.Add(this.replayBufferItem);
+
+            this.replayBufferItem = new ReplayBufferItem { State = this.replayBufferItem.Next_state };
+            this.reward = -0.001f;
         }
         else
             RespawnShip();

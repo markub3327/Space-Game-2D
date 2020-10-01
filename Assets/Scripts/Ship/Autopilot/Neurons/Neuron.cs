@@ -28,12 +28,14 @@ public class Neuron
     public float beta_1;
     public float beta_2;
     public float epsilon;
-    public ulong _time;
+
+    public ulong _time = 0;
 
     public Neuron(int num_of_inputs, int num_of_neurons, Activation activation)
     {
         this.output = 0.0f;
         this.z = 0f;
+        this._time = 0;
         this.sigma = 0.0f;
         this.num_of_inputs = num_of_inputs;
         this.activation = activation;
@@ -42,8 +44,7 @@ public class Neuron
         this.learning_rate = 0.001f;
         this.beta_1 = 0.9f;
         this.beta_2 = 0.999f;
-        this.epsilon = 0.0000001f; // 1e-07;
-        this._time = 0;
+        this.epsilon = 1E-07f;
 
         this.weights = new float[num_of_inputs + 1];        // +bias
         this.g_t = new float[num_of_inputs + 1];            // +bias
@@ -101,7 +102,7 @@ public class Neuron
         return this.output;
     }
 
-    public void train(NeuralLayer edge, NeuralLayer BPG_edge, int idx)
+    public void gradient(NeuralLayer edge, NeuralLayer BPG_edge, int idx)
     {
         float sum = 0.0f;
         for (int k = 0; k < BPG_edge.neurons.Length; k++)
@@ -113,14 +114,12 @@ public class Neuron
         // get gradients
         for (int n = 0; n < this.num_of_inputs; n++)
         {
-            g_t[n] = this.sigma * edge.neurons[n].output;
+            g_t[n] += this.sigma * edge.neurons[n].output;
         }
-        g_t[this.num_of_inputs] = this.sigma;
-
-        this.Adam();
+        g_t[this.num_of_inputs] += this.sigma;
     }
 
-    public void train(float[] input, NeuralLayer BPG_edge, int idx)
+    public void gradient(float[] input, NeuralLayer BPG_edge, int idx)
     {
         float sum = 0.0f;
         for (int k = 0; k < BPG_edge.neurons.Length; k++)
@@ -132,14 +131,12 @@ public class Neuron
         // get gradients
         for (int n = 0; n < this.num_of_inputs; n++)
         {
-            g_t[n] = this.sigma * input[n];
+            g_t[n] += this.sigma * input[n];
         }
-        g_t[this.num_of_inputs] = this.sigma;
-
-        this.Adam();
+        g_t[this.num_of_inputs] += this.sigma;
     }
 
-    public void train(NeuralLayer edge, float y)
+    public void gradient(NeuralLayer edge, float y)
     {
         this.sigma = y - this.output;
         this.sigma *= this.activation.deriv(this);
@@ -147,19 +144,18 @@ public class Neuron
         // get gradients
         for (int n = 0; n < this.num_of_inputs; n++)
         {
-            g_t[n] = this.sigma * edge.neurons[n].output;
+            g_t[n] += this.sigma * edge.neurons[n].output;
         }
-        g_t[this.num_of_inputs] = this.sigma;
-
-        this.Adam();
+        g_t[this.num_of_inputs] += this.sigma;
     }
 
-    private void Adam()
+    public void train()
     {
-        this._time = this._time + 1;
+        this._time += 1;
 
         for (int n = 0; n < this.weights.Length; n++)
         {
+            // Adam
             m_t[n] = beta_1*m_t[n] + (1f-beta_1)*g_t[n];	            // updates the moving averages of the gradient
 	        v_t[n] = beta_2*v_t[n] + (1f-beta_2)*(g_t[n]*g_t[n]);	    // updates the moving averages of the squared gradient
 	        
@@ -167,7 +163,10 @@ public class Neuron
 	        float v_cap = v_t[n]/(1f-math.pow(beta_2, this._time));		        // calculates the bias-corrected estimates
         
             // update weights
-	        this.weights[n] += (this.learning_rate*m_cap)/(math.sqrt(v_cap)+this.epsilon);
+	        this.weights[n] += math.mul(this.learning_rate, m_cap)/(math.sqrt(v_cap)+this.epsilon);
+
+            // clear gradients
+            this.g_t[n] = 0f;
 	    }
     }
 

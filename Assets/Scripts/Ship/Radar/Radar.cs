@@ -10,12 +10,18 @@ namespace Sensors
         // Radar okolo lode
         public static float[] Scan(Vector2 origin, Vector2 lookDirection, ShipController parent)
         {
-            var state = new float[num_of_rays * num_of_objs];
+            var state = new float[num_of_rays * num_of_objs + 3];
             float angle;
             int idx;
 
+            // stav hraca
+            state[0] = parent.Health / (float)ShipController.maxHealth;
+            state[1] = parent.Ammo / (float)ShipController.maxAmmo;
+            state[2] = parent.Fuel / (float)ShipController.maxFuel;
+            //Debug.Log($"state[0]: {state[0]}, state[1]: {state[1]}, state[2]: {state[2]}");
+
             // Vysli luce pod uhlami po 22.5 stupnoch
-            for (idx = 0, angle = 0f; angle < 360; angle += 22.5f, idx+=num_of_objs)
+            for (idx = 3, angle = 0f; angle < 360; angle += 22.5f, idx+=num_of_objs)
             {
                 //Debug.DrawRay(origin, lookDirection.Shift(angle), Color.magenta);
                 var ray = Physics2D.RaycastAll(origin, lookDirection.Shift(angle), 20.0f);

@@ -9,8 +9,6 @@ public class GeneticsAlgorithm : MonoBehaviour
     private AgentDDQN bestAgent = null;
 
     private List<AgentDDQN> agents;
-
-    public GameObject[] nebulas;
     
     private StreamWriter log_file;
 
@@ -59,12 +57,6 @@ public class GeneticsAlgorithm : MonoBehaviour
                 a.episode += 1;
 
                 a.RespawnShip();
-            }
-
-            // obnov hmloviny
-            foreach (var n in this.nebulas)
-            {
-                n.SetActive(true);
             }
         }
     }

@@ -6,7 +6,7 @@ using System.IO;
 public class AgentDDQN : ShipController
 {
     // Senzory
-    private const int num_of_states = Sensors.Radar.num_of_rays * Sensors.Radar.num_of_objs;
+    private const int num_of_states = Sensors.Radar.num_of_rays * Sensors.Radar.num_of_objs + 3;
     private const int num_of_actions = 18;
 
     // Neuronove siete
@@ -40,43 +40,57 @@ public class AgentDDQN : ShipController
     
         /*var lines = File.ReadAllLines("dataset.csv");
         var out_log = File.CreateText("log.csv");
-        var x_train = new float[lines.Length][];
-        var y_train = new float[lines.Length][];
-        for (int i = 0; i < lines.Length; i++)
+        var num_of_patterns = lines.Length / 16;
+
+        var x_train = new float[num_of_patterns][];
+        var y_train = new float[num_of_patterns][];
+        for (int i = 0, k = 0; i < num_of_patterns; i++)
         {
-            var line = lines[i].Split(';');
-            x_train[i] = new float[1] { float.Parse(line[0]) };
-            y_train[i] = new float[1] { float.Parse(line[1]) };
-            Debug.Log($"x: {x_train[i][0]}, y: {y_train[i][0]}");
-        }
+            x_train[i] = new float[16];
+            y_train[i] = new float[16];
+
+            for (int j = 0; j < 16; j++, k++)
+            {
+                var line = lines[k].Split(';');
+                x_train[i][j] = float.Parse(line[0]);
+                y_train[i][j] = float.Parse(line[1]);
+                Debug.Log($"x: {x_train[i][j]}, y: {y_train[i][j]}");
+            }
+        }        
         Debug.Log($"pocet_vzorov: {lines.Length}");
 
         for (int t = 0; t < 1000; t++)
         {
-            float avgErr = 0f;
-
-            for (int v = 0; v < lines.Length; v++)
+            for (int v = 0; v < num_of_patterns; v++)
             {
-                var target = QNet.predict(x_train[v]);
-                
-                // Vypocet gradientu
-                QNet.train(x_train[v], y_train[v]);
+                float avgErr = 0f;
 
-                // Mean absolute error
-                var delta = y_train[v][0] - target[0];
-                float mean = math.mul(delta, delta);
-                avgErr += mean;
-
-                if (t == 999)
+                for (int k = 0; k < 16; k++)
                 {
-                    out_log.WriteLine($"x:{x_train[v][0]};y:{target[0]};y_true:{y_train[v][0]}");
-                    Debug.Log($"y: {target[0]}, y_true: {y_train[v][0]}");
-                }
-            }
+                    var target = QNet.predict(new float[] { x_train[v][k] });
+                
+                    // Vypocet gradientu
+                    QNet.gradient(new float[] { x_train[v][k] }, new float[] { y_train[v][k] });
 
-            // Priemer chyby NN
-            avgErr /= (float)lines.Length;
-            Debug.Log($"avgErr.QNet[{this.Nickname}] = {avgErr}");
+                    // Mean absolute error
+                    var delta = y_train[v][k] - target[0];
+                    float mean = math.mul(delta, delta);
+                    avgErr += mean;
+
+                    if (t == 999)
+                    {
+                        out_log.WriteLine($"x:{x_train[v][k]};y:{target[0]};y_true:{y_train[v][k]}");
+                        Debug.Log($"y: {target[0]}, y_true: {y_train[v][k]}");
+                    }
+                }
+
+                // Priemer chyby NN
+                avgErr /= 16f;
+                Debug.Log($"avgErr.QNet[{this.Nickname}][{v}] = {avgErr}");
+
+                // pretrenuj siet na mini-balicek
+                QNet.train(16);
+            }
         }
         out_log.Close();
         UnityEditor.EditorApplication.isPlaying = false;*/
@@ -177,7 +191,7 @@ public class AgentDDQN : ShipController
         }
     }
 
-    private float Training(float gamma=0.90f, float tau=0.01f)
+    private float Training(float gamma=0.95f, float tau=0.01f)
     {
         float avgErr = 0f;
 
@@ -203,13 +217,16 @@ public class AgentDDQN : ShipController
                 target[sample[i].Action] = sample[i].Reward;
             }
 
-            // Training Q network  - Mini-batch gradient descent with momentum           
-            QNet.train(sample[i].State, target);
+            // get gradient
+            QNet.gradient(sample[i].State, target);
 
             // Mean absolute error
             var delta = target[sample[i].Action] - QNet.neuronLayers[QNet.neuronLayers.Count - 1].neurons[sample[i].Action].output;
             avgErr += math.mul(delta, delta) / (float)num_of_actions;
         }
+
+        // Training Q network - Mini-batch gradient descent with momentum           
+        QNet.train();
 
         // Soft update Q Target network
         for (int j = 0; j < this.QTargetNet.neuronLayers.Count; j++)

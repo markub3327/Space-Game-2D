@@ -39,24 +39,35 @@ public class NeuralNetwork
         return y;
     }
 
-    public void train(float[] x, float[] y)
+    public void gradient(float[] x, float[] y)
     {
         for (int m = 0; m < this.neuronLayers[this.neuronLayers.Count-1].neurons.Length; m++)
         {
-            this.neuronLayers[this.neuronLayers.Count-1].neurons[m].train(this.neuronLayers[this.neuronLayers.Count-1].edge, y[m]);
+            this.neuronLayers[this.neuronLayers.Count-1].neurons[m].gradient(this.neuronLayers[this.neuronLayers.Count-1].edge, y[m]);
         }
 
         for (int l = this.neuronLayers.Count-2; l >= 1; l--)
         {
             for (int m = 0; m < this.neuronLayers[l].neurons.Length; m++)
             {
-               this.neuronLayers[l].neurons[m].train(this.neuronLayers[l].edge, this.neuronLayers[l].BPG_egde, m);
+               this.neuronLayers[l].neurons[m].gradient(this.neuronLayers[l].edge, this.neuronLayers[l].BPG_egde, m);
             }
         }
 
         for (int m = 0; m < this.neuronLayers[0].neurons.Length; m++)
         {
-            this.neuronLayers[0].neurons[m].train(x, this.neuronLayers[0].BPG_egde, m);
+            this.neuronLayers[0].neurons[m].gradient(x, this.neuronLayers[0].BPG_egde, m);
+        }
+    }
+
+    public void train()
+    {
+        for (int l = 0; l < this.neuronLayers.Count; l++)
+        {
+            for (int m = 0; m < this.neuronLayers[l].neurons.Length; m++)
+            {
+                this.neuronLayers[l].neurons[m].train();
+            }
         }
     }
 
