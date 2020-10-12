@@ -6,7 +6,7 @@ using System.IO;
 public class AgentDDQN : ShipController
 {
     // Senzory
-    private const int num_of_states = Sensors.Radar.num_of_rays * Sensors.Radar.num_of_objs + 3;
+    private const int num_of_states = Sensors.Radar.num_of_rays * Sensors.Radar.num_of_objs;
     private const int num_of_actions = 18;
 
     // Neuronove siete
@@ -29,13 +29,13 @@ public class AgentDDQN : ShipController
         base.Start();
 
         // vytvor Q siet
-        QNet.addLayer(128, NeuronLayerType.INPUT, num_of_states);
-        QNet.addLayer(128, NeuronLayerType.HIDDEN, edge:QNet.neuronLayers[0]);
+        QNet.addLayer(100, NeuronLayerType.INPUT, num_of_states);
+        QNet.addLayer(100, NeuronLayerType.HIDDEN, edge:QNet.neuronLayers[0]);
         QNet.addLayer(num_of_actions, NeuronLayerType.OUTPUT, edge:QNet.neuronLayers[1]);
 
         // vytvor Q_target siet
-        QTargetNet.addLayer(128, NeuronLayerType.INPUT, num_of_states);
-        QTargetNet.addLayer(128, NeuronLayerType.HIDDEN, edge:QTargetNet.neuronLayers[0]);
+        QTargetNet.addLayer(100, NeuronLayerType.INPUT, num_of_states);
+        QTargetNet.addLayer(100, NeuronLayerType.HIDDEN, edge:QTargetNet.neuronLayers[0]);
         QTargetNet.addLayer(num_of_actions, NeuronLayerType.OUTPUT, edge:QTargetNet.neuronLayers[1]);
     
         /*var lines = File.ReadAllLines("dataset.csv");
@@ -43,18 +43,21 @@ public class AgentDDQN : ShipController
         var num_of_patterns = lines.Length / 16;
 
         var x_train = new float[num_of_patterns][];
-        var y_train = new float[num_of_patterns][];
+        var y_train = new float[num_of_patterns][][];
         for (int i = 0, k = 0; i < num_of_patterns; i++)
         {
             x_train[i] = new float[16];
-            y_train[i] = new float[16];
+            y_train[i] = new float[16][];
 
             for (int j = 0; j < 16; j++, k++)
             {
+                y_train[i][j] = new float[2];
+
                 var line = lines[k].Split(';');
                 x_train[i][j] = float.Parse(line[0]);
-                y_train[i][j] = float.Parse(line[1]);
-                Debug.Log($"x: {x_train[i][j]}, y: {y_train[i][j]}");
+                y_train[i][j][0] = float.Parse(line[1]);
+                y_train[i][j][1] = float.Parse(line[2]);
+                Debug.Log($"x: {x_train[i][j]}, y_0: {y_train[i][j][0]}, y_1: {y_train[i][j][1]}");
             }
         }        
         Debug.Log($"pocet_vzorov: {lines.Length}");
@@ -70,17 +73,18 @@ public class AgentDDQN : ShipController
                     var target = QNet.predict(new float[] { x_train[v][k] });
                 
                     // Vypocet gradientu
-                    QNet.gradient(new float[] { x_train[v][k] }, new float[] { y_train[v][k] });
+                    QNet.gradient(new float[] { x_train[v][k] }, y_train[v][k]);
 
                     // Mean absolute error
-                    var delta = y_train[v][k] - target[0];
-                    float mean = math.mul(delta, delta);
+                    var delta_0 = y_train[v][k][0] - target[0];
+                    var delta_1 = y_train[v][k][1] - target[1];
+                    float mean = (math.mul(delta_0, delta_0) + math.mul(delta_1, delta_1)) / 2f;
                     avgErr += mean;
 
                     if (t == 999)
                     {
-                        out_log.WriteLine($"x:{x_train[v][k]};y:{target[0]};y_true:{y_train[v][k]}");
-                        Debug.Log($"y: {target[0]}, y_true: {y_train[v][k]}");
+                        out_log.WriteLine($"x:{x_train[v][k]};y_0:{target[0]};y_0_true:{y_train[v][k][0]};y_1:{target[1]};y_1_true:{y_train[v][k][1]}");
+                        //Debug.Log($"y: {target[0]}, y_true: {y_train[v][k]}");
                     }
                 }
 
@@ -89,7 +93,7 @@ public class AgentDDQN : ShipController
                 Debug.Log($"avgErr.QNet[{this.Nickname}][{v}] = {avgErr}");
 
                 // pretrenuj siet na mini-balicek
-                QNet.train(16);
+                QNet.train();
             }
         }
         out_log.Close();
@@ -124,7 +128,8 @@ public class AgentDDQN : ShipController
 
         // Nacitaj stav, t=0
         this.replayBufferItem = new ReplayBufferItem { State = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this) };
-        this.reward = -0.001f;
+        this.reward = -0.015f;    // najkratsia cesta k planetam
+        this.done = false;
     }
 
     public void Update()
@@ -132,22 +137,20 @@ public class AgentDDQN : ShipController
         // Ak nie je lod znicena = hra hru
         if (!IsDestroyed)
         {
-            this.replayBufferItem.Action = this.Act(this.replayBufferItem.State, epsilon);
+            this.replayBufferItem.Action = this.Act(this.replayBufferItem.State, this.epsilon);
                 
             // Nacitaj stav hry
             this.replayBufferItem.Next_state = Sensors.Radar.Scan(this.rigidbody2d.position, this.LookDirection, this);
             
             this.replayBufferItem.Reward = this.reward;
             this.score += this.replayBufferItem.Reward;
+            this.replayBufferItem.Done = this.done;
             this.step += 1;
             this.levelBox.text = this.score.ToString("0.00");
 
             // Ak uz hrac nema zivoty ani palivo znici sa lod
             if (this.Health <= 0 || this.Fuel <= 0)
             {
-                // Terminalny stav - koniec epizody
-                this.replayBufferItem.Done = true;
-
                 show_stat();
 
                 // Destrukcia lode
@@ -162,9 +165,6 @@ public class AgentDDQN : ShipController
             // hrac obsadil vsetky planety
             else if (this.myPlanets.Count >= 4)
             {
-                // Terminalny stav - koniec epizody
-                this.replayBufferItem.Done = true;
-
                 show_stat();
 
                 Debug.Log("Vytaz!!!");
@@ -172,22 +172,17 @@ public class AgentDDQN : ShipController
 
                 this.epLoss /= (float)this.step;
             }
-            // pokracuje v hre
-            else
-            {
-                // Neterminalny stav - pokracuje v hre
-                this.replayBufferItem.Done = false;             
-            }
 
             // Uloz udalost do bufferu
             ReplayBuffer.Add(this.replayBufferItem);
 
             // Pretrenuj hraca derivaciami
-            if  (ReplayBuffer.Count >= BATCH_SIZE && !this.testMode)
+            if  (testMode == false && ReplayBuffer.Count >= BATCH_SIZE)
                 epLoss += this.Training();
 
             this.replayBufferItem = new ReplayBufferItem { State = this.replayBufferItem.Next_state };
-            this.reward = -0.001f;
+            this.reward = -0.015f;    // najkratsia cesta k planetam
+            this.done = false;
         }
     }
 
@@ -244,12 +239,12 @@ public class AgentDDQN : ShipController
         return avgErr;
     }
 
-    private int Act(float[] state, float epsilon=0.20f)
+    private int Act(float[] state, float epsilon)
     {
         int action;
 
         // Vyuzivaj naucenu vedomost
-        if (UnityEngine.Random.Range(0.0f, 1.0f) < epsilon || testMode)
+        if (testMode == false && UnityEngine.Random.Range(0.0f, 1.0f) < epsilon)
         {
             action = UnityEngine.Random.Range(0, num_of_actions);
         }

@@ -4,7 +4,7 @@ using UnityEngine;
 public class AsteroidGenerator : MonoBehaviour
 {
     // Maximalny pocet municie v hre
-    public static int MaxAsteroidObjects { get; set; } = 6;
+    public static int MaxAsteroidObjects { get; set; } = 4;
 
     // Zoznam volnych pozicii pre municiu
     public List<GameObject> asteroids;

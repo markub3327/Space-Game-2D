@@ -96,10 +96,11 @@ public class ShipController : MonoBehaviour
     // Collider
     private PolygonCollider2D collider2d;
 
-    public Vector2 respawnPoint { get; set; }
+    public static readonly Vector2[] respawnPoints = new Vector2[] { new Vector2(18f, 0f), new Vector2(-18f, 0f), new Vector2(-5, 12), new Vector2(5, -12) };
     public bool IsRespawned { get; set; } = true;
     public float score = 0;
     protected float reward;
+    protected bool done;
 
     // Lod
     public Text nameBox;
@@ -118,8 +119,6 @@ public class ShipController : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
         collider2d = GetComponent<PolygonCollider2D>();
-
-        respawnPoint = this.transform.position;
 
         // Pre vsetky motory lode
         foreach (var motor in Motors)
@@ -193,14 +192,14 @@ public class ShipController : MonoBehaviour
         animator.SetBool("Winner", true);
     }
 
-    public void RespawnShip()
+    public void RespawnShip(Vector2 point)
     {
         // obnov zivoty, palivo a municiu lode na maximum
         this.Health = maxHealth;
         this.Ammo = maxAmmo;
         this.Fuel = maxFuel;
 
-        rigidbody2d.position = respawnPoint;  //Respawn.getPoint();
+        rigidbody2d.position = point;
         IsDestroyed = false;
         collider2d.enabled = true;
         IsRespawned = true;
@@ -291,6 +290,7 @@ public class ShipController : MonoBehaviour
                 // Uberie sa hracovi zivot
                 this.ChangeHealth(-1.0f);
                 this.reward = -0.75f;
+                this.done = false;
                 // Prahra clip poskodenia lode
                 this.PlaySound(damageClip);
                 break;
@@ -307,6 +307,7 @@ public class ShipController : MonoBehaviour
                 // Uberie sa hracovi zivot
                 this.ChangeHealth(-1.0f);
                 this.reward = -0.75f;
+                this.done = false;
                 // Prahra clip poskodenia lode
                 this.PlaySound(damageClip);
                 break;
@@ -315,7 +316,8 @@ public class ShipController : MonoBehaviour
                 {
                     // Pridaj municiu hracovi
                     this.ChangeAmmo(+10.00f);
-                    this.reward = 0.10f;
+                    this.reward = 0.20f;
+                    this.done = false;
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }
@@ -326,7 +328,8 @@ public class ShipController : MonoBehaviour
                 {
                     // Pridaj zivot hracovi
                     this.ChangeHealth(+1.0f);
-                    this.reward = 0.10f;
+                    this.reward = 0.20f;
+                    this.done = false;
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }
@@ -337,7 +340,8 @@ public class ShipController : MonoBehaviour
                 {
                     // Pridaj zivot hracovi
                     this.ChangeFuel(+ShipController.maxFuel);
-                    this.reward = 0.10f;
+                    this.reward = 0.20f;
+                    this.done = false;
                     // Prehraj klip
                     this.PlaySound(collectibleClip);
                 }
@@ -346,7 +350,8 @@ public class ShipController : MonoBehaviour
             case "Asteroid":
                 // Uberie sa hracovi zivot
                 this.ChangeHealth(-1.0f);      
-                this.reward = -0.10f;
+                this.reward = -0.20f;
+                this.done = false;
                 // Prahra clip poskodenia lode
                 this.PlaySound(damageClip);
                 break;
@@ -357,7 +362,8 @@ public class ShipController : MonoBehaviour
                     {
                         planet.OwnerPlanet = this.gameObject;
                         this.myPlanets.Add(planet);
-                        this.reward = 1.0f;
+                        this.reward = 10.0f;
+                        this.done = true;
 
                         planet.dialogBox.Clear();
                         planet.dialogBox.WriteLine($"Planet: {planet.name}");
@@ -368,16 +374,18 @@ public class ShipController : MonoBehaviour
             case "Player":
                 // Uberie sa hracovi zivot
                 this.ChangeHealth(-1.0f);
-                this.reward = -0.10f;
+                this.reward = -0.20f;
+                this.done = false;
                 // Prahra clip poskodenia lode
                 this.PlaySound(damageClip);
                 break;
             case "Space":
                 this.reward = -1.0f;
+                this.done = true;
                 break;
             //default:
-                //Debug.Log($"collision_tag: {collision.gameObject.tag}");
-                //break;
+            //    Debug.Log($"collision_tag: {collision.gameObject.tag}");
+            //    break;
         }
     }
 
@@ -394,7 +402,8 @@ public class ShipController : MonoBehaviour
                     this.PlaySound(this.hitClip);
                     // Znizi zivoty hracovi
                     this.ChangeHealth(-0.50f);
-                    this.reward = -0.10f;
+                    this.reward = -0.20f;
+                    this.done = false;
                 }
                 break;
             default:

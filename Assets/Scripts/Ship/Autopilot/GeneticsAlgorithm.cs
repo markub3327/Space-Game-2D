@@ -8,6 +8,8 @@ public class GeneticsAlgorithm : MonoBehaviour
 {
     private AgentDDQN bestAgent = null;
 
+    public ShipController humanPlayer;
+
     private List<AgentDDQN> agents;
     
     private StreamWriter log_file;
@@ -23,9 +25,9 @@ public class GeneticsAlgorithm : MonoBehaviour
     }
 
     public void Update()
-    {        
+    {
         // Ak vsetci hraci su zniceny obnov populaciu hracov
-        if (agents.Count > 0 && agents.Where(p => p.IsDestroyed == false).Count() == 0)
+        if ((agents.Count > 0 && agents.Where(p => p.IsDestroyed == false).Count() == 0) && (humanPlayer.enabled == true && humanPlayer.IsDestroyed == true))
         {
             // Replace agents with agents list ordered by his fitness
             this.agents.Sort(new AgentsComparer());
@@ -43,12 +45,15 @@ public class GeneticsAlgorithm : MonoBehaviour
             }
 
             // Krizenie
-            //this.Crossover();
+            //if (bestAgent.testMode == false)
+            //    this.Crossover();
 
             // log bestAgent to file
             this.log_file.WriteLine($"{this.bestAgent.episode};{this.bestAgent.step};{this.bestAgent.score};{this.bestAgent.epLoss};{ReplayBuffer.Count};{this.bestAgent.myPlanets.Count};{this.bestAgent.Health};{this.bestAgent.Ammo};{this.bestAgent.Fuel}");
 
             // obnova lodi - respawn
+            int idx;
+            bool[] usedPoints = new bool[ShipController.respawnPoints.Length];
             foreach (var a in agents)
             {
                 a.score = 0f;
@@ -56,8 +61,23 @@ public class GeneticsAlgorithm : MonoBehaviour
                 a.epLoss = 0f;
                 a.episode += 1;
 
-                a.RespawnShip();
+                do {
+                    idx = UnityEngine.Random.Range(0, ShipController.respawnPoints.Length);
+                } while(usedPoints[idx] == true);
+                usedPoints[idx] = true;
+                a.RespawnShip(ShipController.respawnPoints[idx]);
             }
+
+            // respawn human player
+            this.humanPlayer.score = 0f;
+            this.humanPlayer.step = 0;
+            this.humanPlayer.episode += 1;
+
+            do {
+                idx = UnityEngine.Random.Range(0, ShipController.respawnPoints.Length);                    
+            } while(usedPoints[idx] == true);
+            usedPoints[idx] = true;
+            this.humanPlayer.RespawnShip(ShipController.respawnPoints[idx]);
         }
     }
 
@@ -106,7 +126,7 @@ public class GeneticsAlgorithm : MonoBehaviour
     public void OnApplicationQuit()
     {
         // Ak existuje bestAgent
-        if (this.bestAgent != null)
+        if (this.bestAgent != null && this.bestAgent.testMode == false)
         {
             File.WriteAllText(Application.dataPath + "/DDQN_Weights_QNet.save", bestAgent.QNet.ToString());
             Debug.Log("DDQN saved!");
